@@ -1,4 +1,4 @@
-package hr.unizg.fer.zemris.ppj.maheri.interfaces;
+package hr.unizg.fer.zemris.ppj.maheri.gen.interfaces;
 
 import java.util.Map;
 
