@@ -7,8 +7,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -39,21 +43,9 @@ public abstract class RegexParserTest {
 	public static Collection<Object[]> data() throws IOException {
 		ArrayList<Object[]> data = new ArrayList<Object[]>();
 
-		ArrayList<String> input1 = new ArrayList<String>();
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				new FileInputStream(new File("res/testdata/RegexParserTest/1.in"))));
-		String line;
-		while ((line = br.readLine()) != null) {
-			input1.add(line);
-		}
-		br.close();
-		ArrayList<String> output1 = new ArrayList<String>();
-		br = new BufferedReader(new InputStreamReader(new FileInputStream(
-				new File("res/testdata/RegexParserTest/1.out"))));
-		while ((line = br.readLine()) != null) {
-			output1.add(line);
-		}
-		br.close();
+		List<String> input1 = Files.readAllLines(Paths.get("res/testdata/RegexParserTest/1.in"), Charset.defaultCharset());
+		List<String> output1 = Files.readAllLines(Paths.get("res/testdata/RegexParserTest/1.out"), Charset.defaultCharset());
+		
 		data.add(new Object[] { input1.toArray(new String[0]),
 				output1.toArray(new String[0]) });
 		return data;
