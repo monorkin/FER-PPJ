@@ -16,7 +16,7 @@ import hr.unizg.fer.zemris.ppj.maheri.interfaces.IAutomaton;
  * union operator -> create an epsilon transition to start states of all
  * operands
  * 
- * miscellanous, terminology:
+ * miscellaneous, terminology:
  * <ul>
  * <li> final state = the accept state if such exists </li>
  * <li> start = initial state </li>
