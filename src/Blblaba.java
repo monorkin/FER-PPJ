@@ -5,7 +5,7 @@ public class Blblaba {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println("KONJI");
+		System.out.println("KONJI I PIČKEEEEEEEEEEE");
 	}
 
 }
