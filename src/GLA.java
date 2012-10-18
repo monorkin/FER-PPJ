@@ -32,7 +32,7 @@ public class GLA {
 		List<String> regularDefinitionLines;		
 		List<String> lexerStateNames;
 		List<String> tokenNames;
-		List<LexerRuleDescriptionText> lexerRule;
+		List<LexerRuleDescriptionText> lexerRules;
 		
 		// TODO implement where error
 		IInputProcessor ip = new SimpleInputProcessor(inputLines);
@@ -45,7 +45,7 @@ public class GLA {
 		
 		lexerStateNames = ip.getLexerStates();
 		tokenNames = ip.getTokenNames();
-		lexerRule = ip.getLexerRules(regularDefinitions);
+		lexerRules = ip.getLexerRules(regularDefinitions);
 		
 		
 		

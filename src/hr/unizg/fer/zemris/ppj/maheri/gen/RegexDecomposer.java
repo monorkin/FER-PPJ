@@ -10,7 +10,8 @@ import java.util.List;
  * and operator priorities. Then each registered listener is notified by firing
  * a sequence of operations that should be done to reconstruct the regex. The
  * actions are methods in {@link RegexCompositionListener}, and their meanings
- * are documented therein.
+ * are documented therein. This class must be decompose the regex according to
+ * those.
  * 
  * @author dosvald
  */
@@ -24,5 +25,5 @@ public abstract class RegexDecomposer {
 }
 /*
  * Ovo ce se koristiti tako da netko napravi rastav regexa po zagradama i
- * operatorima, i onda na temelju tog pozivati metode IAutomatonBuildera 
+ * operatorima, i onda na temelju tog pozivati metode IAutomatonBuildera
  */
