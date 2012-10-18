@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This interface lists what must be provided for the lexer generator to
- * successfully
+ * This class lists what must be provided for the lexer generator to
+ * successfully do shit
  * 
  * @author dosvald
  */
