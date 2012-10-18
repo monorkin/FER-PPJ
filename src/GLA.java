@@ -1,5 +1,5 @@
-import hr.unizg.fer.zemris.ppj.maheri.gen.interfaces.RegexParser;
-import hr.unizg.fer.zemris.ppj.maheri.lexergen.IInputProcessor;
+import hr.unizg.fer.zemris.ppj.maheri.lexergen.InputProcessor;
+import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegDefResolver;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
 
 import java.io.BufferedReader;
@@ -19,8 +19,9 @@ import java.util.Map;
 public class GLA {
 
 	public static void main(String[] args) throws IOException {
-		// Kad main postane velik, moze se grupirati u metode ili konstruktore nekih klasa koje ce isplivati kao potrebne... 
-		
+		// Kad main postane velik, moze se grupirati u metode ili konstruktore
+		// nekih klasa koje ce isplivati kao potrebne...
+
 		List<String> inputLines = new LinkedList<String>();
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -29,25 +30,26 @@ public class GLA {
 			inputLines.add(currentLine);
 		}
 
-		List<String> regularDefinitionLines;		
+		List<String> regularDefinitionLines;
 		List<String> lexerStateNames;
 		List<String> tokenNames;
 		List<LexerRuleDescriptionText> lexerRules;
-		
-		// TODO implement where error
-		IInputProcessor ip = new SimpleInputProcessor(inputLines);
-		
+
+		// TODO implement this class
+		InputProcessor ip = new InputProcessor(inputLines);
+
 		regularDefinitionLines = ip.getRegularDefinitions();
 
 		Map<String, String> regularDefinitions;
-		RegexParser regDefParser = new SimpleRegexParser();
-		regularDefinitions = regDefParser.parseRegexes(regularDefinitionLines.toArray(new String[0]));
-		
+
+		// TODO implement this class
+		RegDefResolver rds = new RegDefResolver();
+
+		regularDefinitions = rds.parseRegexes(regularDefinitionLines.toArray(new String[0]));
+
 		lexerStateNames = ip.getLexerStates();
 		tokenNames = ip.getTokenNames();
 		lexerRules = ip.getLexerRules(regularDefinitions);
-		
-		
-		
+
 	}
 }
