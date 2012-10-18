@@ -12,25 +12,36 @@ import java.util.Map;
  * @author dosvald
  */
 public class InputProcessor {
+	
+	public InputProcessor(List<String> inputLines) {
+		// TODO IMPLEMENT
+		throw new RuntimeException("unimplemented");
+	}
 
 	/**
 	 * @return list of regular definitions
 	 */
-	public List<String> getRegularDefinitions(){
-		return null;}
+	public List<String> getRegularDefinitions() {
+		// TODO IMPLEMENT
+		return null;
+	}
 
 	/**
 	 * @return list of lexer states that will be used
 	 */
-	public List<String> getLexerStates(){
-		return null;}
+	public List<String> getLexerStates() {
+		// TODO IMPLEMENT
+		return null;
+	}
 
 	/**
 	 * @return list of names of tokens (lexemes) the lexer will tokenize the
 	 *         input program into
 	 */
-	public List<String> getTokenNames(){
-		return null;}
+	public List<String> getTokenNames() {
+		// TODO IMPLEMENT
+		return null;
+	}
 
 	/**
 	 * @return list of {@link LexerRuleDescriptionText} objects, each describing
@@ -42,7 +53,9 @@ public class InputProcessor {
 	 *            according to the definition map. Otherwise the rules are kept
 	 *            verbatim
 	 */
-	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef){
-		return null;}
+	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef) {
+		// TODO IMPLEMENT
+		return null;
+	}
 
 }
