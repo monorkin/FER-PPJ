@@ -5,7 +5,7 @@ PPJ
 
 # WHAT DO
 
-- Aleksandar recimo da treba napraviti klasu RegexParser koju sam ja upecao u main. To je vec zadano.
+- Aleksandar recimo da treba napraviti klasu RegexParser koju sam ja upecao u main. To je vec zadano. Vidio!!! BUDEM!
   
 - Andrej, ti si dosta bio pitao sto treba radit pa evo nesto za sad. Implementiraj SimpleInputProcesor
 (quickfix implement missing u mainu)
