@@ -1,13 +1,13 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
 /**
- * e-NFA
+ * Implementation of e-NFA
  * 
  * @author tljubej
  * 
  */
 public class Automaton {
-	// TODO
+	// TODO sve više manje
 
 	/**
 	 * 
