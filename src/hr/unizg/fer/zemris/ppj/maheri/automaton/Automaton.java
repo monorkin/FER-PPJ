@@ -7,7 +7,7 @@ package hr.unizg.fer.zemris.ppj.maheri.automaton;
  * 
  */
 public class Automaton {
-	// TODO
+	// TODO puno toga
 
 	/**
 	 * 
