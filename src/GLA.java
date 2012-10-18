@@ -1,6 +1,6 @@
-import hr.unizg.fer.zemris.ppj.maheri.gen.interfaces.IInputProcessor;
 import hr.unizg.fer.zemris.ppj.maheri.gen.interfaces.RegexParser;
-import hr.unizg.fer.zemris.ppj.maheri.lexer.gen.structs.LexerRuleDescriptionText;
+import hr.unizg.fer.zemris.ppj.maheri.lexergen.IInputProcessor;
+import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
 
 import java.io.BufferedReader;
 import java.io.IOException;

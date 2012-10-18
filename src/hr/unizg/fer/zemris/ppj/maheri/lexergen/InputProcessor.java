@@ -1,6 +1,6 @@
-package hr.unizg.fer.zemris.ppj.maheri.gen.interfaces;
+package hr.unizg.fer.zemris.ppj.maheri.lexergen;
 
-import hr.unizg.fer.zemris.ppj.maheri.lexer.gen.structs.LexerRuleDescriptionText;
+import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
 
 import java.util.List;
 import java.util.Map;
@@ -11,23 +11,26 @@ import java.util.Map;
  * 
  * @author dosvald
  */
-public interface IInputProcessor {
+public class InputProcessor {
 
 	/**
 	 * @return list of regular definitions
 	 */
-	public List<String> getRegularDefinitions();
+	public List<String> getRegularDefinitions(){
+		return null;}
 
 	/**
 	 * @return list of lexer states that will be used
 	 */
-	public List<String> getLexerStates();
+	public List<String> getLexerStates(){
+		return null;}
 
 	/**
 	 * @return list of names of tokens (lexemes) the lexer will tokenize the
 	 *         input program into
 	 */
-	public List<String> getTokenNames();
+	public List<String> getTokenNames(){
+		return null;}
 
 	/**
 	 * @return list of {@link LexerRuleDescriptionText} objects, each describing
@@ -39,6 +42,7 @@ public interface IInputProcessor {
 	 *            according to the definition map. Otherwise the rules are kept
 	 *            verbatim
 	 */
-	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef);
+	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef){
+		return null;}
 
 }

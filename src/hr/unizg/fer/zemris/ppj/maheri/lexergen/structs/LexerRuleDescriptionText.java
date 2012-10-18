@@ -1,4 +1,4 @@
-package hr.unizg.fer.zemris.ppj.maheri.lexer.gen.structs;
+package hr.unizg.fer.zemris.ppj.maheri.lexergen.structs;
 
 import java.util.List;
 
