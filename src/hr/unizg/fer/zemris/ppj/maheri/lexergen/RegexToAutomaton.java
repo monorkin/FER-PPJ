@@ -28,6 +28,19 @@ public class RegexToAutomaton {
 		}
 	}
 
+	private static char unescape(char e) {
+		switch (e) {
+		case 't':
+			return '\t';
+		case 'n':
+			return '\n';
+		case '_':
+			return ' ';
+		default:
+			return e;
+		}
+	}
+
 	private static boolean isEscapedAt(String regex, int index) {
 		boolean ret = false;
 		while (index >= 0 && regex.charAt(index--) == '\\')
@@ -107,14 +120,49 @@ public class RegexToAutomaton {
 			String prev = curr.begin;
 			for (int i = 0; i < regex.length(); ++i) {
 				if (isEscapedAt(regex, i)) {
-					if (regex.charAt(i) == 't')
+					String s1 = createNewState();
+					String s2 = createNewState();
+					curr.stateNames.add(s1);
+					curr.stateNames.add(s2);
+					curr.addTransition(s1, Character.toString(unescape(regex.charAt(i))), s2);
 				} else {
-					
+					if (regex.charAt(i) == '\\')
+						continue;
+
+					if (regex.charAt(i) != '(') {
+						String s1 = createNewState();
+						String s2 = createNewState();
+						curr.stateNames.add(s1);
+						curr.stateNames.add(s2);
+						curr.addTransition(s1, regex.charAt(i) == '$' ? "" : Character.toString(regex.charAt(i)), s2);
+					} else {
+						int j = findMatchingParenthesis(regex, i);
+						A tmp = convert(regex.substring(i + 1, j));
+						curr.stateNames.addAll(tmp.stateNames);
+						curr.transitionsForState.putAll(tmp.transitionsForState);
+						curr.begin = tmp.begin;
+						curr.end = tmp.end;
+						i = j;
+					}
 				}
-				
-				if (i+1 < regex.length() && i+1 == '*') {
-					
+
+				if (i + 1 < regex.length() && regex.charAt(i + 1) == '*') {
+					String innerBegin = curr.begin;
+					String innerEnd = curr.end;
+					curr.stateNames.add(curr.begin = createNewState());
+					curr.stateNames.add(curr.end = createNewState());
+
+					curr.addTransition(curr.begin, "", innerBegin);
+					curr.addTransition(innerEnd, "", curr.end);
+					curr.addTransition(curr.begin, "", curr.end);
+					curr.addTransition(innerEnd, "", innerEnd);
+
+					++i;
 				}
+				// /
+				curr.addTransition(prev, "", curr.begin);
+				prev = curr.end;
+
 			}
 		}
 
