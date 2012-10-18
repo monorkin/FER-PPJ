@@ -41,7 +41,6 @@ public abstract class RegexParserTest {
 
 		List<String> input1 = Files.readAllLines(Paths.get("res/testdata/RegexParserTest/1.in"), Charset.defaultCharset());
 		List<String> output1 = Files.readAllLines(Paths.get("res/testdata/RegexParserTest/1.out"), Charset.defaultCharset());
-		
 		data.add(new Object[] { input1.toArray(new String[0]),
 				output1.toArray(new String[0]) });
 		return data;
