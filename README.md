@@ -3,21 +3,40 @@ PPJ
 
 PPJ
 
-# WHAT DO
+# WHAT DO - _updated_
 
-- Aleksandar recimo da treba napraviti klasu RegexParser koju sam ja upecao u main. To je vec zadano. Vidio!!! BUDEM!
+- Aleksandar
+ i dalje treba napraviti klasu -RegexParser- RegDefResolver (promijenjeno je samo ime i package) koju sam ja upecao u main.
   
-- Andrej, ti si dosta bio pitao sto treba radit pa evo nesto za sad. Implementiraj SimpleInputProcesor
-(quickfix implement missing u mainu)
+- Andrej, implementiraj -SimpleInputProcesor- InputProcessor 
+koji je isti kao prije 
+samo je renaman i premjesten 
+samo implementiraj 4 funkcije u toj klasi 
+da rade ono sto pise da rade.
 
-- Petar, ocekivao sam da cu danas recimo napravit neko sucelje automata pa ti reci da ti svoj eNKA == eNFA 
-automat s UTRa umotas u taj interface ali nisam stigao. Ako zelis mozes ostavit neko svoje sucelje pa cu ja 
-spajat. Ili barem zalijepi negdje tvoju klasu da vidim s cim imamo posla i kako cemo to ugradit...
+- Petar, postoji klasa Automaton. 
+Uštekaj tu automat s UTRa. 
+Neke funkcije su vec napisane 
+jer je procijenjeno da bi automat bio beskoristan ako ih nema. 
+Neka automat radi s tim funkcijama. 
+Također stavi neki nacin konstrukcije istih iz tekst-fajl oblika kao na utru. 
 
-- Tomislav, namjeravao sam isto tako da cu napravit ovo s regex decomposerom pa da ti implementiras, ali posto
-nisam listener specificirao do kraja onda zasad nis od tog
+- Stanko: 
+ako znas, napravi JUnit testere 
+za RegDefResolver i RegexToAutomaton. 
+Dodaj par testCaseova. 
+RegexToAutomaton je kao napisan do kraja, 
+pa ga mozes i isprobavati (ulaz regex, izlaz automat). 
+Ako ne znas, kreni od ovog s errorom...
 
-Mislio sam i zadat da Stanko napravi testove za ove klase koje budu bile implementirane ali nema jos temelja nazalost.
+- Tomislav radi lexer
+
+### Bilo bi razumno da ljudi osim Tomislava zavrse sve ovo u petak. Pogotovo ono sto je generalno zadano bilo u utorak ak se dobro sjecam. 
+
+Kad je netko gotov sa svojim dijelom (Petar bi trebao moci taj automat samo copypasteom rijesit), moze pomoc drugom...
+Ili moze pocet radit na nekom dijelu labosa koji nije napravljen i nije opisan ovdje da ga nitko ne radi. U najgorem slucaju cemo sve pobrisat (ko ono moje kaj sam zabrijavao s glupostima) tak da nemrete fulat ak nekaj napravite :) 
 
 # Lexer klasa i sve vezano uz to
-- Preporučam da ne dirate to, to je križ koji ja nosim.
+- Preporučam da ne dirate to, to je križ koji ja nosim. _The preceding unsigned comment was placed by tljubej_
+
+Opaska: za drugi labos moram bolje organizirat podjelu posla i organizaciju.
