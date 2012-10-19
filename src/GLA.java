@@ -13,8 +13,10 @@ import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegexToAutomaton;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -62,7 +64,9 @@ public class GLA {
 		lexerStateNames = ip.getLexerStates();
 		tokenNames = ip.getTokenNames();
 		lexerRuleDesciptions = ip.getLexerRules(regularDefinitions);
-
+		
+		
+		//HERE STARTS CONSTRUCTION OF THE LEXER, BRACE FOR SHITSTORM OF EXCEPTIONS
 		Map<String, LexerState> lexerStates = new HashMap<>();
 
 		for (LexerRuleDescriptionText r : lexerRuleDesciptions) {
@@ -94,5 +98,10 @@ public class GLA {
 					RegexToAutomaton.getAutomatonDescription(r.getRegexString())), ruleActions);
 		}
 
+		FileOutputStream stream = new FileOutputStream("analizator/lexerStates.ser");
+		ObjectOutputStream oStream = new ObjectOutputStream(stream);
+		oStream.writeObject(lexerStates);
+		oStream.close();
+		stream.close();
 	}
 }
