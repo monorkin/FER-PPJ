@@ -42,20 +42,38 @@ public class Lexer {
 	 *            the entire file to be lexerized
 	 */
 	public void doLexing() {
-		// Ovo možda ne valja
-		for (int i = startIndex; i < finishIndex; i++) {
-			char currChar = input.charAt(i);
+		while (finishIndex < input.length()) {
+			char currChar = input.charAt(finishIndex);
+			currentState.pushCharToAutomatons(currChar);
 			if (currentState.isAnyAlive()) {
 				finishIndex++;
-				continue;
 			} else {
-				LexerRule accepted = currentState.getAccepted();
-				if (accepted==null) {
+				LexerRule accRule = currentState.getAccepted();
+				if (accRule == null) {
 					startIndex++;
-					i=startIndex;
+					finishIndex=startIndex;
+					System.err.println("LEL POGRIJEŠKA U LEXORIRANJU");
+				} else {
+					accRule.doActions(this);
 				}
+
 			}
+
 		}
+		// Ovo možda ne valja
+		// for (int i = startIndex; i < finishIndex; i++) {
+		// char currChar = input.charAt(i);
+		// if (currentState.isAnyAlive()) {
+		// finishIndex++;
+		// continue;
+		// } else {
+		// LexerRule accepted = currentState.getAccepted();
+		// if (accepted == null) {
+		// startIndex++;
+		// i = startIndex;
+		// }
+		// }
+		// }
 	}
 
 	/**
@@ -146,7 +164,7 @@ public class Lexer {
 	public void reset() {
 		startIndex = 0;
 		finishIndex = 0;
-		lineCount = 0;
+		lineCount = 1;
 	}
 
 }

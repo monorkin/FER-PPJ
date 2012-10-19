@@ -42,7 +42,11 @@ public class LexerRule implements Serializable {
 		return actions;
 	}
 	
-	
+	public void doActions(Lexer lexer) {
+		for (Action a: actions) {
+			a.doAction(lexer);
+		}
+	}
 	
 	
 }
