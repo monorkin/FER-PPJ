@@ -15,7 +15,7 @@ public class InputProcessor {
 	
 	public InputProcessor(List<String> inputLines) {
 		// TODO IMPLEMENT
-		throw new RuntimeException("unimplemented");
+		//throw new RuntimeException("unimplemented");
 	}
 
 	/**
