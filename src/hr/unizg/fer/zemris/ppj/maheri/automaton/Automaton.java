@@ -1,5 +1,7 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
+import java.util.List;
+
 /**
  * Implementation of e-NFA
  * 
@@ -8,6 +10,12 @@ package hr.unizg.fer.zemris.ppj.maheri.automaton;
  */
 public class Automaton {
 	// TODO sve više manje
+	private List<String> automatonDescription;
+	
+	public Automaton(List<String> rules) {
+		this.automatonDescription=rules;
+		//TODO vjerojatno će tu još nešto ić
+	}
 
 	/**
 	 * 
@@ -26,6 +34,13 @@ public class Automaton {
 	}
 
 	public void nextChar(char c) {
+	}
+	
+	/**
+	 * Resets automaton to starting state
+	 */
+	public void reset() {
+		
 	}
 
 }

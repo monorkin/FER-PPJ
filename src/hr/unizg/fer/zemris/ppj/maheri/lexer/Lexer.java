@@ -55,6 +55,7 @@ public class Lexer {
 					System.err.println("LEL POGRIJEŠKA U LEXORIRANJU");
 				} else {
 					accRule.doActions(this);
+					currentState.resetAutomatons();
 				}
 
 			}

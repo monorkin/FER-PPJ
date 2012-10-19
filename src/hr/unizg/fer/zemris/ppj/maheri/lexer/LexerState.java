@@ -1,6 +1,7 @@
 package hr.unizg.fer.zemris.ppj.maheri.lexer;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LexerState implements Serializable {
@@ -17,12 +18,20 @@ public class LexerState implements Serializable {
 	public LexerState(List<LexerRule> rules) {
 		this.rules = rules;
 	}
+	
+	public LexerState() {
+		this.rules = new ArrayList<>();
+	}
 
 	/**
 	 * @return the rules
 	 */
 	public List<LexerRule> getRules() {
 		return rules;
+	}
+	
+	public void addRule(LexerRule rule) {
+		this.rules.add(rule);
 	}
 
 	public void pushCharToAutomatons(char c) {
@@ -44,6 +53,12 @@ public class LexerState implements Serializable {
 			if (r.getRegex().doesAccept()) return r;
 		}
 		return null;
+	}
+	
+	public void resetAutomatons() {
+		for (LexerRule r: rules) {
+			r.getRegex().reset();
+		}
 	}
 
 }
