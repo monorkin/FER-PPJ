@@ -18,8 +18,32 @@ public class RegDefResolver {
 	 * @return A key-value map
 	 */
 	public Map<String, String> parseRegexes(String[] array) {
-		// TODO Auto-generated method stub
-		return null;
+		 Map<String,String> m = new HashMap<String, String>();
+        String name="";
+        String value="";
+        String tempValue="";
+        // napravimo mapu iz stringova
+        for(String i: array) {
+            value="";
+            Scanner scanner = new Scanner(i);
+            scanner.useDelimiter("[{}]");
+            name = scanner.next().trim();
+            while (scanner.hasNext())
+            {
+                tempValue += scanner.next().trim();
+                if (m.get(tempValue)!=null) 
+                {
+                    value+="("+m.get(tempValue)+")";
+
+                }
+                else value+=tempValue;
+                tempValue="";
+            }
+            m.put(name, value);
+            System.err.println("Name is:" + name + ", and Value is:" + value);
+            }
+        
+        return m;
 	}
 
 }
