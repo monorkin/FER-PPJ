@@ -24,6 +24,9 @@ public class Lexer {
 		this.lexerStates = lexerStates;
 		this.currentState = startState;
 		this.input = input;
+		// mislim da ce ti trebati i treci pokazivac. Na slajdovima koriste tri
+		// pokazivaca. Mozda ti ne treba ovdje ovisno dal ce taj treci biti neki
+		// i ili j u nekoj for petlji
 		startIndex = 0;
 		finishIndex = 0;
 		lineCount = 0;
@@ -40,7 +43,8 @@ public class Lexer {
 	}
 
 	/**
-	 * @param currentState the currentState to set
+	 * @param currentState
+	 *            the currentState to set
 	 */
 	public void setCurrentState(LexerState currentState) {
 		this.currentState = currentState;
