@@ -18,3 +18,6 @@ spajat. Ili barem zalijepi negdje tvoju klasu da vidim s cim imamo posla i kako 
 nisam listener specificirao do kraja onda zasad nis od tog
 
 Mislio sam i zadat da Stanko napravi testove za ove klase koje budu bile implementirane ali nema jos temelja nazalost.
+
+# Lexer klasa i sve vezano uz to
+- Preporučam da ne dirate to, to je križ koji ja nosim.

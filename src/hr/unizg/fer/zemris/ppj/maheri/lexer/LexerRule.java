@@ -14,4 +14,16 @@ public class LexerRule implements Serializable {
 
 	private Automaton regex;
 	private List<Action> actions;
+	
+	
+	/**
+	 * @param regex
+	 * @param actions
+	 */
+	public LexerRule(Automaton regex, List<Action> actions) {
+		this.regex = regex;
+		this.actions = actions;
+	}
+	
+	
 }
