@@ -24,7 +24,6 @@ public class DeclareClassAction implements Action, Serializable {
 				lexemClass + " " + lexer.getLineCount() + " "
 						+ lexer.getInput().substring(lexer.getStartIndex(), lexer.getFinishIndex()));
 	lexer.setStartIndex(lexer.getFinishIndex());
-	lexer.setFinishIndex(lexer.getStartIndex()+1);
 	}
 
 }
