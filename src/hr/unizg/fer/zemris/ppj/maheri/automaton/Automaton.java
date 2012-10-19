@@ -42,5 +42,12 @@ public class Automaton {
 	public void reset() {
 		
 	}
+	
+	/**
+	 * Return to previous set of states (before the last char was read)
+	 */
+	public void undoOneStep() {
+		
+	}
 
 }

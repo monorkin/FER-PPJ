@@ -48,15 +48,16 @@ public class Lexer {
 			if (currentState.isAnyAlive()) {
 				finishIndex++;
 			} else {
+				currentState.revertAutomatons();
 				LexerRule accRule = currentState.getAccepted();
 				if (accRule == null) {
 					startIndex++;
-					finishIndex=startIndex;
+					finishIndex = startIndex;
 					System.err.println("LEL POGRIJEŠKA U LEXORIRANJU");
 				} else {
 					accRule.doActions(this);
-					currentState.resetAutomatons();
 				}
+				currentState.resetAutomatons();
 
 			}
 
