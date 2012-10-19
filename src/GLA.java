@@ -96,6 +96,7 @@ public class GLA {
 			}
 			LexerRule tmpRule = new LexerRule(new Automaton(
 					RegexToAutomaton.getAutomatonDescription(r.getRegexString())), ruleActions);
+			lexerStates.get(stateName).addRule(tmpRule);
 		}
 
 		FileOutputStream stream = new FileOutputStream("analizator/lexerStates.ser");
