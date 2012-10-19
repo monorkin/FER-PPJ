@@ -23,7 +23,26 @@ public class LexerRule implements Serializable {
 	public LexerRule(Automaton regex, List<Action> actions) {
 		this.regex = regex;
 		this.actions = actions;
+		
 	}
+
+
+	/**
+	 * @return the regex
+	 */
+	public Automaton getRegex() {
+		return regex;
+	}
+
+
+	/**
+	 * @return the actions
+	 */
+	public List<Action> getActions() {
+		return actions;
+	}
+	
+	
 	
 	
 }
