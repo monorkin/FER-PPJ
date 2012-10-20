@@ -100,7 +100,9 @@ public class GLA {
 
 		FileOutputStream stream = new FileOutputStream("analizator/lexerStates.ser");
 		ObjectOutputStream oStream = new ObjectOutputStream(stream);
+		LexerState startState = lexerStates.get(lexerStateNames.get(0));
 		oStream.writeObject(lexerStates);
+		oStream.writeObject(startState);
 		oStream.close();
 		stream.close();
 	}
