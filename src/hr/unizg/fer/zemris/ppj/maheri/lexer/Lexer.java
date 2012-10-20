@@ -47,7 +47,7 @@ public class Lexer {
 		
 		while (finishIndex<=input.length()) {
 			char c = input.charAt(finishIndex);
-			currentState.pushCharToAutomatons(c);
+			currentState.pushCharToAutomatons(String.valueOf(c));
 			LexerRule tmpRule = currentState.getAccepted();
 			if (tmpRule!=null) {
 				accRule=tmpRule;

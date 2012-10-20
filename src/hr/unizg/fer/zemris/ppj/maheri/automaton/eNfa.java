@@ -90,8 +90,7 @@ public class eNfa extends Automaton {
 	}
 
 	@Override
-	public void nextChar(char c) {
-		String key = String.valueOf(c);
+	public void nextChar(String key) {
 		if (!symbols.contains(key)) {
 			throw new IllegalArgumentException("Key " + key + " is not a valid input for this automaton");
 		}

@@ -44,7 +44,7 @@ public abstract class Automaton {
 	 * 
 	 * @param c
 	 */
-	abstract public void nextChar(char c);
+	abstract public void nextChar(String c);
 
 	/**
 	 * Resets automaton to starting state

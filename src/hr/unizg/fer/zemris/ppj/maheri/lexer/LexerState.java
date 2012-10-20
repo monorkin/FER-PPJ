@@ -34,7 +34,7 @@ public class LexerState implements Serializable {
 		this.rules.add(rule);
 	}
 
-	public void pushCharToAutomatons(char c) {
+	public void pushCharToAutomatons(String c) {
 		for (LexerRule r : rules) {
 			r.getRegex().nextChar(c);
 		}
