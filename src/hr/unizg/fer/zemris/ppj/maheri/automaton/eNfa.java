@@ -47,6 +47,7 @@ public class eNfa extends Automaton {
 		for (Transition t : this.transitions) {
 			if (t.getKey().equals(EPSILON)) {
 				this.epsilonInstances.add(t.getOrigin());
+				t.getOrigin().eTransition = t;
 			}
 
 			if (!this.states.contains(t.getOrigin()) || !this.states.containsAll(t.getDestinations())) {
