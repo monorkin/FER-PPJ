@@ -3,52 +3,48 @@ package hr.unizg.fer.zemris.ppj.maheri.automaton;
 import java.util.List;
 
 /**
- * Implementation of e-NFA
+ * An abstract class representing an automaton
  * 
  * @author tljubej
+ * @author Petar Šegina <psegina@ymail.com>
  * 
  */
-public class Automaton {
-	// TODO sve više manje
-	private List<String> automatonDescription;
-	
-	public Automaton(List<String> rules) {
-		this.automatonDescription=rules;
-		//TODO vjerojatno će tu još nešto ić
+public abstract class Automaton {
+
+	/**
+	 * A constant marking the symbol used for representing epsilon transitions
+	 */
+	public static final String EPSILON = "$";
+
+	public Automaton(List<State> states, List<String> symbols, List<Transition> transitions, State startingState,
+			List<State> acceptableStates) {
+
 	}
 
 	/**
 	 * 
 	 * @return false if in a "dead" state, true otherwise
 	 */
-	public boolean isAlive() {
-		return false;
-	}
+	abstract public boolean isAlive();
 
 	/**
 	 * 
 	 * @return true if in an "accepted" state, false otherwise
 	 */
-	public boolean doesAccept() {
-		return false;
-	}
+	abstract public boolean isAcceptable();
 
-	public void nextChar(char c) {
-	}
-	
+	/**
+	 * Perform a transition based on the input character
+	 * 
+	 * @param c
+	 */
+	abstract public void nextChar(char c);
+
 	/**
 	 * Resets automaton to starting state
 	 */
 	public void reset() {
-		
+
 	}
-	
-	//Vjerojatno neće trebat
-//	/**
-//	 * Return to previous set of states (before the last char was read)
-//	 */
-//	public void undoOneStep() {
-//		
-//	}
 
 }
