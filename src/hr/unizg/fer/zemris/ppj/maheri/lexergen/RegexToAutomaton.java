@@ -183,31 +183,34 @@ public class RegexToAutomaton {
 		List<String> symbols = new LinkedList<>();
 		List<Transition> transitions = new LinkedList<>();
 		// TODO determine the starting state and acceptable states
-		State startingState;
-		List<State> acceptableStates;
-		
+		List<State> acceptableStates = new LinkedList<>();
+
 		// Generate state list
-		for(String s : nfa.stateNames) {
+		for (String s : nfa.stateNames) {
 			states.add(new State(s));
 		}
-		
+
+		State startingState = State.getByName(nfa.begin, states);
+		acceptableStates.add(State.getByName(nfa.end, states));
+
 		/*
 		 * Generate transition list
 		 */
-		for(String origin : nfa.transitionsForState.keySet()) {
+		for (String origin : nfa.transitionsForState.keySet()) {
 			Map<String, List<String>> transitionMap = nfa.transitionsForState.get(origin);
-			for(String key :transitionMap.keySet()) {
+			for (String key : transitionMap.keySet()) {
 				Transition t = new Transition();
 				t.origin = State.getByName(origin, states);
 				t.key = key;
-				if(key.length() == 0) key = Automaton.EPSILON;
+				if (key.length() == 0)
+					key = Automaton.EPSILON;
 				t.destinations = new Vector<State>();
-				for(String s : transitionMap.get(key)) {
+				for (String s : transitionMap.get(key)) {
 					t.destinations.add(State.getByName(s, states));
 				}
 			}
 		}
-		
+
 		return new eNfa(states, symbols, transitions, startingState, acceptableStates);
 	}
 
