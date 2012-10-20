@@ -19,7 +19,7 @@ public class RegDefResolver {
 	 *           The input to parse and resolve regexes
 	 * @return A key-value map
 	 */
-	public Map<String, String> parseRegexes(String[] array) {
+	public static Map<String, String> parseRegexes(String[] array) {
 		 Map<String,String> m = new HashMap<String, String>();
         String name="";
         String value="";
