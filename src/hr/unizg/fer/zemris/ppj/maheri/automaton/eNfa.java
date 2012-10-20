@@ -49,6 +49,8 @@ public class eNfa extends Automaton {
 				this.epsilonInstances.add(t.getOrigin());
 				t.getOrigin().eTransition = t;
 			}
+			
+			t.getOrigin().transitions.add(t);
 
 			if (!this.states.contains(t.getOrigin()) || !this.states.containsAll(t.getDestinations())) {
 				StringBuilder sb = new StringBuilder();
@@ -86,9 +88,15 @@ public class eNfa extends Automaton {
 
 	@Override
 	public List<State> getActiveStates() {
+		Collections.sort(this.currentStates);
 		return this.currentStates;
 	}
 
+	@Override
+	public void reset() {
+		initialise();
+	}
+	
 	@Override
 	public void nextChar(String key) {
 		if (!symbols.contains(key)) {
@@ -142,7 +150,7 @@ public class eNfa extends Automaton {
 						nextStates.add(q2);
 					}
 				}
-
+				
 			}
 
 			/*
