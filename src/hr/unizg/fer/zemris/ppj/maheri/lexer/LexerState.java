@@ -50,7 +50,7 @@ public class LexerState implements Serializable {
 	
 	public LexerRule getAccepted() {
 		for (LexerRule r: rules) {
-			if (r.getRegex().doesAccept()) return r;
+			if (r.getRegex().isAcceptable()) return r;
 		}
 		return null;
 	}
