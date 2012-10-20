@@ -34,6 +34,12 @@ public abstract class Automaton {
 	abstract public boolean isAcceptable();
 
 	/**
+	 * 
+	 * @return the current states of the automaton
+	 */
+	abstract public List<State> getActiveStates();
+	
+	/**
 	 * Perform a transition based on the input character
 	 * 
 	 * @param c
