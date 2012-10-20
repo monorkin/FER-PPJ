@@ -1,9 +1,16 @@
 package hr.unizg.fer.zemris.ppj.maheri.lexergen;
 
+import hr.unizg.fer.zemris.ppj.maheri.automaton.Automaton;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.Transition;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 public class RegexToAutomaton {
 	private static int stateNumber = 0;
@@ -167,6 +174,41 @@ public class RegexToAutomaton {
 		}
 
 		return curr;
+	}
+	
+	public static eNfa getAutomaton(String regex) {
+		A nfa = convert(regex);
+
+		List<State> states = new LinkedList<>();
+		List<String> symbols = new LinkedList<>();
+		List<Transition> transitions = new LinkedList<>();
+		// TODO determine the starting state and acceptable states
+		State startingState;
+		List<State> acceptableStates;
+		
+		// Generate state list
+		for(String s : nfa.stateNames) {
+			states.add(new State(s));
+		}
+		
+		/*
+		 * Generate transition list
+		 */
+		for(String origin : nfa.transitionsForState.keySet()) {
+			Map<String, List<String>> transitionMap = nfa.transitionsForState.get(origin);
+			for(String key :transitionMap.keySet()) {
+				Transition t = new Transition();
+				t.origin = State.getByName(origin, states);
+				t.key = key;
+				if(key.length() == 0) key = Automaton.EPSILON;
+				t.destinations = new Vector<State>();
+				for(String s : transitionMap.get(key)) {
+					t.destinations.add(State.getByName(s, states));
+				}
+			}
+		}
+		
+		return new eNfa(states, symbols, transitions, startingState, acceptableStates);
 	}
 
 	public static List<String> getAutomatonDescription(String regex) {

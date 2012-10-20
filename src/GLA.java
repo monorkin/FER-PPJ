@@ -64,9 +64,9 @@ public class GLA {
 		lexerStateNames = ip.getLexerStates();
 		tokenNames = ip.getTokenNames();
 		lexerRuleDesciptions = ip.getLexerRules(regularDefinitions);
-		
-		
-		//HERE STARTS CONSTRUCTION OF THE LEXER, BRACE FOR SHITSTORM OF EXCEPTIONS
+
+		// HERE STARTS CONSTRUCTION OF THE LEXER, BRACE FOR SHITSTORM OF
+		// EXCEPTIONS
 		Map<String, LexerState> lexerStates = new HashMap<>();
 
 		for (LexerRuleDescriptionText r : lexerRuleDesciptions) {
@@ -94,8 +94,7 @@ public class GLA {
 					ruleActions.add(new NewLineAction());
 				}
 			}
-			LexerRule tmpRule = new LexerRule(new Automaton(
-					RegexToAutomaton.getAutomatonDescription(r.getRegexString())), ruleActions);
+			LexerRule tmpRule = new LexerRule(RegexToAutomaton.getAutomaton(r.getRegexString()), ruleActions);
 			lexerStates.get(stateName).addRule(tmpRule);
 		}
 
