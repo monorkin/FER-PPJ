@@ -43,11 +43,12 @@ public class Automaton {
 		
 	}
 	
-	/**
-	 * Return to previous set of states (before the last char was read)
-	 */
-	public void undoOneStep() {
-		
-	}
+	//Vjerojatno neće trebat
+//	/**
+//	 * Return to previous set of states (before the last char was read)
+//	 */
+//	public void undoOneStep() {
+//		
+//	}
 
 }
