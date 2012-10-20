@@ -11,6 +11,11 @@ public class Transition {
 		if (origin == null || key == null || destinations == null) {
 			throw new IllegalArgumentException("Parameters must not be null!");
 		}
+		for(State q : destinations) {
+			if(q == null) {
+				throw new IllegalArgumentException("Null must not be present in destinations");
+			}
+		}
 		this.origin = origin;
 		this.key = key;
 		this.destinations = destinations;
