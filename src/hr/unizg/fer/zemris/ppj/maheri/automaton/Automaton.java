@@ -49,8 +49,6 @@ public abstract class Automaton {
 	/**
 	 * Resets automaton to starting state
 	 */
-	public void reset() {
-
-	}
+	public abstract void reset();
 
 }
