@@ -1,6 +1,6 @@
-//package hr.unizg.fer.zemris.ppj.maheri.lexergen;
+package hr.unizg.fer.zemris.ppj.maheri.lexergen;
 
-//import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
+import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,11 +18,9 @@ public class InputProcessor {
 	List<String> RegularDefinitions = new ArrayList<String>();
 	List<String> LexerStates = new ArrayList<String>();
 	List<String> TokenNames = new ArrayList<String>();
+	String Lexy = new String();
+	List<LexerRuleDescriptionText> LexerRules = new ArrayList<LexerRuleDescriptionText>();
 	
-	/*
-	 * za ujutro: popunit mapu, testirat, osposobit eclipse egit
-	 * napit se popodne
-	 */
 	
 	public InputProcessor(List<String> inputLines) {
 		Integer mode = 1;
@@ -38,25 +36,41 @@ public class InputProcessor {
 	        		  mode = 2;
 	        	  else if(value.charAt(1) == 'L')
 	        		  mode = 3;
-	        	  else if((mode == 3) && (value.charAt(0) == '<'))
-	        	  {
-	        		  mode = 4;
-	        	  }
-	          }        
+	          }
+
+	         if((mode == 3) && (value.charAt(0) == '<'))
+	         {
+	        	 		mode = 4;
+	         }		
 	          switch (mode) {
 	            case 1:  
+	            {
 	            		 RegularDefinitions.add(value); break;
+	            }
 	            case 2: 
+	            {	
 	            	    value = value.substring(3, value.length());
-	            		for(String a: value.split(" ")){
-	            				LexerStates.add(a); }break;
+	            		for(String a: value.split(" "))
+	            		{
+	            		  LexerStates.add(a); 
+	            		}
+	            		break;
+	            }
 	            case 3:  
+	            {
             	        value = value.substring(3, value.length());
-            		    for(String b: value.split(" ")){
-            					TokenNames.add(b); }break;
-	          	}
-	          
+            		    for(String b: value.split(" "))
+            		    {
+            			 TokenNames.add(b); 
+            		    }
+            		    break;
+	            }
+	            case 4:
+	            {
+	            	Lexy += value;
+	            }}
 	        }
+	 	
 	}
 
 	
@@ -93,9 +107,11 @@ public class InputProcessor {
 	 *            according to the definition map. Otherwise the rules are kept
 	 *            verbatim
 	 */
-//	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef) {
-//		// TODO IMPLEMENT
-//		return null;
-//	}
+	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef) {
+		/* TODO: LEXY JE STRING KOJI SADRZI STATE NAME, REGULARNI IZRAZ I AKCIJU. 
+		*  POSAVJETOVATI SE SA GOSP. OSVALD ASAP
+		*/
+		return LexerRules;
+	}
 
 }
