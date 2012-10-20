@@ -199,15 +199,13 @@ public class RegexToAutomaton {
 		for (String origin : nfa.transitionsForState.keySet()) {
 			Map<String, List<String>> transitionMap = nfa.transitionsForState.get(origin);
 			for (String key : transitionMap.keySet()) {
-				Transition t = new Transition();
-				t.origin = State.getByName(origin, states);
-				t.key = key;
 				if (key.length() == 0)
 					key = Automaton.EPSILON;
-				t.destinations = new Vector<State>();
+				List<State> destinations = new LinkedList<>();
 				for (String s : transitionMap.get(key)) {
-					t.destinations.add(State.getByName(s, states));
+					destinations.add(State.getByName(s, states));
 				}
+				transitions.add(new Transition(State.getByName(origin, states), key, destinations));
 			}
 		}
 

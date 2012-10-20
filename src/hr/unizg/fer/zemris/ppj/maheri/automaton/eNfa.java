@@ -45,12 +45,21 @@ public class eNfa extends Automaton {
 		this.acceptableStates = acceptableStates;
 
 		for (Transition t : this.transitions) {
-			if (t.key.equals(EPSILON)) {
-				this.epsilonInstances.add(t.origin);
+			if (t.getKey().equals(EPSILON)) {
+				this.epsilonInstances.add(t.getOrigin());
 			}
 
-			if (!this.states.contains(t.origin) || this.states.containsAll(t.destinations)) {
-				throw new IllegalArgumentException("Transition contains a state not present in the state list\n" + t);
+			if (!this.states.contains(t.getOrigin()) || !this.states.containsAll(t.getDestinations())) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("Transition contains a state not present in the state list!\nTransition:\n\t");
+				sb.append(t);
+				sb.append("\nState list:\n");
+				for (State s : states) {
+					sb.append("\t");
+					sb.append(s);
+					sb.append("\n");
+				}
+				throw new IllegalArgumentException(sb.toString());
 			}
 
 		}
@@ -72,6 +81,11 @@ public class eNfa extends Automaton {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public List<State> getActiveStates() {
+		return this.currentStates;
 	}
 
 	@Override
@@ -101,8 +115,8 @@ public class eNfa extends Automaton {
 				 * states to nextStates
 				 */
 				for (Transition t : q.transitions) {
-					if (t.key.equals(key)) {
-						for (State q2 : t.destinations) {
+					if (t.getKey().equals(key)) {
+						for (State q2 : t.getDestinations()) {
 							if (!nextStates.contains(q2))
 								nextStates.add(q2);
 						}
@@ -118,7 +132,7 @@ public class eNfa extends Automaton {
 				Vector<State> e = new Vector<State>();
 				for (State qt : nextStates) {
 					if (qt.hasEpsilonTransition())
-						for (State qz : qt.eTransition.destinations)
+						for (State qz : qt.eTransition.getDestinations())
 							if (!nextStates.contains(qz))
 								e.add(qz);
 				}
@@ -164,7 +178,7 @@ public class eNfa extends Automaton {
 		currentStates.clear();
 		currentStates.add(startingState);
 		if (startingState.hasEpsilonTransition()) {
-			for (State q2 : startingState.eTransition.destinations) {
+			for (State q2 : startingState.eTransition.getDestinations()) {
 				if (!currentStates.contains(q2))
 					currentStates.add(q2);
 			}
@@ -195,7 +209,7 @@ public class eNfa extends Automaton {
 			pstate.clear();
 			while (hasNextEpsilon) {
 				hasNextEpsilon = false;
-				for (State m : q.eTransition.destinations) {
+				for (State m : q.eTransition.getDestinations()) {
 					/*
 					 * We need to check if we already resolved the current
 					 * state. If we did, we can avoid the work that follows.
@@ -226,7 +240,7 @@ public class eNfa extends Automaton {
 					 */
 
 					if (m.hasEpsilonTransition()) {
-						for (State q2 : m.eTransition.destinations) {
+						for (State q2 : m.eTransition.getDestinations()) {
 							if (!nstate.contains(q2))
 								nstate.add(q2);
 						}
@@ -236,23 +250,23 @@ public class eNfa extends Automaton {
 				}
 
 				for (State q1 : nstate) {
-					if (!q.eTransition.destinations.contains(q1)) {
+					if (!q.eTransition.getDestinations().contains(q1)) {
 						if (DEBUG)
 							System.out.println("\t>Adding " + q1);
-						q.eTransition.destinations.add(q1);
+						q.eTransition.getDestinations().add(q1);
 					}
 				}
 
 				if (DEBUG) {
 					System.out.println("epsilon-circle:");
-					for (State q2 : q.eTransition.destinations) {
+					for (State q2 : q.eTransition.getDestinations()) {
 						System.out.println("\t" + q2);
 					}
 				}
 
 				nstate.clear();
 
-				Collections.sort(q.eTransition.destinations);
+				Collections.sort(q.eTransition.getDestinations());
 			}
 		}
 
