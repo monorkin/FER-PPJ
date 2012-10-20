@@ -55,11 +55,11 @@ public class LexerState implements Serializable {
 		return null;
 	}
 	
-	public void revertAutomatons() {
-		for (LexerRule r: rules) {
-			r.getRegex().undoOneStep();
-		}
-	}
+//	public void revertAutomatons() {
+//		for (LexerRule r: rules) {
+//			r.getRegex().undoOneStep();
+//		}
+//	}
 	
 	public void resetAutomatons() {
 		for (LexerRule r: rules) {
