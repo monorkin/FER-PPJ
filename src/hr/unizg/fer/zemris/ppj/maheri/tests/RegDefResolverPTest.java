@@ -1,16 +1,12 @@
 package hr.unizg.fer.zemris.ppj.maheri.tests;
 
+import static org.junit.Assert.assertTrue;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegDefResolver;
-
-import static org.junit.Assert.*;
+import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -24,7 +20,6 @@ public class RegDefResolverPTest {
 	private String[] input;
 	private String[] output;
 
-
 	public RegDefResolverPTest(String[] input, String[] output) {
 		this.input = input;
 		this.output = output;
@@ -34,26 +29,39 @@ public class RegDefResolverPTest {
 	public static Collection<Object[]> data() throws IOException {
 		ArrayList<Object[]> data = new ArrayList<Object[]>();
 
-		List<String> input1 = Files.readAllLines(Paths.get("res/testdata/RegexParserTest/1.in"), Charset.defaultCharset());
-		List<String> output1 = Files.readAllLines(Paths.get("res/testdata/RegexParserTest/1.out"), Charset.defaultCharset());
-		data.add(new Object[] { input1.toArray(new String[0]),
-				output1.toArray(new String[0]) });
+		for (TestData t : TestUtils.loadData("RegexParserTest")) {
+			data.add(new Object[] { t.getInput().toArray(new String[0]), t.getExpectedOutput().toArray(new String[0]) });
+		}
+
 		return data;
 	}
 
 	@Test
 	public void testOutputKeys() {
 		Map<String, String> map = RegDefResolver.parseRegexes(input);
+		boolean matches;
+
 		for (String s : input) {
-			assertTrue (map.keySet().contains(s.split(" ")[0]));
+			String key = s.split(" ")[0];
+			matches = map.keySet().contains(key);
+			if (!matches) {
+				System.out.println("Key not found: " + key);
+			}
+			assertTrue(matches);
 		}
 	}
 
 	@Test
 	public void testOutputValues() {
 		Map<String, String> map = RegDefResolver.parseRegexes(input);
+		boolean matches;
 		for (String s : output) {
-			assertTrue (map.values().contains(s.split(" ")[1]));
+			String output = s.split(" ")[1];
+			matches = map.values().contains(output);
+			if (!matches) {
+				System.out.println("Value not found: " + output);
+			}
+			assertTrue(matches);
 		}
 	}
 
