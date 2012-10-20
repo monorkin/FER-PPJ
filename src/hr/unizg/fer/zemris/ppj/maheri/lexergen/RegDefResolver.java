@@ -1,6 +1,8 @@
 package hr.unizg.fer.zemris.ppj.maheri.lexergen;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 /**
  * can parse the input and return a Key-Value map with the regexes resolved
