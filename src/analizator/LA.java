@@ -1,4 +1,3 @@
-package analizator;
 
 import hr.unizg.fer.zemris.ppj.maheri.lexer.Lexer;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerState;
