@@ -7,6 +7,11 @@ import java.io.Serializable;
 
 public class SkipAction implements Action, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -483412106813794893L;
+
 	@Override
 	public void doAction(Lexer lexer) {
 		lexer.setStartIndex(lexer.getFinishIndex());

@@ -3,7 +3,6 @@ import hr.unizg.fer.zemris.ppj.maheri.lexer.Lexer;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerState;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Map;

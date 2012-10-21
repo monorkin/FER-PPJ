@@ -1,4 +1,3 @@
-import hr.unizg.fer.zemris.ppj.maheri.automaton.Automaton;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.Action;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerRule;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerState;
@@ -56,10 +55,7 @@ public class GLA {
 
 		Map<String, String> regularDefinitions;
 
-		// TODO implement this class
-		RegDefResolver rds = new RegDefResolver();
-
-		regularDefinitions = rds.parseRegexes(regularDefinitionLines.toArray(new String[0]));
+		regularDefinitions = RegDefResolver.parseRegexes(regularDefinitionLines.toArray(new String[0]));
 
 		lexerStateNames = ip.getLexerStates();
 		tokenNames = ip.getTokenNames();
