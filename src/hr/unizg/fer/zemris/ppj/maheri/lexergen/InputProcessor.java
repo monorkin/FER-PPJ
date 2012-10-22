@@ -1,8 +1,9 @@
-package hr.unizg.fer.zemris.ppj.maheri.lexergen;
+//package hr.unizg.fer.zemris.ppj.maheri.lexergen;
 
-import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
+//import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +11,10 @@ import java.util.Map;
 /**
  * This class lists what must be provided for the lexer generator to
  * successfully do shit
- * 
+ * NOTE: uncomment
  * @author dosvald, crocoder
  */
 
-// test
 public class InputProcessor {
 	
 	List<String> RegularDefinitions = new ArrayList<String>();
@@ -26,7 +26,6 @@ public class InputProcessor {
 	
 	public InputProcessor(List<String> inputLines) {
 		Integer mode = 1;
-		//throw new RuntimeException("unimplemented");
 
 		 Iterator<String> it= inputLines.iterator();
 
@@ -89,13 +88,13 @@ public class InputProcessor {
 	            				extra.add(value);
 	            				value = it.next();
 	            			}
-	            			
+	            			/*
 	            			System.err.printf("state = <%s>, regex = /%s/, action = [%s], ", activeState, regex, action);
 	            			for (String s : extra)
 	            				System.err.print(s + " ... ");
 	            			System.err.println();
-	            			
-	            			LexerRules.add(new LexerRuleDescriptionText(activeState, regex + "UNRESOLVED", action, extra));
+	            			*/
+	            			LexerRules.add(new LexerRuleDescriptionText(activeState, regex, action, extra));
 	            			
 	            			break;
 	            			
@@ -173,7 +172,32 @@ public class InputProcessor {
 	 *            verbatim
 	 */
 	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef) {
-		return LexerRules;
+	
+		Iterator<LexerRuleDescriptionText>bb = LexerRules.iterator();
+		
+		 while(bb.hasNext())
+	        {
+				LexerRuleDescriptionText bbb=(LexerRuleDescriptionText)bb.next();
+				String mainString = bbb.getRegexString();
+				String substitute = "";
+				String p = "";
+				int odkud = 1;
+		     	System.out.println(mainString);
+				while(mainString.indexOf('{', odkud) != -1){
+		     	int pos1 = mainString.indexOf('{', odkud);
+		     	int pos2 = mainString.indexOf('}', odkud);
+		     	odkud += pos2;
+		     	substitute = mainString.substring(pos1+1,pos2);
+		     	System.out.println(" Substitute : " + substitute);
+				if(regDef.get(substitute) != null) 
+		     		 p = mainString.replace(substitute, regDef.get(substitute));
+		     	System.out.println(p);
+				}
+	        }
+		 
+
+		 
+			return LexerRules;
 	}
 
 }
