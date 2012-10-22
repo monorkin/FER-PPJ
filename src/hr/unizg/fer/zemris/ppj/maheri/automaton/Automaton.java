@@ -14,8 +14,8 @@ public abstract class Automaton {
 	/**
 	 * A constant marking the symbol used for representing epsilon transitions
 	 */
-	public static final String EPSILON = "$";
-//	public static final String EPSILON = "";
+//	public static final String EPSILON = "$";
+	public static final String EPSILON = "";
 
 	public Automaton(List<State> states, List<String> symbols, List<Transition> transitions, State startingState,
 			List<State> acceptableStates) {

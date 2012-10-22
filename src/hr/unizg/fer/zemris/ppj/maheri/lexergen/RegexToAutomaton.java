@@ -132,8 +132,8 @@ public class RegexToAutomaton {
 				A tmp = convert(s);
 				curr.stateNames.addAll(tmp.stateNames);
 				curr.transitionsForState.putAll(tmp.transitionsForState);
-				curr.addTransition(curr.begin, "", tmp.begin);
-				curr.addTransition(tmp.end, "", curr.end);
+				curr.addTransition(curr.begin, Automaton.EPSILON, tmp.begin);
+				curr.addTransition(tmp.end, Automaton.EPSILON, curr.end);
 			}
 		} else {
 			String prev = curr.begin;
@@ -155,7 +155,7 @@ public class RegexToAutomaton {
 						s2 = createNewState();
 						curr.stateNames.add(s1);
 						curr.stateNames.add(s2);
-						curr.addTransition(s1, regex.charAt(i) == '$' ? "" : Character.toString(regex.charAt(i)), s2);
+						curr.addTransition(s1, regex.charAt(i) == '$' ? Automaton.EPSILON : Character.toString(regex.charAt(i)), s2);
 					} else {
 						int j = findMatchingParenthesis(regex, i);
 						A tmp = convert(regex.substring(i + 1, j));
@@ -174,19 +174,19 @@ public class RegexToAutomaton {
 					curr.stateNames.add(s1 = createNewState());
 					curr.stateNames.add(s2 = createNewState());
 
-					curr.addTransition(s1, "", innerBegin);
-					curr.addTransition(innerEnd, "", s2);
-					curr.addTransition(s1, "", s2);
-					curr.addTransition(innerEnd, "", innerBegin);
+					curr.addTransition(s1, Automaton.EPSILON, innerBegin);
+					curr.addTransition(innerEnd, Automaton.EPSILON, s2);
+					curr.addTransition(s1, Automaton.EPSILON, s2);
+					curr.addTransition(innerEnd, Automaton.EPSILON, innerBegin);
 
 					++i;
 				}
 				// /
-				curr.addTransition(prev, "", s1);
+				curr.addTransition(prev, Automaton.EPSILON, s1);
 				prev = s2;
 
 			}
-			curr.addTransition(prev, "", curr.end);
+			curr.addTransition(prev, Automaton.EPSILON, curr.end);
 		}
 
 		return curr;

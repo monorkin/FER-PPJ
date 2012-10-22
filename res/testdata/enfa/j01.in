@@ -5,9 +5,9 @@ p5
 stanje1
 s3,a->stanje2
 s3,lab2->s4,p5
-s4,$->st6
+s4,->st6
 s4,utr->s3,p5
 stanje1,a->stanje2
 stanje1,pnp->s3
-stanje2,$->st6
+stanje2,->st6
 stanje2,a->#
