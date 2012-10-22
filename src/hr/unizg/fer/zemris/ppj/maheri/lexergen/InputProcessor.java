@@ -67,6 +67,38 @@ public class InputProcessor {
 	            }
 	            case 4:
 	            {
+	            	
+	            	int pos = value.indexOf('>', 1);
+	            	String activeState = value.substring(1, pos);
+	            	String regex = value.substring(pos+1);
+	            	
+	            	
+	            	while (it.hasNext()) {
+	            		value = it.next();
+	            		if (value.charAt(0) == '{') {
+	            			value = it.next();
+	            			
+	            			String action;
+	            			List<String> extra = new ArrayList<String>();
+	            			
+	            			action = value;
+	            			value = it.next();
+	            			while(value.charAt(0) != '}') {
+	            				extra.add(value);
+	            				value = it.next();
+	            			}
+	            			
+	            			System.err.printf("state = <%s>, regex = /%s/, action = [%s], ", activeState, regex, action);
+	            			for (String s : extra)
+	            				System.err.print(s + " ... ");
+	            			System.err.println();
+	            			
+	            			LexerRules.add(new LexerRuleDescriptionText(activeState, regex + "UNRESOLVED", action, extra));
+	            			
+	            			break;
+	            			
+	            		}
+	            	}
 	            	Lexy += value;
 	            }}
 	        }

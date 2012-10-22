@@ -21,16 +21,28 @@ public class RegexToAutomaton {
 		private String end;
 
 		private void addTransition(String from, String x, String to) {
-			List<String> t = new ArrayList<String>();
-			Map<String, List<String>> u = new HashMap<String, List<String>>();
-			t.add(to);
-			u.put(x, t);
-			transitionsForState.put(from, u);
+			
+			Map<String, List<String>> tmap = transitionsForState.get(from);
+			if (tmap == null)
+				tmap = new HashMap<String, List<String>>();
+			
+			transitionsForState.put(from, tmap);
+			
+			List<String> t = tmap.get(x);
+			if (t == null)
+				t = new LinkedList<String>();
+				
+			tmap.put(x, t);
+			
+			if (!t.contains(to))
+				t.add(to);
+			
 		}
 
 		private A() {
-			begin = createNewState();
-			end = createNewState();
+			stateNames.add(begin = createNewState());
+			stateNames.add(end = createNewState());
+			
 		}
 	}
 
@@ -48,6 +60,7 @@ public class RegexToAutomaton {
 	}
 
 	private static boolean isEscapedAt(String regex, int index) {
+		index--;
 		boolean ret = false;
 		while (index >= 0 && regex.charAt(index--) == '\\')
 			ret = !ret;
@@ -114,20 +127,22 @@ public class RegexToAutomaton {
 		List<String> groups = splitAndGroup(regex);
 		A curr = new A();
 
-		if (groups.size() > 0) {
+		if (groups.size() > 1) {
 			for (String s : groups) {
 				A tmp = convert(s);
 				curr.stateNames.addAll(tmp.stateNames);
 				curr.transitionsForState.putAll(tmp.transitionsForState);
-				curr.addTransition(curr.begin, "", tmp.begin);
-				curr.addTransition(tmp.end, "", curr.end);
+				curr.addTransition(curr.begin, "UNIONSTART", tmp.begin);
+				curr.addTransition(tmp.end, "UNIONJOIN", curr.end);
 			}
 		} else {
 			String prev = curr.begin;
 			for (int i = 0; i < regex.length(); ++i) {
+				String s1;
+				String s2;
 				if (isEscapedAt(regex, i)) {
-					String s1 = createNewState();
-					String s2 = createNewState();
+					s1 = createNewState();
+					s2 = createNewState();
 					curr.stateNames.add(s1);
 					curr.stateNames.add(s2);
 					curr.addTransition(s1, Character.toString(unescape(regex.charAt(i))), s2);
@@ -136,40 +151,42 @@ public class RegexToAutomaton {
 						continue;
 
 					if (regex.charAt(i) != '(') {
-						String s1 = createNewState();
-						String s2 = createNewState();
+						s1 = createNewState();
+						s2 = createNewState();
 						curr.stateNames.add(s1);
 						curr.stateNames.add(s2);
-						curr.addTransition(s1, regex.charAt(i) == '$' ? "" : Character.toString(regex.charAt(i)), s2);
+						curr.addTransition(s1, regex.charAt(i) == '$' ? "EMPTY" : Character.toString(regex.charAt(i)), s2);
 					} else {
 						int j = findMatchingParenthesis(regex, i);
 						A tmp = convert(regex.substring(i + 1, j));
 						curr.stateNames.addAll(tmp.stateNames);
 						curr.transitionsForState.putAll(tmp.transitionsForState);
-						curr.begin = tmp.begin;
-						curr.end = tmp.end;
+						s1 = tmp.begin;
+						s2 = tmp.end;
 						i = j;
+						
 					}
 				}
 
 				if (i + 1 < regex.length() && regex.charAt(i + 1) == '*') {
-					String innerBegin = curr.begin;
-					String innerEnd = curr.end;
-					curr.stateNames.add(curr.begin = createNewState());
-					curr.stateNames.add(curr.end = createNewState());
+					String innerBegin = s1;
+					String innerEnd = s2;
+					curr.stateNames.add(s1 = createNewState());
+					curr.stateNames.add(s2 = createNewState());
 
-					curr.addTransition(curr.begin, "", innerBegin);
-					curr.addTransition(innerEnd, "", curr.end);
-					curr.addTransition(curr.begin, "", curr.end);
-					curr.addTransition(innerEnd, "", innerEnd);
+					curr.addTransition(s1, "CIKLUS_START", innerBegin);
+					curr.addTransition(innerEnd, "CIKLUS_END", s2);
+					curr.addTransition(s1, "CIKLUS_SKIP", s2);
+					curr.addTransition(innerEnd, "CIKLUS_LOOP", innerBegin);
 
 					++i;
 				}
 				// /
-				curr.addTransition(prev, "", curr.begin);
-				prev = curr.end;
+				curr.addTransition(prev, "CONCAT", s1);
+				prev = s2;
 
 			}
+			curr.addTransition(prev, "CONCAT2", curr.end);
 		}
 
 		return curr;
@@ -198,8 +215,8 @@ public class RegexToAutomaton {
 		for (String origin : nfa.transitionsForState.keySet()) {
 			Map<String, List<String>> transitionMap = nfa.transitionsForState.get(origin);
 			for (String key : transitionMap.keySet()) {
-				if (key.length() == 0)
-					key = Automaton.EPSILON;
+//				if (key.length() == 0)
+//					key = Automaton.EPSILON;
 				List<State> destinations = new LinkedList<>();
 				for (String s : transitionMap.get(key)) {
 					destinations.add(State.getByName(s, states));
