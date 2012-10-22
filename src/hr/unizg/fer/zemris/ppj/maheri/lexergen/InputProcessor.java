@@ -13,6 +13,8 @@ import java.util.Map;
  * 
  * @author dosvald, crocoder
  */
+
+// MOJ ZADNJI TEST COMMITANJA U ECLIPSEU PRIJE SAMOUBOJSTVA
 public class InputProcessor {
 	
 	List<String> RegularDefinitions = new ArrayList<String>();
@@ -171,9 +173,6 @@ public class InputProcessor {
 	 *            verbatim
 	 */
 	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef) {
-		/* TODO: LEXY JE STRING KOJI SADRZI STATE NAME, REGULARNI IZRAZ I AKCIJU. 
-		*  POSAVJETOVATI SE SA GOSP. OSVALD ASAP
-		*/
 		return LexerRules;
 	}
 
