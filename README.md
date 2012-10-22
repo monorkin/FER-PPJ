@@ -3,40 +3,27 @@ PPJ
 
 PPJ
 
-# WHAT DO - _updated_
+# WHATS GOING ON
+Skoro sve je napravljeno / napisan kod osim ovog InputProcessora i RegDefResolver koji nisu dovrseni.
 
-- Aleksandar
- i dalje treba napraviti klasu -RegexParser- RegDefResolver (promijenjeno je samo ime i package) koju sam ja upecao u main.
-  
-- Andrej, implementiraj -SimpleInputProcesor- InputProcessor 
-koji je isti kao prije 
-samo je renaman i premjesten 
-samo implementiraj 4 funkcije u toj klasi 
-da rade ono sto pise da rade.
+Treba milijun puta testirati sve sada.
 
-- Petar, postoji klasa Automaton. 
-Uštekaj tu automat s UTRa. 
-Neke funkcije su vec napisane 
-jer je procijenjeno da bi automat bio beskoristan ako ih nema. 
-Neka automat radi s tim funkcijama. 
-Također stavi neki nacin konstrukcije istih iz tekst-fajl oblika kao na utru. 
+ja sam nesto isprobavao i popravljao pa je stanje sada ovakvo:
+- eNFA radi sam za sebe dobro
+- RegexToAutomaton iz rucnih testova u tekstualnom obliku radi nakon popravaka
+- tandem eNFA+RegexToAutomaton ne radi u kombinaciji zbog epsilon prijelaza. Mora se popraviti `$` i `""` i uskladiti da radi s jednim od tih.
+Bolje je koristiti `""` jer nece smetati za literal (escaped) `$` znak. Trivijalni fix je definirati EPSILON="", i to mi na prvi pogled izgleda u redu, ali moram 
+jos to pogledati
+- do lexer nisam imao priliku isprobavati. Ili prvo treba popraviti ove dvije klase kaj sam napisao gore, ili rucno ali to nije bas korisno
 
-- Stanko: 
-ako znas, napravi JUnit testere 
-za RegDefResolver i RegexToAutomaton. 
-Dodaj par testCaseova. 
-RegexToAutomaton je kao napisan do kraja, 
-pa ga mozes i isprobavati (ulaz regex, izlaz automat). 
-Ako ne znas, kreni od ovog s errorom...
+# WAT DO
+Svi neka smisljaju nacine za testirati i testirajte dio po dio. Mozete rucno, mozete napisat main, mozete kako hocete, mozete pisati JUnit testove.
+I onda napisite sto ste pokrenuli i sto nije radilo i sto ste provjerili i tako dalje.
 
-- Tomislav radi lexer
+Ja cu sam ovo gore sa eNFA+RegexToAutomaton kopati.
 
-### Bilo bi razumno da ljudi osim Tomislava zavrse sve ovo u petak. Pogotovo ono sto je generalno zadano bilo u utorak ak se dobro sjecam. 
 
-Kad je netko gotov sa svojim dijelom (Petar bi trebao moci taj automat samo copypasteom rijesit), moze pomoc drugom...
-Ili moze pocet radit na nekom dijelu labosa koji nije napravljen i nije opisan ovdje da ga nitko ne radi. U najgorem slucaju cemo sve pobrisat (ko ono moje kaj sam zabrijavao s glupostima) tak da nemrete fulat ak nekaj napravite :) 
 
-# Lexer klasa i sve vezano uz to
-- Preporučam da ne dirate to, to je križ koji ja nosim. _The preceding unsigned comment was placed by tljubej_
+
 
 Opaska: za drugi labos moram bolje organizirat podjelu posla i organizaciju.
