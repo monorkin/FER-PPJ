@@ -20,7 +20,7 @@ public class RegDefResolver {
 	 * @return A key-value map
 	 */
 	public static Map<String, String> parseRegexes(String[] array) {
-		 Map<String,String> m = new HashMap<String, String>();
+        Map<String,String> m = new HashMap<String, String>();
         String name="";
         String value="";
         String tempValue="";
@@ -30,21 +30,46 @@ public class RegDefResolver {
             Scanner scanner = new Scanner(i);
             scanner.useDelimiter("[{}]");
             name = scanner.next().trim();
-            while (scanner.hasNext())
+            String rightSide = i.substring(1+name.length()+1+1); //jer je {nekaj}_
+            int escapeCounter=0;
+            String rightSide2="";
+            for (int j=0; j<rightSide.length(); j++) {
+                String c=rightSide.substring(j,j+1);
+                if (c.equals("\\")) escapeCounter++;
+                else if (c.equals("{") && escapeCounter%2==1) {
+                    c="ł";
+                    escapeCounter=0;
+                }
+                else if (c.equals("}") && escapeCounter%2==1) {
+                    c="Ł";
+                    escapeCounter=0;
+                }
+                else escapeCounter=0;
+                rightSide2=rightSide2+c;
+            }
+            Scanner scanner2 = new Scanner(rightSide2);
+            scanner2.useDelimiter("[{}]");
+            while (scanner2.hasNext())
             {
-                tempValue += scanner.next().trim();
+                tempValue += scanner2.next().trim();
                 if (m.get(tempValue)!=null) 
                 {
                     value+="("+m.get(tempValue)+")";
-
                 }
-                else value+=tempValue;
+                else 
+                    value+=tempValue;
                 tempValue="";
             }
-            m.put(name, value);
-            System.err.println("Name is:" + name + ", and Value is:" + value);
+            String value2="";
+            for (int j=0; j<value.length(); j++) {
+                String c=value.substring(j,j+1);
+                if (c.equals("ł")) c="{";
+                else if (c.equals("Ł")) c="}";
+                value2=value2+c;
             }
-        
+            m.put(name, value2);
+            System.out.println(m);
+            }
         return m;
 	}
 
