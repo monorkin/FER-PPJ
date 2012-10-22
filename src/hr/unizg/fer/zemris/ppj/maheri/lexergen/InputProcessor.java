@@ -14,7 +14,7 @@ import java.util.Map;
  * @author dosvald, crocoder
  */
 
-// MOJ ZADNJI TEST COMMITANJA U ECLIPSEU PRIJE SAMOUBOJSTVA
+// test
 public class InputProcessor {
 	
 	List<String> RegularDefinitions = new ArrayList<String>();
