@@ -62,7 +62,7 @@ public class EnfaTest {
 					destination.add(State.getByName(s, states));
 				}
 			}
-			String[] partsLeft = parts[0].split(",");
+			String[] partsLeft = parts[0].split(",", -1);
 			transitions.add(new Transition(State.getByName(partsLeft[0], states), partsLeft[1], destination));
 		}
 
