@@ -43,7 +43,7 @@ public class RegDefResolverTest {
 				"{backslashBrace_1} {backslash}\\}", "{backslashReference_2} \\\\{ab}", "{backslashBrace_2} \\\\\\}",
 				"{sve} {backslashBrace_1}{backslashBrace_2}{backslashReference_1}{backslashReference_2}" };
 		Map<String, String> result = RegDefResolver.parseRegexes(array);
-		assertEquals("\\\\}\\\\}\\\\(a|b)\\\\(a|b)", result.get("{sve}"));
+		assertEquals("((\\\\)})(\\\\})((\\\\)(a|b))(\\\\(a|b))", result.get("sve"));
 	}
 
 	@Test
