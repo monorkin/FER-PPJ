@@ -174,7 +174,7 @@ public class InputProcessor {
 	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef) {
 	
 		Iterator<LexerRuleDescriptionText>bb = LexerRules.iterator();
-		
+	/* TODO: test + provjeriti output	
 		 while(bb.hasNext())
 	        {
 				LexerRuleDescriptionText bbb=(LexerRuleDescriptionText)bb.next();
@@ -194,7 +194,7 @@ public class InputProcessor {
 		     	System.out.println(p);
 				}
 	        }
-		 
+		 */
 
 		 
 			return LexerRules;
