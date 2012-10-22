@@ -1,5 +1,6 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -9,8 +10,13 @@ import java.util.List;
  * @author Petar Šegina <psegina@ymail.com>
  * 
  */
-public abstract class Automaton {
+public abstract class Automaton implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6344259345535148906L;
+	
 	/**
 	 * A constant marking the symbol used for representing epsilon transitions
 	 */

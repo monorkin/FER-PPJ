@@ -1,8 +1,14 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Transition {
+public class Transition implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6577490010100126978L;
+	
 	private final State origin;
 	private final List<State> destinations;
 	private final String key;

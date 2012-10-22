@@ -9,6 +9,8 @@ public class LexerState implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 6021088691427970716L;
+	
+	private String stateName;
 
 	public List<LexerRule> rules;
 
@@ -19,8 +21,13 @@ public class LexerState implements Serializable {
 		this.rules = rules;
 	}
 	
-	public LexerState() {
+	public String getName() {
+		return stateName;
+	}
+	
+	public LexerState(String stateName) {
 		this.rules = new ArrayList<>();
+		this.stateName = stateName;
 	}
 
 	/**

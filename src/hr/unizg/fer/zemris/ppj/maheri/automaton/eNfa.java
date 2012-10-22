@@ -14,6 +14,11 @@ import java.util.Vector;
  */
 public class eNfa extends Automaton {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2150327628309046380L;
+	
 	private List<State> states;
 	private List<String> symbols;
 	private List<Transition> transitions;

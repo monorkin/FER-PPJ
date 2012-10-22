@@ -38,7 +38,8 @@ public class RegDefResolverPTest {
 
 	@Test
 	public void testOutputKeys() {
-		Map<String, String> map = RegDefResolver.parseRegexes(input);
+		RegDefResolver r = new RegDefResolver(input);
+		Map<String, String> map = r.getResolved();
 		boolean matches;
 
 		for (String s : input) {
@@ -54,7 +55,8 @@ public class RegDefResolverPTest {
 
 	@Test
 	public void testOutputValues() {
-		Map<String, String> map = RegDefResolver.parseRegexes(input);
+		RegDefResolver r = new RegDefResolver(input);
+		Map<String, String> map = r.getResolved();
 		boolean matches;
 		for (String s : output) {
 			String output = s.split(" ")[1];

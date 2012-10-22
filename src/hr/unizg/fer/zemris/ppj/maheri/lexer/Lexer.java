@@ -34,6 +34,8 @@ public class Lexer {
 		finishIndex = 0;
 		lastIndex=-1;
 		lineCount = 1;
+		
+		System.err.println("Made lexer starting in state " + startState.getName()); 
 	}
 
 	/**

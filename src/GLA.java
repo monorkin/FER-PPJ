@@ -53,13 +53,9 @@ public class GLA {
 
 		regularDefinitionLines = ip.getRegularDefinitions();
 
-		Map<String, String> regularDefinitions;
-
-		regularDefinitions = RegDefResolver.parseRegexes(regularDefinitionLines.toArray(new String[0]));
-
 		lexerStateNames = ip.getLexerStates();
 		tokenNames = ip.getTokenNames();
-		lexerRuleDesciptions = ip.getLexerRules(regularDefinitions);
+		lexerRuleDesciptions = ip.getLexerRules();
 
 		// HERE STARTS CONSTRUCTION OF THE LEXER, BRACE FOR SHITSTORM OF
 		// EXCEPTIONS
@@ -68,7 +64,7 @@ public class GLA {
 		for (LexerRuleDescriptionText r : lexerRuleDesciptions) {
 			String stateName = r.getActiveStateName();
 			if (!lexerStates.containsKey(stateName)) {
-				lexerStates.put(stateName, new LexerState());
+				lexerStates.put(stateName, new LexerState(stateName));
 			}
 			List<Action> ruleActions = new ArrayList<>();
 			List<String> stringActions = r.getExtraParameterLines();

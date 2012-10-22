@@ -74,6 +74,7 @@ public class InputProcessor {
 	            	String activeState = value.substring(1, pos);
 	            	String regex = value.substring(pos+1);
 	            	
+	            	RegDefResolver resolver = new RegDefResolver(RegularDefinitions.toArray(new String[0]));
 	            	
 	            	while (it.hasNext()) {
 	            		value = it.next();
@@ -95,7 +96,7 @@ public class InputProcessor {
 	            				System.err.print(s + " ... ");
 	            			System.err.println();
 	            			
-	            			LexerRules.add(new LexerRuleDescriptionText(activeState, regex + "UNRESOLVED", action, extra));
+	            			LexerRules.add(new LexerRuleDescriptionText(activeState, resolver.resolve(regex), action, extra));
 	            			
 	            			break;
 	            			
@@ -165,14 +166,8 @@ public class InputProcessor {
 	/**
 	 * @return list of {@link LexerRuleDescriptionText} objects, each describing
 	 *         a match rule the lexer will follow when tokenizing input
-	 * @param regDef
-	 *            map containing regular definition names as keys, and resolved
-	 *            regular expression as values. If this parameter is not
-	 *            <code>null</code>, this method shall resolve regexes in rules
-	 *            according to the definition map. Otherwise the rules are kept
-	 *            verbatim
 	 */
-	public List<LexerRuleDescriptionText> getLexerRules(Map<String, String> regDef) {
+	public List<LexerRuleDescriptionText> getLexerRules() {
 		return LexerRules;
 	}
 
