@@ -105,7 +105,38 @@ public class InputProcessor {
 	 	
 	}
 
-	
+// izrazi do kraja popodne, testovi do navecer, testiranja preko noci, rezultati sutra ujutro
+/*
+ Iterator<String> lr = lexerRuleString.iterator();
+		 String activeStateNameIn = new String();
+		 String regexStringIn = new String();
+		 String actionNameIn = new String();
+		 List<String> extraParameterLinesIn = new ArrayList<String>();
+		 
+		 while(lr.hasNext())
+	        {
+			 String val=(String)lr.next();
+			 if(val.charAt(0) == '<'){
+				 		String[] splitNameRegex = val.split(">");
+				 		activeStateNameIn = splitNameRegex[0].substring(1, splitNameRegex[0].length());
+				 		regexStringIn = splitNameRegex[1];
+						val=(String)lr.next();
+					}
+			 if(val.charAt(0) == '{'){val=(String)lr.next();}
+			 actionNameIn = val;
+			 val=(String)lr.next();
+			 while(val.charAt(0) != '}')
+			 {
+				 extraParameterLinesIn.add(val); 
+				 val=(String)lr.next();
+			 }					
+
+			lexerRules.add(new LexerRuleDescriptionText(activeStateNameIn, regexStringIn, actionNameIn, extraParameterLinesIn));
+			extraParameterLinesIn.clear();
+
+			 
+	        }
+*/	
 	
 	/**
 	 * @return list of regular definitions
