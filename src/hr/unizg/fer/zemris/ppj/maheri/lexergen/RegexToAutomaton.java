@@ -132,8 +132,8 @@ public class RegexToAutomaton {
 				A tmp = convert(s);
 				curr.stateNames.addAll(tmp.stateNames);
 				curr.transitionsForState.putAll(tmp.transitionsForState);
-				curr.addTransition(curr.begin, "UNIONSTART", tmp.begin);
-				curr.addTransition(tmp.end, "UNIONJOIN", curr.end);
+				curr.addTransition(curr.begin, "", tmp.begin);
+				curr.addTransition(tmp.end, "", curr.end);
 			}
 		} else {
 			String prev = curr.begin;
@@ -155,7 +155,7 @@ public class RegexToAutomaton {
 						s2 = createNewState();
 						curr.stateNames.add(s1);
 						curr.stateNames.add(s2);
-						curr.addTransition(s1, regex.charAt(i) == '$' ? "EMPTY" : Character.toString(regex.charAt(i)), s2);
+						curr.addTransition(s1, regex.charAt(i) == '$' ? "" : Character.toString(regex.charAt(i)), s2);
 					} else {
 						int j = findMatchingParenthesis(regex, i);
 						A tmp = convert(regex.substring(i + 1, j));
@@ -174,19 +174,19 @@ public class RegexToAutomaton {
 					curr.stateNames.add(s1 = createNewState());
 					curr.stateNames.add(s2 = createNewState());
 
-					curr.addTransition(s1, "CIKLUS_START", innerBegin);
-					curr.addTransition(innerEnd, "CIKLUS_END", s2);
-					curr.addTransition(s1, "CIKLUS_SKIP", s2);
-					curr.addTransition(innerEnd, "CIKLUS_LOOP", innerBegin);
+					curr.addTransition(s1, "", innerBegin);
+					curr.addTransition(innerEnd, "", s2);
+					curr.addTransition(s1, "", s2);
+					curr.addTransition(innerEnd, "", innerBegin);
 
 					++i;
 				}
 				// /
-				curr.addTransition(prev, "CONCAT", s1);
+				curr.addTransition(prev, "", s1);
 				prev = s2;
 
 			}
-			curr.addTransition(prev, "CONCAT2", curr.end);
+			curr.addTransition(prev, "", curr.end);
 		}
 
 		return curr;
@@ -217,6 +217,7 @@ public class RegexToAutomaton {
 			for (String key : transitionMap.keySet()) {
 //				if (key.length() == 0)
 //					key = Automaton.EPSILON;
+				// DO MAGIC HERE ?
 				List<State> destinations = new LinkedList<>();
 				for (String s : transitionMap.get(key)) {
 					destinations.add(State.getByName(s, states));
@@ -225,7 +226,7 @@ public class RegexToAutomaton {
 			}
 		}
 
-		return new eNfa(states, symbols, transitions, startingState, acceptableStates);
+		return new eNfa(states, null, transitions, startingState, acceptableStates);
 	}
 
 	public static List<String> getAutomatonDescription(String regex) {
