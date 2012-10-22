@@ -55,7 +55,7 @@ public class TestUtils {
 	 * @return A list of TestData objects, where each one contains the input and
 	 *         the expected output
 	 */
-	public static List<TestData> loadData(final String componentName) throws IOException {
+	public static List<TestData> loadData(final String componentName) {
 		List<TestData> result = new ArrayList<>();
 		File componentDir = new File("res/testdata/" + componentName);
 		if (!componentDir.exists() || !componentDir.isDirectory()) {
@@ -65,9 +65,15 @@ public class TestUtils {
 		for (File in : testCandidates) {
 			if (in.getName().endsWith(".in")) {
 				File out = new File(in.getPath().replace(".in", ".out"));
-				TestData t = new TestData(Files.readAllLines(Paths.get(in.getPath()), Charset.defaultCharset()),
-						Files.readAllLines(Paths.get(out.getPath()), Charset.defaultCharset()));
-				result.add(t);
+				try {
+					TestData t;
+					t = new TestData(Files.readAllLines(Paths.get(in.getPath()), Charset.defaultCharset()),
+							Files.readAllLines(Paths.get(out.getPath()), Charset.defaultCharset()));
+					result.add(t);
+				} catch (IOException e) {
+					System.err.println("error loading test data for " + componentName);
+					e.printStackTrace();
+				}
 			}
 		}
 
