@@ -43,6 +43,7 @@ public class RegDefResolverPTest {
 
 		for (String s : input) {
 			String key = s.split(" ")[0];
+			key = key.substring(1, key.length()-1);
 			matches = map.keySet().contains(key);
 			if (!matches) {
 				System.out.println("Key not found: " + key);
