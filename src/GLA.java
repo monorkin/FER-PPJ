@@ -90,6 +90,13 @@ public class GLA {
 					ruleActions.add(new NewLineAction());
 				}
 			}
+
+			// FIXME this debug output describes text-format automaton, bugs may
+			// be left behind in direct construction
+			System.out.println("Automaton for string " + r.getRegexString() + "is: \n");
+			for (String s : RegexToAutomaton.getAutomatonDescription(r.getRegexString()))
+				System.out.println(s);
+
 			LexerRule tmpRule = new LexerRule(RegexToAutomaton.getAutomaton(r.getRegexString()), ruleActions);
 			lexerStates.get(stateName).addRule(tmpRule);
 		}
