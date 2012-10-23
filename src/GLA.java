@@ -93,7 +93,7 @@ public class GLA {
 			for (String s : RegexToAutomaton.getAutomatonDescription(r.getRegexString()))
 				System.out.println(s);
 
-			LexerRule tmpRule = new LexerRule(RegexToAutomaton.getAutomaton(r.getRegexString()), ruleActions);
+			LexerRule tmpRule = new LexerRule(RegexToAutomaton.getAutomaton(r.getRegexString()), ruleActions, r.getRegexString());
 			lexerStates.get(stateName).addRule(tmpRule);
 		}
 

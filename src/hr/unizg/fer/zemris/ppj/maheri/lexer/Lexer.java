@@ -49,21 +49,26 @@ public class Lexer {
 		
 		while (finishIndex<=input.length()) {
 			char c = input.charAt(finishIndex);
+			System.err.printf("in state %s\t [%s]%c\n", currentState.getName(), input.substring(startIndex, lastIndex>=startIndex?lastIndex:startIndex+1), c);
 			currentState.pushCharToAutomatons(String.valueOf(c));
 			LexerRule tmpRule = currentState.getAccepted();
 			if (tmpRule!=null) {
+				System.err.println("Rule " + tmpRule.hashCode() + " for regex  " + tmpRule.realRegex + " accepts");
 				accRule=tmpRule;
 				lastIndex=finishIndex;
 			}
 			if (currentState.isAnyAlive() && finishIndex!=input.length()) {
+				System.err.println("Some rules may still match");
 				finishIndex++;
 			} else {
+				System.err.println("No rule match is alive");
 				if (accRule==null) {
 					System.err.println("LEL ERROR U LEXERANJU");
 					startIndex++;
 					lastIndex=-1;
 					finishIndex=startIndex;
 				} else {
+					System.err.println("Doing acion for last accepted rule, that is " + "Rule " + accRule.hashCode() + " for regex  " + accRule.realRegex);
 					finishIndex=lastIndex+1;
 					accRule.doActions(this);
 					lastIndex=-1;

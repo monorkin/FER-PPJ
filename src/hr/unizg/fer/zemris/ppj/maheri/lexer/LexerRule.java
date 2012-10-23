@@ -13,6 +13,7 @@ public class LexerRule implements Serializable {
 	private static final long serialVersionUID = 6224382889233758395L;
 
 	private Automaton regex;
+	public String realRegex;
 	private List<Action> actions;
 	
 	
@@ -20,9 +21,10 @@ public class LexerRule implements Serializable {
 	 * @param regex
 	 * @param actions
 	 */
-	public LexerRule(Automaton regex, List<Action> actions) {
+	public LexerRule(Automaton regex, List<Action> actions, String realRegex) {
 		this.regex = regex;
 		this.actions = actions;
+		this.realRegex = realRegex;
 		
 	}
 
