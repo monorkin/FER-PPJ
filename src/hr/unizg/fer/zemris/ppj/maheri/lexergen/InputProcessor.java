@@ -5,7 +5,6 @@ import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class lists what must be provided for the lexer generator to

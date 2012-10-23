@@ -26,7 +26,7 @@ public class LexerState implements Serializable {
 	}
 	
 	public LexerState(String stateName) {
-		this.rules = new ArrayList<>();
+		this.rules = new ArrayList<LexerRule>();
 		this.stateName = stateName;
 	}
 

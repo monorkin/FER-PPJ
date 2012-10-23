@@ -2,10 +2,8 @@ package hr.unizg.fer.zemris.ppj.maheri.tests;
 
 import static org.junit.Assert.*;
 
-import hr.unizg.fer.zemris.ppj.maheri.automaton.Automaton;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
-import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerState;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegexToAutomaton;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 
@@ -17,9 +15,6 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -87,7 +82,7 @@ public class AutomatonSerializationTest {
 			matcherAutomaton =  (eNfa) oin.readObject();
 			oin.close();
 			file.close();
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 

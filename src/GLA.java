@@ -7,7 +7,6 @@ import hr.unizg.fer.zemris.ppj.maheri.lexer.actions.DeclareClassAction;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.actions.NewLineAction;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.actions.SkipAction;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.InputProcessor;
-import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegDefResolver;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegexToAutomaton;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
 
@@ -59,14 +58,14 @@ public class GLA {
 
 		// HERE STARTS CONSTRUCTION OF THE LEXER, BRACE FOR SHITSTORM OF
 		// EXCEPTIONS
-		Map<String, LexerState> lexerStates = new HashMap<>();
+		Map<String, LexerState> lexerStates = new HashMap<String, LexerState>();
 
 		for (LexerRuleDescriptionText r : lexerRuleDesciptions) {
 			String stateName = r.getActiveStateName();
 			if (!lexerStates.containsKey(stateName)) {
 				lexerStates.put(stateName, new LexerState(stateName));
 			}
-			List<Action> ruleActions = new ArrayList<>();
+			List<Action> ruleActions = new ArrayList<Action>();
 			List<String> stringActions = r.getExtraParameterLines();
 			String action = r.getActionName();
 			if (action.equals("-")) {

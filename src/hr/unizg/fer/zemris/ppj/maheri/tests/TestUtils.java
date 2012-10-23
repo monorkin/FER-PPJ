@@ -1,10 +1,10 @@
 package hr.unizg.fer.zemris.ppj.maheri.tests;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,7 +56,7 @@ public class TestUtils {
 	 *         the expected output
 	 */
 	public static List<TestData> loadData(final String componentName) {
-		List<TestData> result = new ArrayList<>();
+		List<TestData> result = new ArrayList<TestData>();
 		File componentDir = new File("res/testdata/" + componentName);
 		if (!componentDir.exists() || !componentDir.isDirectory()) {
 			throw new IllegalArgumentException("Test directory does not exist or is invalid");
@@ -66,9 +66,23 @@ public class TestUtils {
 			if (in.getName().endsWith(".in")) {
 				File out = new File(in.getPath().replace(".in", ".out"));
 				try {
+					List<String> linesIn = new LinkedList<String>();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(
+							in.getPath()))));
+					String currentLine;
+					while ((currentLine = reader.readLine()) != null) {
+						linesIn.add(currentLine);
+					}
+					reader.close();
+
+					List<String> linesOut = new LinkedList<String>();
+					reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(out.getPath()))));
+					while ((currentLine = reader.readLine()) != null) {
+						linesOut.add(currentLine);
+					}
+					reader.close();
 					TestData t;
-					t = new TestData(Files.readAllLines(Paths.get(in.getPath()), Charset.defaultCharset()),
-							Files.readAllLines(Paths.get(out.getPath()), Charset.defaultCharset()));
+					t = new TestData(linesIn, linesOut);
 					result.add(t);
 				} catch (IOException e) {
 					System.err.println("error loading test data for " + componentName);
@@ -81,7 +95,7 @@ public class TestUtils {
 	}
 
 	public static List<File> traversePath(File root) {
-		List<File> files = new LinkedList<>();
+		List<File> files = new LinkedList<File>();
 		for (String file : root.list()) {
 			File f = new File(root, file);
 			if (f.isDirectory()) {

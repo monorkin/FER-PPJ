@@ -5,7 +5,6 @@ import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerRule;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerState;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Map;
 import java.util.Scanner;
@@ -22,7 +21,7 @@ public class LA {
 			startState = (LexerState) oin.readObject();
 			oin.close();
 			file.close();
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		

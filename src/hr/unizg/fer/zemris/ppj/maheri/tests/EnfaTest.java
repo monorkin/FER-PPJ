@@ -31,7 +31,7 @@ public class EnfaTest {
 
 	@Parameters
 	public static Collection<Object[]> params() throws IOException {
-		List<Object[]> data = new ArrayList<>();
+		List<Object[]> data = new ArrayList<Object[]>();
 		for (TestData t : TestUtils.loadData("enfa")) {
 			data.add(new Object[] { t.getInput(), t.getExpectedOutput() });
 		}
@@ -40,23 +40,23 @@ public class EnfaTest {
 
 	@Test
 	public void testAutomaton() {
-		List<State> states = new LinkedList<>();
+		List<State> states = new LinkedList<State>();
 		for (String s : input.get(1).split(",")) {
 			states.add(new State(s));
 		}
 		List<String> symbols = Arrays.asList(input.get(2).split(","));
-		List<State> acceptableStates = new LinkedList<>();
+		List<State> acceptableStates = new LinkedList<State>();
 		for (String s : input.get(3).split(",")) {
 			acceptableStates.add(State.getByName(s, states));
 		}
 		State startingState = State.getByName(input.get(4), states);
-		List<Transition> transitions = new LinkedList<>();
+		List<Transition> transitions = new LinkedList<Transition>();
 		int i = 5;
 		int len = input.size();
 		for (i = 5; i < len; i++) {
 			String transition = input.get(i);
 			String[] parts = transition.split("->");
-			List<State> destination = new LinkedList<>();
+			List<State> destination = new LinkedList<State>();
 			for (String s : parts[1].split(",")) {
 				if (!s.equals("#")) {
 					destination.add(State.getByName(s, states));

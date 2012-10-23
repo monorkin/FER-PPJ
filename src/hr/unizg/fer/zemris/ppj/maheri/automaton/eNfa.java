@@ -25,18 +25,18 @@ public class eNfa extends Automaton {
 	private State startingState;
 	private List<State> acceptableStates;
 
-	private List<State> epsilonInstances = new LinkedList<>();
+	private List<State> epsilonInstances = new LinkedList<State>();
 
 	/*
 	 * currentStates is a Set containing all the states in the current iteration
 	 * of the simulation tree
 	 */
-	private List<State> currentStates = new LinkedList<>();
+	private List<State> currentStates = new LinkedList<State>();
 	/*
 	 * newStates is a Set containing all the states which will appear in the
 	 * next iteration of the simulation tree
 	 */
-	private List<State> nextStates = new LinkedList<>();
+	private List<State> nextStates = new LinkedList<State>();
 
 	private static final boolean DEBUG = false;
 

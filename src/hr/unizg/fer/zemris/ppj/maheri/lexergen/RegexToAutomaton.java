@@ -195,11 +195,11 @@ public class RegexToAutomaton {
 	public static eNfa getAutomaton(String regex) {
 		A nfa = convert(regex);
 
-		List<State> states = new LinkedList<>();
-		List<String> symbols = new LinkedList<>();
-		List<Transition> transitions = new LinkedList<>();
+		List<State> states = new LinkedList<State>();
+		List<String> symbols = new LinkedList<String>();
+		List<Transition> transitions = new LinkedList<Transition>();
 		// TODO determine the starting state and acceptable states
-		List<State> acceptableStates = new LinkedList<>();
+		List<State> acceptableStates = new LinkedList<State>();
 
 		// Generate state list
 		for (String s : nfa.stateNames) {
@@ -218,7 +218,7 @@ public class RegexToAutomaton {
 //				if (key.length() == 0)
 //					key = Automaton.EPSILON;
 				// DO MAGIC HERE ?
-				List<State> destinations = new LinkedList<>();
+				List<State> destinations = new LinkedList<State>();
 				for (String s : transitionMap.get(key)) {
 					destinations.add(State.getByName(s, states));
 				}

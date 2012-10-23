@@ -10,8 +10,6 @@ import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
