@@ -14,8 +14,7 @@ public class SkipAction implements Action, Serializable {
 
 	@Override
 	public void doAction(Lexer lexer) {
-		lexer.setStartIndex(lexer.getFinishIndex());
-		lexer.setFinishIndex(lexer.getStartIndex()+1);
+		lexer.setStartIndex(lexer.getFinishIndex()+1);
 	}
 
 }

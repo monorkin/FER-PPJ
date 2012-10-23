@@ -27,7 +27,9 @@ public class ComeBackAction implements Action, Serializable {
 
 	@Override
 	public void doAction(Lexer lexer) {
-		lexer.setFinishIndex(lexer.getStartIndex()+comeBack+1);
+		int index = lexer.getStartIndex()+comeBack-1;
+		lexer.setFinishIndex(index);
+		lexer.setLastIndex(index);
 	}
 
 }
