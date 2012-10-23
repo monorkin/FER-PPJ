@@ -80,7 +80,7 @@ public class Lexer {
 			if (accRule == null) {
 				System.err.println("no accepted rules = lexing error at line " + lineCount
 						+ ", ignoring invalid character '" + input.charAt(startIndex) + "' at pos " + startIndex);
-				finishIndex = ++startIndex;
+				finishIndex = startIndex++;
 				currentState.resetAutomatons();
 			} else {
 				System.err.println("selecting accepted rule, rule " + accRule.hashCode() + " for regex  "
