@@ -100,8 +100,16 @@ public class GLA {
 		FileOutputStream stream = new FileOutputStream("analizator/lexerStates.ser");
 		ObjectOutputStream oStream = new ObjectOutputStream(stream);
 		LexerState startState = lexerStates.get(lexerStateNames.get(0));
+		System.err.println("About to begin serialization");
+		try {
 		oStream.writeObject(lexerStates);
+		} catch (Error e) {
+			System.err.println("Scary error!!!");
+			e.printStackTrace();
+		}
+		System.err.println("Wrote start state");
 		oStream.writeObject(startState);
+		System.err.println("Wrote other states");
 		oStream.close();
 		stream.close();
 	}
