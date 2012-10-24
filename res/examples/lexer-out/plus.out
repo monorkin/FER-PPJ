@@ -1,0 +1,13 @@
+OPERAND 2 3
+OP_plus 2 -
+Uplus 2 -
+OPERAND 2 0x12
+OP_plus 2 -
+LIJEVA_ZAGRADA 2 (
+OPERAND 4 3
+OP_plus 4 -
+Uplus 4 -
+Uplus 5 -
+Uplus 5 -
+OPERAND 5 076
+DESNA_ZAGRADA 5 )
