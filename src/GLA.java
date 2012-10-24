@@ -86,13 +86,8 @@ public class GLA {
 				}
 			}
 
-			// FIXME this debug output describes text-format automaton, bugs may
-			// be left behind in direct construction
-			System.out.println("Automaton for string " + r.getRegexString() + "is: \n");
-			for (String s : RegexToAutomaton.getAutomatonDescription(r.getRegexString()))
-				System.out.println(s);
-
-			LexerRule tmpRule = new LexerRule(RegexToAutomaton.getAutomaton(r.getRegexString()), ruleActions, r.getRegexString());
+			LexerRule tmpRule = new LexerRule(RegexToAutomaton.getAutomaton(r.getRegexString()), ruleActions,
+					r.getRegexString());
 			lexerStates.get(stateName).addRule(tmpRule);
 		}
 
@@ -101,15 +96,15 @@ public class GLA {
 		LexerState startState = lexerStates.get(lexerStateNames.get(0));
 		System.err.println("About to begin serialization");
 		try {
-		oStream.writeObject(lexerStates);
+			oStream.writeObject(lexerStates);
+			System.err.println("Wrote other states");
+			oStream.writeObject(startState);
+			System.err.println("Wrote start state");
+			oStream.close();
+			stream.close();
 		} catch (Error e) {
 			System.err.println("Scary error!!!");
 			e.printStackTrace();
 		}
-		System.err.println("Wrote start state");
-		oStream.writeObject(startState);
-		System.err.println("Wrote other states");
-		oStream.close();
-		stream.close();
 	}
 }

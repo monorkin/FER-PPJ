@@ -39,6 +39,7 @@ public class RegDefResolver {
 					} else {
 						System.err.println("WARN: unescaped '{' in regdef reference");
 					}
+					break;
 				default:
 					if (escaped) {
 						escaped = false;
@@ -96,7 +97,7 @@ public class RegDefResolver {
 			String value = resolve(rhs);
 			
 			map.put(name, value.toString());
-			System.out.println(line + " ### [" + name + "], " + value);
+//			System.out.println(line + " ### [" + name + "], " + value);
 		}
 	}
 

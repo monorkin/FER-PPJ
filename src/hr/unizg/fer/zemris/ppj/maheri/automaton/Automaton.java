@@ -7,7 +7,7 @@ import java.util.List;
  * An abstract class representing an automaton
  * 
  * @author tljubej
- * @author Petar Šegina <psegina@ymail.com>
+ * @author Petar Segina <psegina@ymail.com>
  * 
  */
 public abstract class Automaton implements Serializable {

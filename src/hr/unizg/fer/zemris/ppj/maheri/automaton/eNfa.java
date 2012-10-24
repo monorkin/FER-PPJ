@@ -9,7 +9,7 @@ import java.util.Vector;
  * A representation of a Non-deterministic finite automaton with epsilon
  * transitions
  * 
- * @author Petar Šegina <psegina@ymail.com>
+ * @author Petar Segina <psegina@ymail.com>
  * 
  */
 public class eNfa extends Automaton {

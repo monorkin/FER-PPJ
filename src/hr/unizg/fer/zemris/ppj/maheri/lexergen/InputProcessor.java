@@ -30,7 +30,7 @@ public class InputProcessor {
 
 	     while(it.hasNext())
 	        {
-	         String value=(String)it.next();   
+	         String value=it.next();   
 	         if(value.charAt(0) == '%'){
 	        	  if(value.charAt(1) == 'X')
 	        		  mode = 2;
