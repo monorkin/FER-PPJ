@@ -1,9 +1,10 @@
 PPJ
 ===
 
-
 # KAKVA JE SITUACIJA
-SVE JE IMPLEMENTIRANO I MALČICE TESTIRANO. SERIJALIZACIJA DAJE STACK OVERFLOW ALI ASISTENT JE REKAO DA ĆE POVEĆATI LIMIT.
+Lab1 je implementiran. Testirano je s fer2materijali primjerima u res/examples/other,
+kao i sa sluzbenim iz upute (= oni sa integracijskog testa u sprut-u)
 
-# STA TREBA RADIT
-### TESTIRAT
+Projekt radi na sprutu nakon sto sam sve potrebno importao iako eclipse misli da 
+se ne koristi.
+
