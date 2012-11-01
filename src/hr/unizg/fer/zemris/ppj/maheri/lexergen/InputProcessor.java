@@ -13,7 +13,7 @@ import java.util.List;
  * @author dosvald, crocoder
  */
 
-// test
+
 public class InputProcessor {
 	
 	List<String> RegularDefinitions = new ArrayList<String>();
