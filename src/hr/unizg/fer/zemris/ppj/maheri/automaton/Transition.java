@@ -1,7 +1,9 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Transition implements Serializable {
 	/**
@@ -10,7 +12,7 @@ public class Transition implements Serializable {
 	private static final long serialVersionUID = 6577490010100126978L;
 	
 	private final State origin;
-	private final List<State> destinations;
+	private final Set<State> destinations;
 	private final String key;
 
 	public Transition(final State origin, final String key, final List<State> destinations) {
@@ -24,14 +26,14 @@ public class Transition implements Serializable {
 		}
 		this.origin = origin;
 		this.key = key;
-		this.destinations = destinations;
+		this.destinations = new LinkedHashSet<State>(destinations);
 	}
 
 	public State getOrigin() {
 		return origin;
 	}
 
-	public List<State> getDestinations() {
+	public Set<State> getDestinations() {
 		return destinations;
 	}
 

@@ -1,9 +1,12 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
+import java.util.Set;
 
 /**
  * A representation of a Non-deterministic finite automaton with epsilon
@@ -31,12 +34,12 @@ public class eNfa extends Automaton {
 	 * currentStates is a Set containing all the states in the current iteration
 	 * of the simulation tree
 	 */
-	private List<State> currentStates = new LinkedList<State>();
+	private LinkedHashSet<State> currentStates = new LinkedHashSet<State>();
 	/*
 	 * newStates is a Set containing all the states which will appear in the
 	 * next iteration of the simulation tree
 	 */
-	private List<State> nextStates = new LinkedList<State>();
+	private Set<State> nextStates = new HashSet<State>();
 
 	private static final boolean DEBUG = false;
 
@@ -93,8 +96,10 @@ public class eNfa extends Automaton {
 
 	@Override
 	public List<State> getActiveStates() {
-		Collections.sort(this.currentStates);
-		return this.currentStates;
+		List<State> list = new ArrayList<State>(this.currentStates);
+		Collections.sort(list);
+		this.currentStates = new LinkedHashSet<State>(list);
+		return list;
 	}
 
 	@Override
@@ -142,19 +147,15 @@ public class eNfa extends Automaton {
 				/*
 				 * For each state in nextStates, add all epsilon circles
 				 */
-				Vector<State> e = new Vector<State>();
+				Set<State> e = new HashSet<State>();
 				for (State qt : nextStates) {
 					if (qt.hasEpsilonTransition())
 						for (State qz : qt.eTransition.getDestinations())
 							if (!nextStates.contains(qz))
 								e.add(qz);
 				}
-
-				for (State q2 : e) {
-					if (!nextStates.contains(q2)) {
-						nextStates.add(q2);
-					}
-				}
+				
+				nextStates.addAll(e);
 				
 			}
 
@@ -206,8 +207,8 @@ public class eNfa extends Automaton {
 		 */
 
 		boolean hasNextEpsilon;
-		Vector<State> nstate = new Vector<State>();
-		Vector<State> pstate = new Vector<State>();
+		List<State> nstate = new LinkedList<State>();
+		List<State> pstate = new LinkedList<State>();
 
 		if (DEBUG) {
 			System.out.println("===\nChecking epsilon circles\n===");
@@ -279,7 +280,7 @@ public class eNfa extends Automaton {
 
 				nstate.clear();
 
-				Collections.sort(q.eTransition.getDestinations());
+//				Collections.sort(q.eTransition.getDestinations());
 			}
 		}
 

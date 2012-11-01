@@ -1,8 +1,8 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 public class State implements Comparable<State>, Serializable {
 
@@ -12,7 +12,7 @@ public class State implements Comparable<State>, Serializable {
 	private static final long serialVersionUID = 2135739431782216137L;
 	
 	protected String name;
-	protected Vector<Transition> transitions = new Vector<Transition>();;
+	protected List<Transition> transitions = new LinkedList<Transition>();;
 	protected Transition eTransition = null;
 
 	public State(String name) {
