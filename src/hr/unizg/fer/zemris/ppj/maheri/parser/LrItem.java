@@ -7,8 +7,6 @@ public class LrItem extends Production {
 
 	public static final String DOT = "*";
 
-	private final String symbol;
-	private final String production;
 	private final int dotPosition;
 
 	public LrItem(final String symbol, final String production, final int dotPosition) {
@@ -16,8 +14,6 @@ public class LrItem extends Production {
 		if (dotPosition > production.length() || dotPosition < 0) {
 			throw new IllegalArgumentException("Dot position is out of range: " + dotPosition);
 		}
-		this.symbol = symbol;
-		this.production = production;
 		this.dotPosition = dotPosition;
 	}
 
@@ -42,20 +38,12 @@ public class LrItem extends Production {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		StringBuilder production = new StringBuilder(this.production);
+		StringBuilder production = new StringBuilder(getValue());
 		production.insert(dotPosition, DOT);
-		sb.append(symbol);
+		sb.append(getKey());
 		sb.append("->");
 		sb.append(production);
 		return sb.toString();
-	}
-
-	public final String getSymbol() {
-		return symbol;
-	}
-
-	public final String getProduction() {
-		return production;
 	}
 
 	public final int getDotPosition() {
