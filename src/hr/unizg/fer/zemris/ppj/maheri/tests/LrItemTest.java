@@ -40,7 +40,7 @@ public class LrItemTest {
 		List<String> myOutput = new LinkedList<String>();
 		for (String s : input) {
 			String[] parts = s.split("->");
-			Production p = new Production(parts[0], parts[1]);
+			Production p = new Production(parts[0], parts.length == 2 ? parts[1] : "");
 			for (LrItem item : LrItem.fromProduction(p)) {
 				myOutput.add(item.toString());
 			}
