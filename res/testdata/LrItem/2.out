@@ -1,0 +1,15 @@
+S'->*Sc
+S'->S*c
+S'->Sc*
+S->*SA
+S->S*A
+S->SA*
+S->*A
+S->A*
+A->*aSb
+A->a*Sb
+A->aS*b
+A->aSb*
+A->*ab
+A->a*b
+A->ab*
