@@ -1,8 +1,12 @@
 package hr.unizg.fer.zemris.ppj.maheri.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import hr.unizg.fer.zemris.ppj.maheri.parser.LrItem;
 import hr.unizg.fer.zemris.ppj.maheri.parser.Production;
+import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
+import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
+import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 
 import java.util.ArrayList;
@@ -40,7 +44,26 @@ public class LrItemTest {
 		List<String> myOutput = new LinkedList<String>();
 		for (String s : input) {
 			String[] parts = s.split("->");
-			Production p = new Production(parts[0], parts.length == 2 ? parts[1] : "");
+			NonTerminalSymbol key = new NonTerminalSymbol(parts[0]);
+			List<List<Symbol>> productionDestination = new ArrayList<List<Symbol>>();
+			if (parts.length > 1) {
+				for (String s2 : parts[1].split("\\|")) {
+					List<Symbol> symbols = new ArrayList<Symbol>();
+					for (Character c : s2.toCharArray()) {
+						if (Character.isUpperCase(c)) {
+							symbols.add(new NonTerminalSymbol(String.valueOf(c)));
+						} else {
+							symbols.add(new TerminalSymbol(String.valueOf(c)));
+						}
+					}
+					productionDestination.add(symbols);
+				}
+			} else {
+				productionDestination.add(new ArrayList<Symbol>());
+			}
+			Production p = new Production(key, productionDestination);
+			System.out.println(p);
+			System.out.println(LrItem.fromProduction(p));
 			for (LrItem item : LrItem.fromProduction(p)) {
 				myOutput.add(item.toString());
 			}

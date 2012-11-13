@@ -1,6 +1,8 @@
 package hr.unizg.fer.zemris.ppj.maheri.parser;
 
 import hr.unizg.fer.zemris.ppj.maheri.automaton.Automaton;
+import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
+import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +15,7 @@ public class ParserUtils {
 	 * A.K.A. skup ZAPOČINJE za nezavršne znakove
 	 * TODO tljubej
 	 */
-	public static Set<String> begins(Grammar grammar, String nonterminalSymbol) {
+	public static Set<Symbol> begins(Grammar grammar, String nonterminalSymbol) {
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
@@ -21,7 +23,7 @@ public class ParserUtils {
 	 * A.K.A. skup ZAPOČINJE za produkcije
 	 * TODO tljubej
 	 */
-	public static Set<String> begins(Grammar grammar, Production production) {
+	public static Set<NonTerminalSymbol> begins(Grammar grammar, Production production) {
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 	
@@ -29,7 +31,7 @@ public class ParserUtils {
 	 * A.K.A. skup slijedi za sve prazne nezavršne znakove
 	 * TODO tljubej
 	 */
-	public static Set<String> follows(Grammar grammar, String nonterminalSymbol) {
+	public static Set<Symbol> follows(Grammar grammar, String nonterminalSymbol) {
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 

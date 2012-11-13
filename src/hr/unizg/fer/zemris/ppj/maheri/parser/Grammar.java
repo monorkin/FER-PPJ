@@ -1,7 +1,14 @@
 package hr.unizg.fer.zemris.ppj.maheri.parser;
 
+import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
+import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
+import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,18 +23,18 @@ public class Grammar {
 	public static final String START_SYMBOL_FORMAT = "<_%s_>";
 
 	private final Set<Production> productions;
-	private final Set<String> nonterminalSymbols;
-	private final Set<String> terminalSymbols;
-	private final Map<String, Set<Production>> map;
-	private String startSymbol;
+	private final Set<NonTerminalSymbol> nonterminalSymbols;
+	private final Set<TerminalSymbol> terminalSymbols;
+	private final Map<NonTerminalSymbol, Set<Production>> map;
+	private NonTerminalSymbol startSymbol;
 
-	public Grammar(Set<Production> productions, Set<String> nonterminalSymbols, Set<String> terminalSymbols,
-			String startSymbol) {
+	public Grammar(Set<Production> productions, Set<NonTerminalSymbol> nonterminalSymbols,
+			Set<TerminalSymbol> terminalSymbols, NonTerminalSymbol startSymbol) {
 		this.productions = productions;
 		this.terminalSymbols = terminalSymbols;
 		this.nonterminalSymbols = nonterminalSymbols;
 		this.startSymbol = startSymbol;
-		map = new HashMap<String, Set<Production>>();
+		map = new HashMap<NonTerminalSymbol, Set<Production>>();
 		for (Production p : productions) {
 			if (map.get(p.getKey()) == null) {
 				map.put(p.getKey(), new HashSet<Production>());
@@ -38,7 +45,7 @@ public class Grammar {
 		}
 	}
 
-	public final Set<String> getNonterminalSymbols() {
+	public final Set<NonTerminalSymbol> getNonterminalSymbols() {
 		return nonterminalSymbols;
 	}
 
@@ -46,15 +53,15 @@ public class Grammar {
 		return this.productions;
 	}
 
-	public Set<Production> getProductionsForSymbol(String nonterminatingSymbol) {
+	public Set<Production> getProductionsForSymbol(NonTerminalSymbol nonterminatingSymbol) {
 		return map.get(nonterminatingSymbol);
 	}
 
-	public final String getStartSymbol() {
+	public final NonTerminalSymbol getStartSymbol() {
 		return startSymbol;
 	}
 
-	public final Set<String> getTerminalSymbols() {
+	public final Set<TerminalSymbol> getTerminalSymbols() {
 		return terminalSymbols;
 	}
 
@@ -64,9 +71,11 @@ public class Grammar {
 	 * the old starting symbol
 	 */
 	public final void createAlternateStartSymbol() {
-		String newSymbol = String.format(START_SYMBOL_FORMAT, startSymbol.substring(1, startSymbol.length() - 1));
+		NonTerminalSymbol newSymbol = new NonTerminalSymbol(String.format(START_SYMBOL_FORMAT, startSymbol));
 		nonterminalSymbols.add(newSymbol);
-		productions.add(new Production(newSymbol, startSymbol));
+		List<List<Symbol>> productionDestination = new ArrayList<List<Symbol>>(1);
+		productionDestination.add(Arrays.asList(new Symbol[] { newSymbol }));
+		productions.add(new Production(newSymbol, productionDestination));
 		startSymbol = newSymbol;
 	}
 

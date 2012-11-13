@@ -1,6 +1,10 @@
 package hr.unizg.fer.zemris.ppj.maheri.parser;
 
+import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
+import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
+
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,27 +16,27 @@ import java.util.Set;
  */
 public class Lr1Item extends LrItem {
 
-	protected Set<String> nonterminatingSymbols;
+	protected Set<NonTerminalSymbol> nonterminalSymbols;
 
-	public Lr1Item(String symbol, String production, int dotPosition) {
+	public Lr1Item(NonTerminalSymbol symbol, List<List<Symbol>> production, int dotPosition) {
 		super(symbol, production, dotPosition);
-		Set<String> t = new HashSet<String>();
-		t.add("#");
-		this.nonterminatingSymbols = t;
+		Set<NonTerminalSymbol> t = new HashSet<NonTerminalSymbol>();
+		t.add(new NonTerminalSymbol("#"));
+		this.nonterminalSymbols = t;
 	}
 
 	public Lr1Item(LrItem item) {
 		this(item.getKey(), item.getValue(), item.getDotPosition());
 	}
 
-	public Lr1Item(LrItem item, Set<String> nonterminatingSymbols) {
+	public Lr1Item(LrItem item, Set<NonTerminalSymbol> nonterminatingSymbols) {
 		super(item.getKey(), item.getValue(), item.getDotPosition());
-		this.nonterminatingSymbols = nonterminatingSymbols;
+		this.nonterminalSymbols = nonterminatingSymbols;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s %s", super.toString(), nonterminatingSymbols.toString());
+		return String.format("%s %s", super.toString(), nonterminalSymbols.toString());
 	}
 
 }
