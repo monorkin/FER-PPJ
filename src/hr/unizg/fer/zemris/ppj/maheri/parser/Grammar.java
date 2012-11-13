@@ -13,11 +13,13 @@ import java.util.Set;
  */
 public class Grammar {
 
+	public static final String START_SYMBOL_FORMAT = "<_%s_>";
+
 	private final Set<Production> productions;
 	private final Set<String> nonterminalSymbols;
 	private final Set<String> terminalSymbols;
 	private final Map<String, Set<Production>> map;
-	private final String startSymbol;
+	private String startSymbol;
 
 	public Grammar(Set<Production> productions, Set<String> nonterminalSymbols, Set<String> terminalSymbols,
 			String startSymbol) {
@@ -54,6 +56,18 @@ public class Grammar {
 
 	public final Set<String> getTerminalSymbols() {
 		return terminalSymbols;
+	}
+
+	/**
+	 * Modifies this grammar and introduces a new starting symbol with a
+	 * production of <N>-><S> where <N> is the new starting symbol and <S> is
+	 * the old starting symbol
+	 */
+	public final void createAlternateStartSymbol() {
+		String newSymbol = String.format(START_SYMBOL_FORMAT, startSymbol.substring(1, startSymbol.length() - 1));
+		nonterminalSymbols.add(newSymbol);
+		productions.add(new Production(newSymbol, startSymbol));
+		startSymbol = newSymbol;
 	}
 
 }
