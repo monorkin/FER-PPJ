@@ -27,7 +27,7 @@ public class Production {
 		this.leftSide = leftSide;
 		rightSide = new ArrayList<Symbol>();
 
-		String[] rightSideArray = rightSideString.split("\\s*");
+		String[] rightSideArray = rightSideString.split("\\s+");
 
 		for (String s : rightSideArray) {
 			if (s.equals(EPSILON))
