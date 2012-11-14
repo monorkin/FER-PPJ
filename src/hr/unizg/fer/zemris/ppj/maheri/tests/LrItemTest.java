@@ -61,11 +61,13 @@ public class LrItemTest {
 			} else {
 				productionDestination.add(new ArrayList<Symbol>());
 			}
-			Production p = new Production(key, productionDestination);
-			System.out.println(p);
-			System.out.println(LrItem.fromProduction(p));
-			for (LrItem item : LrItem.fromProduction(p)) {
-				myOutput.add(item.toString());
+			for (List<Symbol> e : productionDestination) {
+				Production p = new Production(key, e);
+				System.out.println(p);
+				System.out.println(LrItem.fromProduction(p));
+				for (LrItem item : LrItem.fromProduction(p)) {
+					myOutput.add(item.toString());
+				}
 			}
 		}
 		assertEquals(output.size(), myOutput.size());

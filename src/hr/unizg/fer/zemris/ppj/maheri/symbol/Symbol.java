@@ -9,9 +9,11 @@ public abstract class Symbol {
 	public static final char BLANK = ' ';
 
 	private final String value;
+	private final boolean terminal;
 
-	public Symbol(final String value) {
+	public Symbol(final String value, boolean terminal) {
 		this.value = value;
+		this.terminal = terminal;
 	}
 
 	public final String getValue() {
@@ -35,7 +37,7 @@ public abstract class Symbol {
 		return value;
 	}
 
-	public static Symbol getFromList(List<? extends Symbol> haystack, String needle) {
+	public static Symbol getFromList(Iterable<? extends Symbol> haystack, String needle) {
 		for (Symbol s : haystack) {
 			if (s.equals(needle)) {
 				return s;
@@ -44,4 +46,7 @@ public abstract class Symbol {
 		return null;
 	}
 
+	public boolean isTerminal() {
+		return terminal;
+	}
 }

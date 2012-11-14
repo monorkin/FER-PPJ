@@ -41,7 +41,10 @@ public class SAInputProcessorTest {
 
 	@Test
 	public void test() {
-		String[] output = InputProcessor.parseInput(input).toString().split("\n");
+		String[] output = InputProcessor.parseInput(input.toArray(new String[0])).toString().split("\n");
+		for (int i = 0; i < expectedOutput.size(); ++i) {
+			System.err.println(output[i]);
+		}
 		for (int i = 0; i < expectedOutput.size(); ++i) {
 			assertEquals(expectedOutput.get(i), output[i]);
 		}

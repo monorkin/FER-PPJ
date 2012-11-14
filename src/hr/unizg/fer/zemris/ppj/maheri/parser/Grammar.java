@@ -4,10 +4,9 @@ import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,12 +35,12 @@ public class Grammar {
 		this.startSymbol = startSymbol;
 		map = new HashMap<NonTerminalSymbol, Set<Production>>();
 		for (Production p : productions) {
-			if (map.get(p.getKey()) == null) {
-				map.put(p.getKey(), new HashSet<Production>());
+			if (map.get(p.getLeftHandSide()) == null) {
+				map.put(p.getLeftHandSide(), new LinkedHashSet<Production>());
 			}
-			Set<Production> t = map.get(p.getKey());
+			Set<Production> t = map.get(p.getLeftHandSide());
 			t.add(p);
-			map.put(p.getKey(), t);
+			map.put(p.getLeftHandSide(), t);
 		}
 	}
 
@@ -73,26 +72,17 @@ public class Grammar {
 	public final void createAlternateStartSymbol() {
 		NonTerminalSymbol newSymbol = new NonTerminalSymbol(String.format(START_SYMBOL_FORMAT, startSymbol));
 		nonterminalSymbols.add(newSymbol);
-		List<List<Symbol>> productionDestination = new ArrayList<List<Symbol>>(1);
-		productionDestination.add(Arrays.asList(new Symbol[] { newSymbol }));
-		productions.add(new Production(newSymbol, productionDestination));
+		productions.add(new Production(newSymbol, Arrays.asList(new Symbol[] { startSymbol })));
 		startSymbol = newSymbol;
-	}
+	} 
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for (Production p : getProductions()) {
-			for (List<Symbol> group : p.getValue()) {
-				sb.append(p.getKey());
-				sb.append(Symbol.ARROW);
-				for (Symbol s : group) {
-					sb.append(s == null ? "" : s);
-				}
-				sb.append("\n");
-			}
+			sb.append(p.toString());
+			sb.append("\n");
 		}
 		return sb.toString();
 	}
-
 }

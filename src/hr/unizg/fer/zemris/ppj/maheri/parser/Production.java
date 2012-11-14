@@ -3,41 +3,43 @@ package hr.unizg.fer.zemris.ppj.maheri.parser;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Production {
+	protected static final String EPSILON = "$"; 
 
-	private final NonTerminalSymbol key;
-	private final List<List<Symbol>> value;
+	private final NonTerminalSymbol leftSide;
+	private final List<Symbol> rightSide;
 
-	public NonTerminalSymbol getKey() {
-		return key;
+	public NonTerminalSymbol getLeftHandSide() {
+		return leftSide;
 	}
 
-	public List<List<Symbol>> getValue() {
-		return value;
+	public List<Symbol> getRightHandSide() {
+		return rightSide;
 	}
 
-	public Production(final NonTerminalSymbol key, final List<List<Symbol>> value) {
-		this.key = key;
-		this.value = value;
+	public Production(final NonTerminalSymbol key, final List<Symbol> value) {
+		this.leftSide = key;
+		this.rightSide = value;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(key);
+		sb.append(leftSide);
 		sb.append(Symbol.ARROW);
-		if (value.size() > 0) {
-			for (List<Symbol> production : value) {
-				for (Symbol s : production) {
-					sb.append(s);
-				}
-				sb.append("|");
+		if (rightSide.size() > 0) {
+			for (Symbol s : rightSide) {
+				sb.append(s);
 			}
-			sb.setLength(sb.length() - 1);
+		} else {
+			sb.append(EPSILON);
 		}
 		return sb.toString();
 	}
+
+
 
 }
