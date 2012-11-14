@@ -30,7 +30,7 @@ public class Grammar {
 		String s = lines[0];
 
 		s.replaceAll("%V ", "");
-		String[] tmpsyms = s.split("\\s*");
+		String[] tmpsyms = s.split("\\s+");
 		for (String ii : tmpsyms) {
 			symbols.add(new Symbol(ii, false));
 		}
@@ -38,7 +38,7 @@ public class Grammar {
 		s = lines[1];
 
 		s.replaceAll("%T ", "");
-		tmpsyms = s.split("\\s*");
+		tmpsyms = s.split("\\s+");
 		for (String ii : tmpsyms) {
 			symbols.add(new Symbol(ii, true));
 		}
