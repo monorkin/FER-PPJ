@@ -22,13 +22,13 @@ public class Grammar {
 
 	public static final String START_SYMBOL_FORMAT = "<_%s_>";
 
-	private final Set<Production> productions;
+	private final List<Production> productions;
 	private final Set<NonTerminalSymbol> nonterminalSymbols;
 	private final Set<TerminalSymbol> terminalSymbols;
 	private final Map<NonTerminalSymbol, Set<Production>> map;
 	private NonTerminalSymbol startSymbol;
 
-	public Grammar(Set<Production> productions, Set<NonTerminalSymbol> nonterminalSymbols,
+	public Grammar(List<Production> productions, Set<NonTerminalSymbol> nonterminalSymbols,
 			Set<TerminalSymbol> terminalSymbols, NonTerminalSymbol startSymbol) {
 		this.productions = productions;
 		this.terminalSymbols = terminalSymbols;
@@ -49,7 +49,7 @@ public class Grammar {
 		return nonterminalSymbols;
 	}
 
-	public Set<Production> getProductions() {
+	public List<Production> getProductions() {
 		return this.productions;
 	}
 
@@ -77,6 +77,22 @@ public class Grammar {
 		productionDestination.add(Arrays.asList(new Symbol[] { newSymbol }));
 		productions.add(new Production(newSymbol, productionDestination));
 		startSymbol = newSymbol;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (Production p : getProductions()) {
+			for (List<Symbol> group : p.getValue()) {
+				sb.append(p.getKey());
+				sb.append(Symbol.ARROW);
+				for (Symbol s : group) {
+					sb.append(s == null ? "" : s);
+				}
+				sb.append("\n");
+			}
+		}
+		return sb.toString();
 	}
 
 }
