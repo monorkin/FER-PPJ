@@ -2,6 +2,8 @@ package hr.unizg.fer.zemris.ppj.maheri.parser;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class LRparser {
@@ -112,11 +114,11 @@ public class LRparser {
  */
 class lifoStack
 {
-	private static ArrayList<lifoStackItem> tStack;
+	private static List<lifoStackItem> tStack;
 	
 	public lifoStack()
 	{
-		tStack = new ArrayList<lifoStackItem>();
+		tStack = new LinkedList<lifoStackItem>();
 	}
 	
 	public void push(lifoStackItem aItem)
