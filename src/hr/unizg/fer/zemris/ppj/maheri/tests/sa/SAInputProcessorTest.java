@@ -1,7 +1,8 @@
-package hr.unizg.fer.zemris.ppj.maheri.tests;
+package hr.unizg.fer.zemris.ppj.maheri.tests.sa;
 
 import static org.junit.Assert.assertEquals;
 import hr.unizg.fer.zemris.ppj.maheri.parser.InputProcessor;
+import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 
 import java.util.Collection;

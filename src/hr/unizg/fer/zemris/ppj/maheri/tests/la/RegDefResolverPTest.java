@@ -1,7 +1,8 @@
-package hr.unizg.fer.zemris.ppj.maheri.tests;
+package hr.unizg.fer.zemris.ppj.maheri.tests.la;
 
 import static org.junit.Assert.assertTrue;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegDefResolver;
+import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 
 import java.io.IOException;

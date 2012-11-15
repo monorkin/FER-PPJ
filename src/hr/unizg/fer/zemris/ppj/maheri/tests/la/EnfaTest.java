@@ -1,9 +1,10 @@
-package hr.unizg.fer.zemris.ppj.maheri.tests;
+package hr.unizg.fer.zemris.ppj.maheri.tests.la;
 
 import static org.junit.Assert.assertEquals;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.Transition;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
+import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 
 import java.io.IOException;

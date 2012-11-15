@@ -1,4 +1,4 @@
-package hr.unizg.fer.zemris.ppj.maheri.tests;
+package hr.unizg.fer.zemris.ppj.maheri.tests.sa;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -7,6 +7,7 @@ import hr.unizg.fer.zemris.ppj.maheri.parser.Production;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
+import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package hr.unizg.fer.zemris.ppj.maheri.tests;
+package hr.unizg.fer.zemris.ppj.maheri.tests.la;
 
 import static org.junit.Assert.*;
 

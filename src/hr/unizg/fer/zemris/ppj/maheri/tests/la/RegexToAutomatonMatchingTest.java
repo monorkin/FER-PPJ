@@ -1,17 +1,13 @@
-package hr.unizg.fer.zemris.ppj.maheri.tests;
+package hr.unizg.fer.zemris.ppj.maheri.tests.la;
 
 import static org.junit.Assert.*;
 
 import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegexToAutomaton;
+import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +17,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class AutomatonSerializationTest {
+public class RegexToAutomatonMatchingTest {
 
 	private String regex;
 	private String[] stringsToRunMatch;
@@ -32,7 +28,7 @@ public class AutomatonSerializationTest {
 	 * @param regex
 	 * @param stringsToRunMatch
 	 */
-	public AutomatonSerializationTest(String regex, String[] stringsToRunMatch) {
+	public RegexToAutomatonMatchingTest(String regex, String[] stringsToRunMatch) {
 		this.regex = regex;
 		this.stringsToRunMatch = stringsToRunMatch;
 
@@ -62,30 +58,6 @@ public class AutomatonSerializationTest {
 
 	@Test
 	public void test() {
-		System.err.println("regex is " + regex);
-		try {
-			FileOutputStream stream = new FileOutputStream("res/testdata/AutomatonSerialization/automaton.ser");
-			ObjectOutputStream oStream = new ObjectOutputStream(stream);
-			oStream.writeObject(matcherAutomaton);
-			System.err.println("Wrote Automaton");
-			oStream.close();
-			stream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		matcherAutomaton = null;
-		
-		try {
-			FileInputStream file = new FileInputStream("res/testdata/AutomatonSerialization/automaton.ser");
-			ObjectInputStream oin = new ObjectInputStream(file);
-			matcherAutomaton =  (eNfa) oin.readObject();
-			oin.close();
-			file.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 		for (String s : stringsToRunMatch) {
 			matcherAutomaton.reset();
 			System.err.print("at start, states are: ");
