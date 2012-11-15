@@ -12,7 +12,9 @@ public class LRparser {
 	private static String tOutput;
 	
 	//Inicijalizacija
-	//Prima ulazni niz znakova, te Map<Integer, Map<String, String>>
+	//Prima ulazni niz znakova, te Map<Integer, Map<String, String>> 
+	// Objasnjenje ::: Integer = broj retka; Mapa = sadrzaj retka -> prvi string = naslov stupca (znak) -> drugi string = akcija
+	//				   drzim se sintakse iz UTR ako da drugi string sadrzi "rX", "lX" ili "prihvati"
 	public LRparser(String inputString, Map<Integer, Map <String, String>> actionsTable, Map<Integer, Map <String, String>> newStatesTable) 
 	{
 		tStack    = new lifoStack();
@@ -27,11 +29,11 @@ public class LRparser {
 	//Parsiraj niz
 	private static void lrParse()
 	{
-		tStack.add(new lifoStackItem("prvi","sPrvi"));
-		tStack.add(new lifoStackItem("drugi","sDrugi"));
-		tStack.add(new lifoStackItem("treci","sTreci"));
-		
-		tStack.print();
+		boolean running = true;
+		while (running)
+		{
+			
+		}
 		
 	}
 	
