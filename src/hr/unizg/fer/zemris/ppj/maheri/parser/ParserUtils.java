@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class ParserUtils {
+public class ParserUtils {
 
 	private Grammar grammar;
 
@@ -23,7 +23,7 @@ class ParserUtils {
 	/**
 	 * @param grammar
 	 */
-	ParserUtils(Grammar grammar) {
+	public ParserUtils(Grammar grammar) {
 		this.grammar = grammar;
 
 		productions = grammar.getProductions();
@@ -60,8 +60,7 @@ class ParserUtils {
 						allEmpty = false;
 				}
 				if (allEmpty) {
-					change = true;
-					emptySymbols.add(p.getLeftHandSide());
+					change = emptySymbols.add(p.getLeftHandSide());
 				}
 			}
 		}
