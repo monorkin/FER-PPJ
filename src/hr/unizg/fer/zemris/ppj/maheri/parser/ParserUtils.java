@@ -10,8 +10,12 @@ import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class ParserUtils {
@@ -152,22 +156,36 @@ public class ParserUtils {
 	public eNfa automatonFromGrammar() {
 		Logger.log("=========\n\nConverting grammar\n\n" + grammar + "\n=========");
 		Symbol oldStart = grammar.getStartSymbol();
-		Symbol start = grammar.createAlternateStartSymbol();
-		Set<Lr1Item> lrItems = new HashSet<Lr1Item>();
-
+		Symbol startSymbol = grammar.createAlternateStartSymbol();
+		
+		Set<LrItem> lrItems = new HashSet<LrItem>();
+		
+		Map<Lr1Item, State> autStates = new HashMap<Lr1Item, State>();
+		
 		/*
-		 * Generate Lr1Items from the grammar
+		 * Generate LrItems from the grammar
 		 */
-		Logger.log("Generated Lr1Items");
-		TerminalSymbol endS = new TerminalSymbol("#END#");
+		Logger.log("Generated LrItems");
 		for (Production p : grammar.getProductions()) {
 			for (LrItem item : LrItem.fromProduction(p)) {
-				Lr1Item lritem = new Lr1Item(item, new HashSet<TerminalSymbol>(Arrays.asList(new TerminalSymbol[] { endS })));
-				Logger.log("\t" + lritem);
-				lrItems.add(lritem);
+				lrItems.add(item);
 			}
 		}
-
+		
+		/*
+		 * Make start state
+		 */
+		TerminalSymbol endS = new TerminalSymbol("#END#");
+		Set<LrItem> possibleStartItems = LrItem.getStartingItemForSymbol(startSymbol, lrItems);
+		Lr1Item start1Item = new Lr1Item(
+				possibleStartItems.toArray(new LrItem[1])[0],
+				new HashSet<TerminalSymbol>(Arrays.asList(new TerminalSymbol[] { endS })));
+		
+		State startState = new State(start1Item.toString());
+		startState.setData(start1Item);
+		
+		autStates.put(start1Item, startState);
+		
 		/*
 		 * Generate a list of symbols for the automaton
 		 */
@@ -179,24 +197,8 @@ public class ParserUtils {
 			symbols.add(s.getValue());
 		}
 
-		List<Transition> transitions = new ArrayList<Transition>();
-		List<State> states = new ArrayList<State>();
-
-		State startingState = new State(start.toString());
-		states.add(startingState);
-
-		for (Lr1Item item : lrItems) {
-			State t = new State(item.toString());
-			states.add(t);
-			/*
-			 * Rule 4.a - initial transition
-			 */
-//			if (item.getDotPosition() == 0 && item.getLeftHandSide().equals(oldStart)) {
-//				Transition t2 = new Transition(startingState, Automaton.EPSILON, Arrays.asList(new State[] { t }));
-//				transitions.add(t2);
-//			}
-		}
-
+		Set<Transition> transitions = new HashSet<Transition>();
+		
 		/*
 		 * Additional transitions - these must be done after the first pass, as
 		 * not all states were available until now
@@ -204,8 +206,10 @@ public class ParserUtils {
 		boolean changed = true;
 		while (changed) {
 			changed = false;
-			Set<Lr1Item> addedItems = new HashSet<Lr1Item>();
-			for (Lr1Item item : lrItems) {
+			Map<Lr1Item, State> addedStates = new HashMap<Lr1Item, State>();
+			for (Entry<Lr1Item, State> pair : autStates.entrySet()) {
+				Lr1Item item = pair.getKey();
+				State state = pair.getValue();
 
 				final Symbol activeSymbol;
 				final int dotPosition = item.getDotPosition();
@@ -220,13 +224,23 @@ public class ParserUtils {
 				/*
 				 * Rule 4.b - skipping over a symbol
 				 */
-				Lr1Item nextItem = LrItem.getItemWithNextDot(item, lrItems);
+				LrItem nextItem = LrItem.getItemWithNextDot(item, lrItems);
 				if (nextItem != null) {
 					Symbol x = item.getRightHandSide().get(dotPosition);
 					Logger.log("\tNext item: " + nextItem);
-					Transition next = new Transition(State.getByName(item.toString(), states), x.getValue(),
-							Arrays.asList(new State[] { State.getByName(nextItem.toString(), states) }));
+					
+					Lr1Item next1Item = new Lr1Item(nextItem, item.getTerminalSymbols());
+					State nextState = autStates.get(next1Item);
+					if (nextState == null) {
+						nextState = new State(next1Item.toString());
+						nextState.setData(next1Item);
+						changed = true;
+						addedStates.put(next1Item, nextState);
+					}
+					Transition next = new Transition(state, x.getValue(),
+							Arrays.asList(new State[] { nextState }));					
 					transitions.add(next);
+					
 					Logger.log("\t\tTransition: " + next);
 				} else {
 					Logger.log("\tNo next transition");
@@ -258,35 +272,37 @@ public class ParserUtils {
 						Logger.log("\tDestination T = " + t);
 
 						Logger.log("\tInitial productions for " + activeSymbol);
-						Set<Lr1Item> items = LrItem.getStartingItemForSymbol(activeSymbol, lrItems);
-						for (Lr1Item titem : items) {
+						Set<LrItem> items = LrItem.getStartingItemForSymbol(activeSymbol, lrItems);
+						for (LrItem titem : items) {
 							Logger.log("\t\t" + titem);
 						}
 
 						Logger.log("\tNew productions:");
-						for (Lr1Item titem : items) {
-							Lr1Item newItem = new Lr1Item(titem, t);
-							Logger.log("\t\t\t" + newItem);
-							if (!lrItems.contains(newItem)) {
+						
+						Set<State> epsilonDests = new HashSet<State>();
+						for (LrItem titem : items) {
+							Lr1Item new1Item = new Lr1Item(titem, t);
+							Logger.log("\t\t\t" + new1Item);
+							
+							State newState = autStates.get(new1Item);
+							if (newState == null) {
 								Logger.log("\t\t\t\tAdding to current items");
-								addedItems.add(newItem);
-							}
-							State s = new State(newItem.toString());
-							states.add(s);
-							Transition trans = new Transition(State.getByName(item.toString(), states),
-									Automaton.EPSILON, Arrays.asList(new State[] { s }));
-							Logger.log("Adding transition "+trans);
-							if(!transitions.contains(trans)) {
+								newState = new State(new1Item.toString());
+								newState.setData(new1Item);
 								changed = true;
-								transitions.add(trans);
+								addedStates.put(new1Item, newState);
 							}
+							Logger.log("Adding transition to "+newState);
+							epsilonDests.add(newState);
 						}
-
+						
+						Transition trans = new Transition(state, Automaton.EPSILON, new ArrayList<State>(epsilonDests));
+						transitions.add(trans);
 //					}
 
 				}
 			}
-			lrItems.addAll(addedItems);
+			autStates.putAll(addedStates);
 
 		}
 
@@ -294,7 +310,10 @@ public class ParserUtils {
 		for (Transition t : transitions) {
 			Logger.log("\t" + t);
 		}
-
-		return new eNfa(states, symbols, transitions, startingState, states);
+		ArrayList<State> stateList = new ArrayList<State>(autStates.values());
+		ArrayList<Transition> transitionsList = new ArrayList<Transition>(transitions);
+		Collections.sort(stateList);
+		List<State> acceptableStates = stateList;
+		return new eNfa(stateList, symbols, transitionsList, startState, acceptableStates);
 	}
 }

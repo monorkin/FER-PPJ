@@ -10,6 +10,16 @@ public class State implements Comparable<State>, Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 2135739431782216137L;
+	
+	private Object data;
+	
+	public Object getData() {
+		return data;
+	}
+	
+	public void setData(Object data) {
+		this.data = data;
+	}
 
 	protected String name;
 	protected List<Transition> transitions = new LinkedList<Transition>();;

@@ -21,7 +21,7 @@ public class eNfa extends Automaton {
 	 * 
 	 */
 	private static final long serialVersionUID = -2150327628309046380L;
-	
+
 	private List<State> states;
 	private List<String> symbols;
 	private List<Transition> transitions;
@@ -57,7 +57,7 @@ public class eNfa extends Automaton {
 				this.epsilonInstances.add(t.getOrigin());
 				t.getOrigin().eTransition = t;
 			}
-			
+
 			t.getOrigin().transitions.add(t);
 
 			if (!this.states.contains(t.getOrigin()) || !this.states.containsAll(t.getDestinations())) {
@@ -93,9 +93,9 @@ public class eNfa extends Automaton {
 		}
 		return false;
 	}
-	
+
 	@Override
-	public List<String> getSymbols(){
+	public List<String> getSymbols() {
 		return this.symbols;
 	}
 
@@ -103,22 +103,22 @@ public class eNfa extends Automaton {
 	public List<State> getAcceptableStates() {
 		return this.acceptableStates;
 	}
-	
+
 	@Override
 	public State getStartState() {
 		return startingState;
 	}
-	
+
 	@Override
 	public List<State> getStates() {
 		return this.states;
 	}
-	
+
 	@Override
 	public List<Transition> getTransitions() {
 		return this.transitions;
 	}
-	
+
 	@Override
 	public List<State> getActiveStates() {
 		List<State> list = new ArrayList<State>(this.currentStates);
@@ -131,9 +131,15 @@ public class eNfa extends Automaton {
 	public void reset() {
 		initialise();
 	}
-	
+
 	@Override
 	public void nextChar(String key) {
+		peekNextChar(key);
+		currentStates.clear();
+		currentStates.addAll(nextStates);
+	}
+
+	protected Set<State> peekNextChar(String key) {
 		if (symbols != null && !symbols.contains(key)) {
 			throw new IllegalArgumentException("Key " + key + " is not a valid input for this automaton");
 		}
@@ -150,63 +156,41 @@ public class eNfa extends Automaton {
 		 * For every state which is active in the current iteration, we need to
 		 * determine the states which will follow based on the input symbol
 		 */
-		if (!currentStates.isEmpty()) {
-			for (State q : currentStates) {
 
-				/*
-				 * For each applicable transition, add all the destination
-				 * states to nextStates
-				 */
-				for (Transition t : q.transitions) {
-					if (t.getKey().equals(key)) {
-						for (State q2 : t.getDestinations()) {
-							if (!nextStates.contains(q2))
-								nextStates.add(q2);
-						}
-						if (DEBUG) {
-							System.out.println("Aplicable transition: " + t);
-						}
+		nextStates.clear();
+		for (State q : currentStates) {
+
+			/*
+			 * For each applicable transition, add all the destination states to
+			 * nextStates
+			 */
+			for (Transition t : q.transitions) {
+				if (t.getKey().equals(key)) {
+					for (State q2 : t.getDestinations()) {
+						if (!nextStates.contains(q2))
+							nextStates.add(q2);
+					}
+					if (DEBUG) {
+						System.out.println("Aplicable transition: " + t);
 					}
 				}
-
-				/*
-				 * For each state in nextStates, add all epsilon circles
-				 */
-				Set<State> e = new HashSet<State>();
-				for (State qt : nextStates) {
-					if (qt.hasEpsilonTransition())
-						for (State qz : qt.eTransition.getDestinations())
-							if (!nextStates.contains(qz))
-								e.add(qz);
-				}
-				
-				nextStates.addAll(e);
-				
 			}
 
 			/*
-			 * If the Set nextStates is empty, we can safely clear currentStates
-			 * and skip the next part
+			 * For each state in nextStates, add all epsilon circles
 			 */
-
-			if (nextStates.isEmpty()) {
-				currentStates.clear();
-				return;
+			Set<State> e = new HashSet<State>();
+			for (State qt : nextStates) {
+				if (qt.hasEpsilonTransition())
+					for (State qz : qt.eTransition.getDestinations())
+						if (!nextStates.contains(qz))
+							e.add(qz);
 			}
 
-			/*
-			 * Once we are done with the current iteration, we prepare the
-			 * simulator for the next one by making nextStates currentStates
-			 */
-			currentStates.clear();
-			currentStates.addAll(nextStates);
-			nextStates.clear();
+			nextStates.addAll(e);
 
-		} else {
-			if (DEBUG) {
-				System.out.println("\tSet is empty");
-			}
 		}
+		return nextStates;
 	}
 
 	/**
@@ -305,7 +289,7 @@ public class eNfa extends Automaton {
 
 				nstate.clear();
 
-//				Collections.sort(q.eTransition.getDestinations());
+				// Collections.sort(q.eTransition.getDestinations());
 			}
 		}
 
