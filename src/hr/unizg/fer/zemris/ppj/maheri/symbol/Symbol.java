@@ -1,12 +1,11 @@
 package hr.unizg.fer.zemris.ppj.maheri.symbol;
 
-import java.util.List;
-
-public abstract class Symbol {
+public abstract class Symbol implements Comparable<Symbol> {
 
 	public static final String DOT = "*";
 	public static final String ARROW = "->";
 	public static final char BLANK = ' ';
+	public static final String END = "#";
 
 	private final String value;
 	private final boolean terminal;
@@ -31,7 +30,7 @@ public abstract class Symbol {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return value.hashCode();
@@ -40,6 +39,11 @@ public abstract class Symbol {
 	@Override
 	public String toString() {
 		return value;
+	}
+
+	@Override
+	public int compareTo(Symbol that) {
+		return this.getValue().compareTo(that.getValue());
 	}
 
 	public static Symbol getFromList(Iterable<? extends Symbol> haystack, String needle) {

@@ -1,11 +1,15 @@
 package hr.unizg.fer.zemris.ppj.maheri.parser;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.Automaton;
-import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.Transition;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -145,20 +149,151 @@ public class ParserUtils {
 		return symSet;
 	}
 
-	public static final String TRANSITION_FORMAT = "%s,%s";
-
-	public Automaton automatonFromGrammar() {
-		grammar.createAlternateStartSymbol();
+	public eNfa automatonFromGrammar() {
+		Logger.log("=========\n\nConverting grammar\n\n" + grammar + "\n=========");
+		Symbol oldStart = grammar.getStartSymbol();
+		Symbol start = grammar.createAlternateStartSymbol();
 		Set<Lr1Item> lrItems = new HashSet<Lr1Item>();
+
+		/*
+		 * Generate Lr1Items from the grammar
+		 */
+		Logger.log("Generated Lr1Items");
 		for (Production p : grammar.getProductions()) {
 			for (LrItem item : LrItem.fromProduction(p)) {
-				lrItems.add(new Lr1Item(item, startsWithSet(item.getRightHandSide())));
+				Lr1Item lritem = new Lr1Item(item, startsWithSet(item.getRightHandSide()));
+				Logger.log("\t" + lritem);
+				lrItems.add(lritem);
 			}
 		}
 
-		// TODO psegina : generate transition map
-		// TODO psegina : transform to DFA
+		/*
+		 * Generate a list of symbols for the automaton
+		 */
+		List<String> symbols = new ArrayList<String>();
+		for (Symbol s : grammar.getNonterminalSymbols()) {
+			symbols.add(s.getValue());
+		}
+		for (Symbol s : grammar.getTerminalSymbols()) {
+			symbols.add(s.getValue());
+		}
 
-		throw new UnsupportedOperationException("Not yet implemented");
+		List<Transition> transitions = new ArrayList<Transition>();
+		List<State> states = new ArrayList<State>();
+
+		State startingState = new State(start.toString());
+		states.add(startingState);
+
+		for (Lr1Item item : lrItems) {
+			State t = new State(item.toString());
+			states.add(t);
+			/*
+			 * Rule 4.a - initial transition
+			 */
+			if (item.getDotPosition() == 0 && item.getLeftHandSide().equals(oldStart)) {
+				Transition t2 = new Transition(startingState, Automaton.EPSILON, Arrays.asList(new State[] { t }));
+				transitions.add(t2);
+			}
+		}
+
+		/*
+		 * Additional transitions - these must be done after the first pass, as
+		 * not all states were available until now
+		 */
+		boolean changed = true;
+		while (changed) {
+			changed = false;
+			Set<Lr1Item> addedItems = new HashSet<Lr1Item>();
+			for (Lr1Item item : lrItems) {
+
+				final Symbol activeSymbol;
+				final int dotPosition = item.getDotPosition();
+				if (dotPosition < item.getRightHandSide().size()) {
+					activeSymbol = item.getRightHandSide().get(dotPosition);
+				} else {
+					activeSymbol = null;
+				}
+				Logger.log("Item: " + item);
+				Logger.log("\tActive symbol " + activeSymbol);
+
+				/*
+				 * Rule 4.b - skipping over a symbol
+				 */
+				Lr1Item nextItem = LrItem.getItemWithNextDot(item, lrItems);
+				if (nextItem != null) {
+					Symbol x = item.getRightHandSide().get(dotPosition);
+					Logger.log("\tNext item: " + nextItem);
+					Transition next = new Transition(State.getByName(item.toString(), states), x.getValue(),
+							Arrays.asList(new State[] { State.getByName(nextItem.toString(), states) }));
+					transitions.add(next);
+					Logger.log("\t\tTransition: " + next);
+				} else {
+					Logger.log("\tNo next transition");
+				}
+
+				/*
+				 * Rule 4.c - analysis of nonterminal symbols
+				 */
+
+				if (activeSymbol != null && !activeSymbol.isTerminal()) {
+					Logger.log("\tNonterminal symbol " + activeSymbol + " on right hand side");
+					int len = item.getRightHandSide().size();
+					List<Symbol> remainingSymbols = new ArrayList<Symbol>();
+					for (int i = dotPosition + 1; i < len; ++i) {
+						remainingSymbols.add(item.getRightHandSide().get(i));
+					}
+					Logger.log("\tRemaining symbols :" + remainingSymbols);
+					Set<TerminalSymbol> t = new HashSet<TerminalSymbol>();
+					if (remainingSymbols.size() > 0) {
+						Set<TerminalSymbol> startsWith = startsWithSet(remainingSymbols);
+						Logger.log("\tAnalyzing aplicable terminal symbols:");
+						Logger.log("\t\tStarts with: " + startsWith);
+						t.addAll(startsWith);
+						if (emptySymbols.contains(activeSymbol)) {
+							Logger.log("\t\tActive symbol is an empty one.");
+							Logger.log("\t\t\tAdding: " + item.getTerminalSymbols());
+							t.addAll(item.getTerminalSymbols());
+						}
+						Logger.log("\tDestination T = " + t);
+
+						Logger.log("\tInitial productions for " + activeSymbol);
+						Set<Lr1Item> items = LrItem.getStartingItemForSymbol(activeSymbol, lrItems);
+						for (Lr1Item titem : items) {
+							Logger.log("\t\t" + titem);
+						}
+
+						Logger.log("\tNew productions:");
+						for (Lr1Item titem : items) {
+							Lr1Item newItem = new Lr1Item(titem, t);
+							Logger.log("\t\t\t" + newItem);
+							if (!lrItems.contains(newItem)) {
+								Logger.log("\t\t\t\tAdding to current items");
+								addedItems.add(newItem);
+							}
+							State s = new State(newItem.toString());
+							states.add(s);
+							Transition trans = new Transition(State.getByName(item.toString(), states),
+									Automaton.EPSILON, Arrays.asList(new State[] { s }));
+							Logger.log("Adding transition "+trans);
+							if(!transitions.contains(trans)) {
+								changed = true;
+								transitions.add(trans);
+							}
+						}
+
+					}
+
+				}
+			}
+			lrItems.addAll(addedItems);
+
+		}
+
+		Logger.log("Final transitions:");
+		for (Transition t : transitions) {
+			Logger.log("\t" + t);
+		}
+
+		return new eNfa(states, symbols, transitions, startingState, states);
 	}
 }

@@ -10,7 +10,7 @@ public class Transition implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 6577490010100126978L;
-	
+
 	private final State origin;
 	private final Set<State> destinations;
 	private final String key;
@@ -19,8 +19,8 @@ public class Transition implements Serializable {
 		if (origin == null || key == null || destinations == null) {
 			throw new IllegalArgumentException("Parameters must not be null!");
 		}
-		for(State q : destinations) {
-			if(q == null) {
+		for (State q : destinations) {
+			if (q == null) {
 				throw new IllegalArgumentException("Null must not be present in destinations");
 			}
 		}
@@ -39,6 +39,27 @@ public class Transition implements Serializable {
 
 	public String getKey() {
 		return key;
+	}
+
+	@Override
+	public int hashCode() {
+		return this.toString().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object that) {
+		if (!(that instanceof Transition)) {
+			return false;
+		}
+		Transition t = (Transition) that;
+
+		for (State destination : destinations) {
+			if (!t.getDestinations().contains(destination)) {
+				return false;
+			}
+		}
+
+		return this.key == t.getKey() && this.origin == t.origin;
 	}
 
 	@Override

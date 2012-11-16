@@ -3,11 +3,10 @@ package hr.unizg.fer.zemris.ppj.maheri.parser;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Production {
-	protected static final String EPSILON = "$"; 
+	protected static final String EPSILON = "$";
 
 	private final NonTerminalSymbol leftSide;
 	private final List<Symbol> rightSide;
@@ -26,6 +25,23 @@ public class Production {
 	}
 
 	@Override
+	public int hashCode() {
+		return this.toString().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object that) {
+		if (!(that instanceof Production)) {
+			return false;
+		}
+
+		Production other = (Production) that;
+
+		return this.leftSide.equals(other.getLeftHandSide()) && this.rightSide.equals(other.getRightHandSide());
+
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(leftSide);
@@ -39,7 +55,5 @@ public class Production {
 		}
 		return sb.toString();
 	}
-
-
 
 }

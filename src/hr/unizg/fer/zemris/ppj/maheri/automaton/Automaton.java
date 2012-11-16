@@ -16,11 +16,11 @@ public abstract class Automaton implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -6344259345535148906L;
-	
+
 	/**
 	 * A constant marking the symbol used for representing epsilon transitions
 	 */
-//	public static final String EPSILON = "$";
+	// public static final String EPSILON = "$";
 	public static final String EPSILON = "";
 
 	public Automaton(List<State> states, List<String> symbols, List<Transition> transitions, State startingState,
@@ -42,10 +42,40 @@ public abstract class Automaton implements Serializable {
 
 	/**
 	 * 
+	 * @return A list of all symbols valid for this automaton
+	 */
+	abstract public List<String> getSymbols();
+
+	/**
+	 * 
+	 * @return The starting state of this automaton
+	 */
+	abstract public State getStartState();
+
+	/**
+	 * 
+	 * @return A list of acceptable states for this automaton
+	 */
+	abstract public List<State> getAcceptableStates();
+
+	/**
+	 * 
+	 * @return A list of states of this automaton
+	 */
+	abstract public List<State> getStates();
+
+	/**
+	 * 
+	 * @return A list of the transitions which are a part of this automaton
+	 */
+	abstract public List<Transition> getTransitions();
+
+	/**
+	 * 
 	 * @return the current states of the automaton
 	 */
 	abstract public List<State> getActiveStates();
-	
+
 	/**
 	 * Perform a transition based on the input character
 	 * 

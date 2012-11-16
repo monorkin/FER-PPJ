@@ -10,7 +10,7 @@ public class State implements Comparable<State>, Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 2135739431782216137L;
-	
+
 	protected String name;
 	protected List<Transition> transitions = new LinkedList<Transition>();;
 	protected Transition eTransition = null;
@@ -39,6 +39,11 @@ public class State implements Comparable<State>, Serializable {
 	@Override
 	public int compareTo(State arg0) {
 		return this.name.compareTo(arg0.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.toString().hashCode();
 	}
 
 	@Override

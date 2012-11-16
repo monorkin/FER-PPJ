@@ -60,4 +60,25 @@ public class LrItem extends Production {
 		return dotPosition;
 	}
 
+	public static <A extends LrItem> Set<A> getStartingItemForSymbol(Symbol s, Iterable<A> allItems) {
+		Set<A> result = new HashSet<A>();
+		for (A item : allItems) {
+			if (item.getLeftHandSide().equals(s) && item.getDotPosition() == 0) {
+				result.add(item);
+			}
+		}
+		return result;
+	}
+
+	public static <A extends LrItem> A getItemWithNextDot(A currentItem, Iterable<A> allItems) {
+		for (A item : allItems) {
+			if (item.getDotPosition() == currentItem.getDotPosition() + 1
+					&& item.getLeftHandSide().equals(currentItem.getLeftHandSide())
+					&& item.getRightHandSide().equals(currentItem.getRightHandSide())) {
+				return item;
+			}
+		}
+		return null;
+	}
+
 }

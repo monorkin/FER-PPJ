@@ -17,7 +17,7 @@ import java.util.Set;
  */
 public class Lr1Item extends LrItem {
 
-	protected Set<TerminalSymbol> terminalSymbols;
+	private final Set<TerminalSymbol> terminalSymbols;
 
 	public Lr1Item(NonTerminalSymbol symbol, List<Symbol> production, int dotPosition) {
 		super(symbol, production, dotPosition);
@@ -35,9 +35,40 @@ public class Lr1Item extends LrItem {
 		this.terminalSymbols = set;
 	}
 
+	public Set<TerminalSymbol> getTerminalSymbols() {
+		return terminalSymbols;
+	}
+
+	@Override
+	public int hashCode() {
+		return this.toString().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object that) {
+		if (!(that instanceof Lr1Item)) {
+			return false;
+		}
+		Lr1Item other = (Lr1Item) that;
+		return this.getDotPosition() == other.getDotPosition()
+				&& this.getLeftHandSide().equals(other.getLeftHandSide())
+				&& this.getTerminalSymbols().equals(other.getTerminalSymbols())
+				&& this.getRightHandSide().equals(other.getRightHandSide());
+	}
+
 	@Override
 	public String toString() {
-		return String.format("%s %s", super.toString(), terminalSymbols.toString());
+		StringBuilder syms = new StringBuilder();
+		if (terminalSymbols.isEmpty()) {
+			syms.append(Symbol.END);
+			syms.append(" ");
+		} else {
+			for (Symbol s : terminalSymbols) {
+				syms.append(s.toString());
+				syms.append(" ");
+			}
+		}
+		return String.format("%s {%s}", super.toString(), syms);
 	}
 
 }

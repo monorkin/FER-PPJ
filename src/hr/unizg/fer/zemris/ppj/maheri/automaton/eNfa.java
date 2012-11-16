@@ -93,7 +93,32 @@ public class eNfa extends Automaton {
 		}
 		return false;
 	}
+	
+	@Override
+	public List<String> getSymbols(){
+		return this.symbols;
+	}
 
+	@Override
+	public List<State> getAcceptableStates() {
+		return this.acceptableStates;
+	}
+	
+	@Override
+	public State getStartState() {
+		return startingState;
+	}
+	
+	@Override
+	public List<State> getStates() {
+		return this.states;
+	}
+	
+	@Override
+	public List<Transition> getTransitions() {
+		return this.transitions;
+	}
+	
 	@Override
 	public List<State> getActiveStates() {
 		List<State> list = new ArrayList<State>(this.currentStates);

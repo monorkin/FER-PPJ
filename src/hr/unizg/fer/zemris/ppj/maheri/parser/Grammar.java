@@ -68,13 +68,16 @@ public class Grammar {
 	 * Modifies this grammar and introduces a new starting symbol with a
 	 * production of <N>-><S> where <N> is the new starting symbol and <S> is
 	 * the old starting symbol
+	 * 
+	 * @return The new starting symbol
 	 */
-	public final void createAlternateStartSymbol() {
+	public final Symbol createAlternateStartSymbol() {
 		NonTerminalSymbol newSymbol = new NonTerminalSymbol(String.format(START_SYMBOL_FORMAT, startSymbol));
 		nonterminalSymbols.add(newSymbol);
-		productions.add(new Production(newSymbol, Arrays.asList(new Symbol[] { startSymbol })));
+		productions.add(new Production(newSymbol, Arrays.asList(new Symbol[] { })));
 		startSymbol = newSymbol;
-	} 
+		return newSymbol;
+	}
 
 	@Override
 	public String toString() {
