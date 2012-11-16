@@ -1,0 +1,18 @@
+%V <A> <B> <C> <D> <E>
+%T a b c d e f
+%Syn a b c
+<A>
+ <B> <C> c
+ e <D> <B>
+<B>
+ $
+ b <C> <D> <E>
+<C>
+ <D> a <B>
+ c a
+<D>
+ $
+ d <D>
+<E>
+ e <A> f
+ c

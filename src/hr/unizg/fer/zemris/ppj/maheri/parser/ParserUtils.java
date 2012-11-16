@@ -296,4 +296,31 @@ public class ParserUtils {
 
 		return new eNfa(states, symbols, transitions, startingState, states);
 	}
+	
+	/**
+	 * Za debag svrhe, ne shvaćati preozbiljno
+	 */
+	@Override
+	public String toString() {
+		String str="    ";
+		for (Symbol s: symbols) {
+			str+=s.getValue()+" ";
+		}
+		str+="\n";
+		for (int i=0; i<startsWithSymbol[0].length; i++) {
+			str+=symbols.get(i).getValue()+"  ";
+			for (int j=0; j<startsWithSymbol[0].length; j++) {
+				//čupić bi me tuko zbog ovog
+				str+=startsWithSymbol[i][j]+" ";
+			}
+			//i ovog
+			str+="\n";
+		}
+		
+		for (Production p: grammar.getProductions()) {
+			str+=startsWithSet(p.getRightHandSide())+"\n";
+		}
+		
+		return str;
+	}
 }
