@@ -66,7 +66,7 @@ public class InputProcessor {
 		}
 
 		for (NonTerminalSymbol sym : ntOrder) {
-//			productions.add(new Production(sym, productionMap.get(sym)));
+			// productions.add(new Production(sym, productionMap.get(sym)));
 		}
 
 		return new Grammar(productions, new HashSet<NonTerminalSymbol>(nonTerminalSymbols),
@@ -85,7 +85,7 @@ public class InputProcessor {
 
 		String s = lines[0];
 
-		s.replaceAll("%V ", "");
+		s = s.replaceAll("%V ", "");
 		String[] tmpsyms = s.split("\\s+");
 		for (String ii : tmpsyms) {
 			nsymbols.add(new NonTerminalSymbol(ii));
@@ -93,7 +93,7 @@ public class InputProcessor {
 
 		s = lines[1];
 
-		s.replaceAll("%T ", "");
+		s = s.replaceAll("%T ", "");
 		tmpsyms = s.split("\\s+");
 		for (String ii : tmpsyms) {
 			tsymbols.add(new TerminalSymbol(ii));
