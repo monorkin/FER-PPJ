@@ -159,9 +159,10 @@ public class ParserUtils {
 		 * Generate Lr1Items from the grammar
 		 */
 		Logger.log("Generated Lr1Items");
+		TerminalSymbol endS = new TerminalSymbol("#END#");
 		for (Production p : grammar.getProductions()) {
 			for (LrItem item : LrItem.fromProduction(p)) {
-				Lr1Item lritem = new Lr1Item(item, startsWithSet(item.getRightHandSide()));
+				Lr1Item lritem = new Lr1Item(item, new HashSet<TerminalSymbol>(Arrays.asList(new TerminalSymbol[] { endS })));
 				Logger.log("\t" + lritem);
 				lrItems.add(lritem);
 			}
@@ -190,10 +191,10 @@ public class ParserUtils {
 			/*
 			 * Rule 4.a - initial transition
 			 */
-			if (item.getDotPosition() == 0 && item.getLeftHandSide().equals(oldStart)) {
-				Transition t2 = new Transition(startingState, Automaton.EPSILON, Arrays.asList(new State[] { t }));
-				transitions.add(t2);
-			}
+//			if (item.getDotPosition() == 0 && item.getLeftHandSide().equals(oldStart)) {
+//				Transition t2 = new Transition(startingState, Automaton.EPSILON, Arrays.asList(new State[] { t }));
+//				transitions.add(t2);
+//			}
 		}
 
 		/*
@@ -244,13 +245,13 @@ public class ParserUtils {
 					}
 					Logger.log("\tRemaining symbols :" + remainingSymbols);
 					Set<TerminalSymbol> t = new HashSet<TerminalSymbol>();
-					if (remainingSymbols.size() > 0) {
+//					if (remainingSymbols.size() > 0) {
 						Set<TerminalSymbol> startsWith = startsWithSet(remainingSymbols);
 						Logger.log("\tAnalyzing aplicable terminal symbols:");
 						Logger.log("\t\tStarts with: " + startsWith);
 						t.addAll(startsWith);
-						if (emptySymbols.contains(activeSymbol)) {
-							Logger.log("\t\tActive symbol is an empty one.");
+						if (isStringEmpty(remainingSymbols)) {
+							Logger.log("\t\tRemainder is an empty one.");
 							Logger.log("\t\t\tAdding: " + item.getTerminalSymbols());
 							t.addAll(item.getTerminalSymbols());
 						}
@@ -281,7 +282,7 @@ public class ParserUtils {
 							}
 						}
 
-					}
+//					}
 
 				}
 			}
