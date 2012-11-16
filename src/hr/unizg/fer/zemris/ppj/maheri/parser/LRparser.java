@@ -8,14 +8,14 @@ import java.util.Map;
 
 public class LRparser {
 	
-	private static int tDebug = 1;
+	private int tDebug = 1;
 	
 	
-	private static lifoStack tStack;
-	private static Map<Integer, Map <String, String>> tAction;
-	private static Map<Integer, Map<String, HashSet<String>>> tTransitions;
-	private static ArrayList<String> tInput;
-	private static int tState;
+	private lifoStack tStack;
+	private Map<Integer, Map <String, String>> tAction;
+	private Map<Integer, Map<String, List<String>>> tTransitions;
+	private ArrayList<String> tInput;
+	private int tState;
 	
 	/*
 	 * Inicijalizacija
@@ -27,7 +27,7 @@ public class LRparser {
 	 * 				   a za kljuc "R" desnu stranu produkcije (koja je spremljena kao hash dakle {a,b,c,patka,guska,kokos,...})
 	 * 				   
 	 */
-	public LRparser(ArrayList<String> aInput, Map<Integer, Map <String, String>> actionsTable, Map<Integer, Map <String, HashSet<String>>> aTransitions) 
+	public LRparser(ArrayList<String> aInput, Map<Integer, Map <String, String>> actionsTable, Map<Integer, Map <String, List<String>>> aTransitions) 
 	{
 		tStack    	 = new lifoStack();
 		tAction   	 = actionsTable;
@@ -36,7 +36,7 @@ public class LRparser {
 	}
 	
 	//Parsiraj niz
-	public static void parse()
+	public void parse()
 	{
 		String hAction;
 		String hProductLeft;
@@ -47,8 +47,10 @@ public class LRparser {
 		int nextState = 0;
 		tState = 0;
 		
-		tInput.add("_|_");
-		tStack.push(new lifoStackItem(0, "_|_"));
+		tInput.add("\0");
+		tStack.push(new lifoStackItem(0, "\0"));
+		
+		ArrayList<TreeNode> treeBranches = new ArrayList<TreeNode>();
 		
 		while (running)
 		{
@@ -74,14 +76,42 @@ public class LRparser {
 			//Reduciraj
 			case 1:
 				int noRemove = 0;
-				hProductLeft  = (String) tTransitions.get(nextState).get("L").toArray()[0];
+				hProductLeft  = (String) tTransitions.get(nextState).get("L").get(0);
 				noRemove = tTransitions.get(nextState).get("R").size();
 								
+				
+				int numJoins = 0;
+				List<String> removed = new LinkedList<String>();
 				for (int i = 0; i < noRemove; i++) 
 				{
 					//TODO Napravi stablo
-					tStack.pop();
+					lifoStackItem top = tStack.pop();
+					removed.add(top.getSymbol());
+					
+					if (top.getSymbol().startsWith("<"))
+						++numJoins;
 				}
+				
+				if (numJoins > treeBranches.size()) {
+					throw new IllegalStateException("Parser has blown up, too few branches");
+				}
+				
+				List<TreeNode> rhs = new LinkedList<TreeNode>();				
+				
+				int rightmostBranchIndex = treeBranches.size()-1;
+				for (String r : removed) {
+					if (r.startsWith("<")) {
+						rhs.add(0, treeBranches.get(rightmostBranchIndex--));
+					} else {
+						rhs.add(0, new TreeNode(r, null));
+					}
+				}
+				
+				TreeNode node = new TreeNode(hProductLeft, rhs);
+				
+				if (treeBranches.size() != 0)
+					treeBranches.subList(treeBranches.size() - numJoins, treeBranches.size()).clear();
+				treeBranches.add(node);
 				
 				nextState = tStack.look().getState();
 				tState = Integer.parseInt(tAction.get(nextState).get(hProductLeft));
@@ -92,18 +122,42 @@ public class LRparser {
 				
 			//Prihvati
 			case 2:
-				if (tDebug == 1) System.out.println("LR_PARSER: Niz je u jeziku!");
+				if (tDebug == 1) System.err.println("LR_PARSER: Niz je u jeziku!");
 				running = false;
 				break;
 			
 			//Nedefinirani slucaj = ERROR
 			default:
-				if (tDebug == 1) System.out.println("LR_PARSER: Niz nije u jeziku!");
+				if (tDebug == 1) System.err.println("LR_PARSER: Niz nije u jeziku!");
 				running = false;
 				break;
 			}
 			if (tDebug == 1) tStack.print();
 		}	
+	}
+}
+
+class TreeNode {
+	String name;
+	List<TreeNode> children;
+	
+	/**
+	 * @param name
+	 * @param children
+	 */
+	public TreeNode(String name, List<TreeNode> children) {
+		this.name = name;
+		this.children = children;
+	}
+	
+	void printRecursive(int depth) {
+		StringBuilder out = new StringBuilder(depth + name.length());
+		for (int i = 0; i < depth; ++i)
+			out.append(' ');
+		
+		out.append(name);
+		
+		System.err.println(out.toString());
 	}
 }
 
@@ -146,9 +200,9 @@ class lifoStack
 		for (int i = 0; i < tStack.size(); i++) {
 			hItem = tStack.get(i);
 			
-			System.out.print("\""+hItem.getSymbol()+""+hItem.getState()+"\", ");
+			System.err.print("\""+hItem.getSymbol()+""+hItem.getState()+"\", ");
 		}
-		System.out.print("\n");
+		System.err.print("\n");
 	}
 }
 
