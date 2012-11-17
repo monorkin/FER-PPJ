@@ -1,10 +1,9 @@
-DENIS PENIS
-===
+Lab2 stanje
+=========
 
-# KAKVA JE SITUACIJA
-Lab1 je implementiran. Testirano je s fer2materijali primjerima u res/examples/other,
-kao i sa sluzbenim iz upute (= oni sa integracijskog testa u sprut-u)
-
-Projekt radi na sprutu nakon sto sam sve potrebno importao iako eclipse misli da 
-se ne koristi.
+1. input i ovo pocetno navodno radi.
+2. Pretvorba u nka popravljena i navodno radi.
+3. nka u dfa ne radi
+4. dfa u parser ne postojece
+5. parser navodno radi ali sam jako sumnjicav hoce li funkcionirati
 
