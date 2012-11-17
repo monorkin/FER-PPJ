@@ -15,6 +15,10 @@ public class DFA {
 	
 	private State current;
 	
+	public HashMap<State, HashMap<String, Transition>> getDescription() {
+		return allInOne;
+	}
+	
 // interface Automaton ima hrpu nekih lista koje smetaju samo, pa ga ovo ne implementira
 	
 	public DFA(Collection<State> states, Collection<Transition> transitions, Collection<State> acceptables, State start) {

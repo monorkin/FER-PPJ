@@ -2,6 +2,8 @@ package hr.unizg.fer.zemris.ppj.maheri.parser;
 
 import hr.unizg.fer.zemris.ppj.maheri.Logger;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.Automaton;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.DFA;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.DFAConvert;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.Transition;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
@@ -315,6 +317,37 @@ public class ParserUtils {
 		Collections.sort(stateList);
 		List<State> acceptableStates = stateList;
 		return new eNfa(stateList, symbols, transitionsList, startState, acceptableStates);
+	}
+	
+	public void makeParser() {
+		DFA theDFA = DFAConvert.fromENFA(automatonFromGrammar());
+		
+		HashMap<State, HashMap<String, Transition>> descr = theDFA.getDescription();
+		
+		State parserStart;
+		
+		int stateNum = 0;
+		Map<State, Integer> stateNumbers = new HashMap<State, Integer>();
+		Logger.log("Checking LRitems in states");
+		for (State state : descr.keySet()) {
+			stateNumbers.put(state, ++stateNum); 
+			Logger.log("State " + state + " has items " + state.getData());
+		}
+		
+		int productionNum = 0;
+		Map<Production, Integer> productionNumbers = new HashMap<Production, Integer>();
+		for (Production production : grammar.getProductions()) {
+			productionNumbers.put(production, ++productionNum);
+		}
+		
+		Map<Integer, Map <String, String>> actionsTable; // <brojStanja, < Znak, imeAKcije > > 
+		Map<Integer, Map <String, List<String>>> aTransitions;  // brojStanja, < L ili R, lijeva Ili desna strana produkcije >
+		
+		// 3a
+		
+		// 3b
+		
+		// 3c
 	}
 	
 	/**

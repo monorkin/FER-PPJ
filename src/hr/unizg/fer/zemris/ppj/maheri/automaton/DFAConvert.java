@@ -178,8 +178,14 @@ public class DFAConvert {
 			o = merger.merge(o, st.getData());
 			Logger.log(" " + st);
 		}
-
-		newState.setData(o);
+		
+		if (o instanceof Set<?>) {
+			newState.setData(o);			
+		} else {
+			Set<Object> set = new HashSet<Object>();
+			set.add(o);
+			newState.setData(set);
+		}
 		return newState;
 	}
 
