@@ -67,13 +67,10 @@ public class Transition implements Serializable {
 		}
 		Transition t = (Transition) that;
 
-		for (State destination : destinations) {
-			if (!t.getDestinations().contains(destination)) {
-				return false;
-			}
-		}
+		if (!t.destinations.equals(destinations))
+			return false;
 
-		return this.key == t.getKey() && this.origin == t.origin;
+		return this.key.equals(t.getKey()) && this.origin == t.origin;
 	}
 
 	@Override
