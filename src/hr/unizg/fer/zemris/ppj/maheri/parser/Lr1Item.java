@@ -70,5 +70,18 @@ public class Lr1Item extends LrItem {
 		}
 		return String.format("%s {%s}", super.toString(), syms);
 	}
+	
+
+	public static <A extends Lr1Item> A getItemWithNextDot(A currentItem, Iterable<A> allItems) {
+		for (A item : allItems) {
+			if (item.getDotPosition() == currentItem.getDotPosition() + 1
+					&& item.getLeftHandSide().equals(currentItem.getLeftHandSide())
+					&& item.getRightHandSide().equals(currentItem.getRightHandSide())
+					&& item.getTerminalSymbols().equals(currentItem.getTerminalSymbols())) {
+				return item;
+			}
+		}
+		return null;
+	}
 
 }

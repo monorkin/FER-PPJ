@@ -1,6 +1,8 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +30,10 @@ public class Transition implements Serializable {
 		this.key = key;
 		this.destinations = new LinkedHashSet<State>(destinations);
 	}
+	
+	public Transition(final State origin, final String key, final State singleDestination) {
+		this(origin, key, Arrays.asList(new State[]{singleDestination}));
+	}
 
 	public State getOrigin() {
 		return origin;
@@ -35,6 +41,14 @@ public class Transition implements Serializable {
 
 	public Set<State> getDestinations() {
 		return destinations;
+	}
+	
+	public State getDestination() {
+		Iterator<State> it = destinations.iterator();
+		State ret = it.next();
+		if (it.hasNext())
+			throw new IllegalStateException("Have multiple destinations");
+		return ret;
 	}
 
 	public String getKey() {

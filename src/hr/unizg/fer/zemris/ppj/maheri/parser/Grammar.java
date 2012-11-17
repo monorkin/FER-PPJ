@@ -74,7 +74,7 @@ public class Grammar {
 	public final Symbol createAlternateStartSymbol() {
 		NonTerminalSymbol newSymbol = new NonTerminalSymbol(String.format(START_SYMBOL_FORMAT, startSymbol));
 		nonterminalSymbols.add(newSymbol);
-		productions.add(new Production(newSymbol, Arrays.asList(new Symbol[] { })));
+		productions.add(new Production(newSymbol, Arrays.asList(new Symbol[] { startSymbol })));
 		startSymbol = newSymbol;
 		return newSymbol;
 	}
