@@ -32,6 +32,7 @@ public class DFA {
 			allInOne.put(state, map);
 		}
 		
+		Logger.log(statesSet.size());
 		for (State state : statesSet) {
 			HashMap<String, Transition> map = allInOne.get(state);
 			
@@ -45,6 +46,7 @@ public class DFA {
 					throw new IllegalArgumentException("null key in transition");
 				map.put(key, tran);
 			}
+			Logger.log(map.size());
 		}
 		
 		this.start = start;

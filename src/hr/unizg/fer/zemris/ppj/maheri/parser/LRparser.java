@@ -1,6 +1,9 @@
 package hr.unizg.fer.zemris.ppj.maheri.parser;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,10 +15,14 @@ public class LRparser {
 	
 	
 	private lifoStack tStack;
-	private Map<Integer, Map <String, String>> tAction;
-	private Map<Integer, Map<String, List<String>>> tTransitions;
-	private ArrayList<String> tInput;
+	private ArrayList<HashMap <String, String>> tAction;
+	private ArrayList<HashMap<String, ArrayList<String>>> tTransitions;
+	private List<String> tInput;
 	private int tState;
+	private HashSet<String> sync;
+
+
+	private int startState;
 	
 	/*
 	 * Inicijalizacija
@@ -27,12 +34,14 @@ public class LRparser {
 	 * 				   a za kljuc "R" desnu stranu produkcije (koja je spremljena kao hash dakle {a,b,c,patka,guska,kokos,...})
 	 * 				   
 	 */
-	public LRparser(ArrayList<String> aInput, Map<Integer, Map <String, String>> actionsTable, Map<Integer, Map <String, List<String>>> aTransitions) 
+	public LRparser(List<String> aInput, ArrayList<HashMap <String, String>> actionsTable, ArrayList<HashMap <String, ArrayList<String>>> aTransitions, int startState, HashSet<String> sync) 
 	{
 		tStack    	 = new lifoStack();
 		tAction   	 = actionsTable;
 		tTransitions = aTransitions;
 		tInput    	 = aInput;
+		this.startState = startState;
+		this.sync = sync;
 	}
 	
 	//Parsiraj niz
@@ -45,30 +54,40 @@ public class LRparser {
 		int counter = 0;
 		int action = -1;
 		int nextState = 0;
-		tState = 0;
+		tState = startState;
 		
-		tInput.add("\0");
-		tStack.push(new lifoStackItem(0, "\0"));
+		sync.add("#END#");
+		tInput.add("#END# #END# #END#");
+		tStack.push(new lifoStackItem(tState, "#END# #END# #END#", false));
 		
 		ArrayList<TreeNode> treeBranches = new ArrayList<TreeNode>();
 		
 		while (running)
 		{
-			//Get action
-			hAction = tAction.get(tState).get(tInput.get(counter));
-			action = -1;
-			if (hAction.toLowerCase().charAt(0) == 's') 	   action = 0; //Stavi
-			else if (hAction.toLowerCase().charAt(0) == 'r')   action = 1; //Reduciraj
-			else if (hAction.toLowerCase().equals("prihvati")) action = 2; //Prihvati
+			Logger.log("In state " + tState);
+			Logger.log("Read char " + tInput.get(counter));
 			
-			if (action != 2) nextState = Integer.parseInt(hAction.substring(1));
+			//Get action
+			String currInput = tInput.get(counter);
+			String[] split = currInput.split(" ", 3);
+			String symbol = split[0];
+			
+			hAction = tAction.get(tState).get(symbol);
+			action = -1;
+			if (hAction == null) action = -32144; // ODBACI
+			else if (hAction.toLowerCase().charAt(0) == 's') 	   action = 0; //shift u UTR, Pomakni u PPJ
+			else if (hAction.toLowerCase().charAt(0) == 'r')   action = 1; //Reduciraj
+			else if (hAction.equals("Prihvati")) action = 2; //Prihvati
+			Logger.log("Action is " + hAction + ", " + action);
+			
+			if (action == 1 || action == 0) nextState = Integer.parseInt(hAction.substring(1));
 						
 			//Do Action
 			switch (action) {
-			//Pomak
+			//shift, to jest Pomakni, to jest s12345 to jest Pomakni(123455)
 			case 0:
 				tState = nextState;
-				hItem = new lifoStackItem(tState, tInput.get(counter));
+				hItem = new lifoStackItem(tState, currInput, false);
 				tStack.push(hItem);
 				++counter;	
 				break;
@@ -78,13 +97,14 @@ public class LRparser {
 				int noRemove = 0;
 				hProductLeft  = (String) tTransitions.get(nextState).get("L").get(0);
 				noRemove = tTransitions.get(nextState).get("R").size();
-								
+				
+				Logger.log("Reduce using transition " + hProductLeft + " ::= " + tTransitions.get(nextState).get("R"));
+				Logger.log("Removing " + noRemove + " items");
 				
 				int numJoins = 0;
 				List<String> removed = new LinkedList<String>();
 				for (int i = 0; i < noRemove; i++) 
 				{
-					//TODO Napravi stablo
 					lifoStackItem top = tStack.pop();
 					removed.add(top.getSymbol());
 					
@@ -106,6 +126,8 @@ public class LRparser {
 						rhs.add(0, new TreeNode(r, null));
 					}
 				}
+				if (removed.size() == 0)
+					rhs.add(0, new TreeNode("$", null));
 				
 				TreeNode node = new TreeNode(hProductLeft, rhs);
 				
@@ -114,8 +136,8 @@ public class LRparser {
 				treeBranches.add(node);
 				
 				nextState = tStack.look().getState();
-				tState = Integer.parseInt(tAction.get(nextState).get(hProductLeft));
-				hItem = new lifoStackItem(tState, hProductLeft);
+				tState = Integer.parseInt(tAction.get(nextState).get(hProductLeft)); // citaj NovoStanje
+				hItem = new lifoStackItem(tState, hProductLeft, true);
 				tStack.push(hItem);
 								
 				break;
@@ -124,16 +146,38 @@ public class LRparser {
 			case 2:
 				if (tDebug == 1) System.err.println("LR_PARSER: Niz je u jeziku!");
 				running = false;
+				treeBranches.get(0).printRecursive(0);
 				break;
-			
+				
 			//Nedefinirani slucaj = ERROR
 			default:
-				if (tDebug == 1) System.err.println("LR_PARSER: Niz nije u jeziku!");
-				running = false;
-				break;
+				System.err.println("Syntax error on line " + split[1] + ", error token is " + split[2]);
+				System.err.print("Expected one of: [");
+				for (String possible : tAction.get(tState).keySet()) {
+					System.err.print(possible + " , ");
+				}
+				System.err.println("]");
+				while (counter < tInput.size() && ! sync.contains(tInput.get(counter).split(" ")[0])) {
+					counter++;
+					Logger.log(".");
+				}
+				String sym = tInput.get(counter).split(" ")[0];
+				while (tStack.look() != null && tAction.get(tState).get(sym) == null) {
+					tStack.print();
+					lifoStackItem top = tStack.pop();
+					tState = top.getState();
+					if (top.isSubtreee())
+						treeBranches.remove(treeBranches.size()-1);
+				}
+				if (tStack.look() == null) {
+					System.err.println("The syntax error is fatal");
+					running = false;
+					break;
+				} else {
+				}
 			}
 			if (tDebug == 1) tStack.print();
-		}	
+		}
 	}
 }
 
@@ -157,7 +201,10 @@ class TreeNode {
 		
 		out.append(name);
 		
-		System.err.println(out.toString());
+		System.out.println(out.toString());
+		if (children != null)
+			for (TreeNode node : children)
+				node.printRecursive(depth+1);
 	}
 }
 
@@ -200,7 +247,7 @@ class lifoStack
 		for (int i = 0; i < tStack.size(); i++) {
 			hItem = tStack.get(i);
 			
-			System.err.print("\""+hItem.getSymbol()+""+hItem.getState()+"\", ");
+			System.err.print("\""+hItem.getSymbol()+"|"+hItem.getState()+"\", ");
 		}
 		System.err.print("\n");
 	}
@@ -210,6 +257,7 @@ class lifoStackItem
 {
 	int tState;
 	String tSymbol;
+	private boolean subtreee;
 	
 	public lifoStackItem()
 	{
@@ -217,10 +265,15 @@ class lifoStackItem
 		setSymbol(new String());
 	}
 	
-	public lifoStackItem(int aState, String aSymbol)
+	public boolean isSubtreee() {
+		return subtreee;
+	}
+	
+	public lifoStackItem(int aState, String aSymbol, boolean subtree)
 	{
 		setState(aState);
 		setSymbol(aSymbol);
+		this.subtreee = subtree;
 	}
 	
 	public int getState()

@@ -10,6 +10,7 @@ import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -159,11 +160,11 @@ public class ParserUtils {
 		Logger.log("=========\n\nConverting grammar\n\n" + grammar + "\n=========");
 		Symbol oldStart = grammar.getStartSymbol();
 		Symbol startSymbol = grammar.createAlternateStartSymbol();
-		
+
 		Set<LrItem> lrItems = new HashSet<LrItem>();
-		
+
 		Map<Lr1Item, State> autStates = new HashMap<Lr1Item, State>();
-		
+
 		/*
 		 * Generate LrItems from the grammar
 		 */
@@ -173,21 +174,20 @@ public class ParserUtils {
 				lrItems.add(item);
 			}
 		}
-		
+
 		/*
 		 * Make start state
 		 */
 		TerminalSymbol endS = new TerminalSymbol("#END#");
 		Set<LrItem> possibleStartItems = LrItem.getStartingItemForSymbol(startSymbol, lrItems);
-		Lr1Item start1Item = new Lr1Item(
-				possibleStartItems.toArray(new LrItem[1])[0],
-				new HashSet<TerminalSymbol>(Arrays.asList(new TerminalSymbol[] { endS })));
-		
+		Lr1Item start1Item = new Lr1Item(possibleStartItems.toArray(new LrItem[1])[0], new HashSet<TerminalSymbol>(
+				Arrays.asList(new TerminalSymbol[] { endS })));
+
 		State startState = new State(start1Item.toString());
 		startState.setData(start1Item);
-		
+
 		autStates.put(start1Item, startState);
-		
+
 		/*
 		 * Generate a list of symbols for the automaton
 		 */
@@ -200,7 +200,7 @@ public class ParserUtils {
 		}
 
 		Set<Transition> transitions = new HashSet<Transition>();
-		
+
 		/*
 		 * Additional transitions - these must be done after the first pass, as
 		 * not all states were available until now
@@ -230,7 +230,7 @@ public class ParserUtils {
 				if (nextItem != null) {
 					Symbol x = item.getRightHandSide().get(dotPosition);
 					Logger.log("\tNext item: " + nextItem);
-					
+
 					Lr1Item next1Item = new Lr1Item(nextItem, item.getTerminalSymbols());
 					State nextState = autStates.get(next1Item);
 					if (nextState == null) {
@@ -239,10 +239,9 @@ public class ParserUtils {
 						changed = true;
 						addedStates.put(next1Item, nextState);
 					}
-					Transition next = new Transition(state, x.getValue(),
-							Arrays.asList(new State[] { nextState }));					
+					Transition next = new Transition(state, x.getValue(), Arrays.asList(new State[] { nextState }));
 					transitions.add(next);
-					
+
 					Logger.log("\t\tTransition: " + next);
 				} else {
 					Logger.log("\tNo next transition");
@@ -261,46 +260,46 @@ public class ParserUtils {
 					}
 					Logger.log("\tRemaining symbols :" + remainingSymbols);
 					Set<TerminalSymbol> t = new HashSet<TerminalSymbol>();
-//					if (remainingSymbols.size() > 0) {
-						Set<TerminalSymbol> startsWith = startsWithSet(remainingSymbols);
-						Logger.log("\tAnalyzing aplicable terminal symbols:");
-						Logger.log("\t\tStarts with: " + startsWith);
-						t.addAll(startsWith);
-						if (isStringEmpty(remainingSymbols)) {
-							Logger.log("\t\tRemainder is an empty one.");
-							Logger.log("\t\t\tAdding: " + item.getTerminalSymbols());
-							t.addAll(item.getTerminalSymbols());
-						}
-						Logger.log("\tDestination T = " + t);
+					// if (remainingSymbols.size() > 0) {
+					Set<TerminalSymbol> startsWith = startsWithSet(remainingSymbols);
+					Logger.log("\tAnalyzing aplicable terminal symbols:");
+					Logger.log("\t\tStarts with: " + startsWith);
+					t.addAll(startsWith);
+					if (isStringEmpty(remainingSymbols)) {
+						Logger.log("\t\tRemainder is an empty one.");
+						Logger.log("\t\t\tAdding: " + item.getTerminalSymbols());
+						t.addAll(item.getTerminalSymbols());
+					}
+					Logger.log("\tDestination T = " + t);
 
-						Logger.log("\tInitial productions for " + activeSymbol);
-						Set<LrItem> items = LrItem.getStartingItemForSymbol(activeSymbol, lrItems);
-						for (LrItem titem : items) {
-							Logger.log("\t\t" + titem);
-						}
+					Logger.log("\tInitial productions for " + activeSymbol);
+					Set<LrItem> items = LrItem.getStartingItemForSymbol(activeSymbol, lrItems);
+					for (LrItem titem : items) {
+						Logger.log("\t\t" + titem);
+					}
 
-						Logger.log("\tNew productions:");
-						
-						Set<State> epsilonDests = new HashSet<State>();
-						for (LrItem titem : items) {
-							Lr1Item new1Item = new Lr1Item(titem, t);
-							Logger.log("\t\t\t" + new1Item);
-							
-							State newState = autStates.get(new1Item);
-							if (newState == null) {
-								Logger.log("\t\t\t\tAdding to current items");
-								newState = new State(new1Item.toString());
-								newState.setData(new1Item);
-								changed = true;
-								addedStates.put(new1Item, newState);
-							}
-							Logger.log("Adding transition to "+newState);
-							epsilonDests.add(newState);
+					Logger.log("\tNew productions:");
+
+					Set<State> epsilonDests = new HashSet<State>();
+					for (LrItem titem : items) {
+						Lr1Item new1Item = new Lr1Item(titem, t);
+						Logger.log("\t\t\t" + new1Item);
+
+						State newState = autStates.get(new1Item);
+						if (newState == null) {
+							Logger.log("\t\t\t\tAdding to current items");
+							newState = new State(new1Item.toString());
+							newState.setData(new1Item);
+							changed = true;
+							addedStates.put(new1Item, newState);
 						}
-						
-						Transition trans = new Transition(state, Automaton.EPSILON, new ArrayList<State>(epsilonDests));
-						transitions.add(trans);
-//					}
+						Logger.log("Adding transition to " + newState);
+						epsilonDests.add(newState);
+					}
+
+					Transition trans = new Transition(state, Automaton.EPSILON, new ArrayList<State>(epsilonDests));
+					transitions.add(trans);
+					// }
 
 				}
 			}
@@ -312,68 +311,239 @@ public class ParserUtils {
 		for (Transition t : transitions) {
 			Logger.log("\t" + t);
 		}
+
+		System.err.println("Made enfa with " + autStates.size() + " states and " + transitions.size()
+				+ " (compacted) transitions");
 		ArrayList<State> stateList = new ArrayList<State>(autStates.values());
 		ArrayList<Transition> transitionsList = new ArrayList<Transition>(transitions);
 		Collections.sort(stateList);
 		List<State> acceptableStates = stateList;
 		return new eNfa(stateList, symbols, transitionsList, startState, acceptableStates);
 	}
-	
-	public void makeParser() {
+
+	public ParserTable makeParser() {
 		DFA theDFA = DFAConvert.fromENFA(automatonFromGrammar());
-		
+
 		HashMap<State, HashMap<String, Transition>> descr = theDFA.getDescription();
-		
-		State parserStart;
-		
+
 		int stateNum = 0;
 		Map<State, Integer> stateNumbers = new HashMap<State, Integer>();
 		Logger.log("Checking LRitems in states");
 		for (State state : descr.keySet()) {
-			stateNumbers.put(state, ++stateNum); 
-			Logger.log("State " + state + " has items " + state.getData());
+			stateNumbers.put(state, stateNum++);
+			Logger.log("State " + state + " gets " + (stateNum - 1));
 		}
-		
+
 		int productionNum = 0;
 		Map<Production, Integer> productionNumbers = new HashMap<Production, Integer>();
 		for (Production production : grammar.getProductions()) {
-			productionNumbers.put(production, ++productionNum);
+			productionNumbers.put(production, productionNum++);
+			Logger.log("Production " + production + " gets " + (productionNum - 1));
+		}
+
+		ArrayList<HashMap<String, String>> actionsTable = new ArrayList<HashMap<String, String>>(stateNum);
+		// <brojStanja, < Znak,imeAKcije > >
+		ArrayList<HashMap<String, ArrayList<String>>> aTransitions = new ArrayList<HashMap<String, ArrayList<String>>>(
+				productionNum);
+		// brojStanja, < L ili R, lijeva Ili desna strana produkcije >
+		int parserStartState = 0;
+
+		for (Production production : grammar.getProductions()) {
+			HashMap<String, ArrayList<String>> prod = new HashMap<String, ArrayList<String>>();
+			prod.put("L", new ArrayList<String>(Arrays.asList(production.getLeftHandSide().toString())));
+			ArrayList<String> right = new ArrayList<String>(production.getRightHandSide().size());
+			for (Symbol r : production.getRightHandSide()) {
+				right.add(r.toString());
+			}
+			prod.put("R", right);
+			aTransitions.add(prod);
+		}
+
+		for (int i = 0; i < stateNum; ++i) {
+			actionsTable.add(new HashMap<String, String>());
+		}
+
+		for (Entry<State, HashMap<String, Transition>> entry : descr.entrySet()) {
+			for (Entry<String, Transition> transitionEntry : entry.getValue().entrySet()) {
+				State s = entry.getKey();
+				State t = transitionEntry.getValue().getDestination();
+				String a = transitionEntry.getKey();
+
+				int sIndex = stateNumbers.get(s);
+				int tIndex = stateNumbers.get(t);
+				Logger.log("s=" + sIndex + ", a=" + a + ", t=" + tIndex);
+
+				// 4a
+				if (a.charAt(0) == '<') {
+					// NovoStanje[s, A] = Stavi(t) u PPJ, ili samo 't' u UTR
+					Logger.log("\tNovoStanje[s,a]=" + tIndex);
+					actionsTable.get(sIndex).put(a, Integer.toString(tIndex));
+				}
+			}
+		}
+
+		for (Entry<State, HashMap<String, Transition>> entry : descr.entrySet()) {
+			State s = entry.getKey();
+			int sIndex = stateNumbers.get(s);
+
+			Logger.log("s=" + sIndex);
+
+			Set<Lr1Item> items = (Set<Lr1Item>) entry.getKey().getData();
+			for (Lr1Item item : items) {
+				// 6
+				if (item.getDotPosition() == 0 && item.getLeftHandSide().equals(grammar.getStartSymbol())) {
+					parserStartState = sIndex;
+					Logger.log("Found start state, it is " + parserStartState);
+				}
+
+				int prodIndex = productionNumbers.get(new Production(item.getLeftHandSide(), item.getRightHandSide()));
+				Logger.log("\tprod=" + prodIndex + " [ "
+						+ new LrItem(item.getLeftHandSide(), item.getRightHandSide(), item.getDotPosition()) + " ]");
+
+				// prihvati , reduciraj
+				if (item.getDotPosition() == item.getRightHandSide().size()) {
+					// 3c
+					if (item.getLeftHandSide().equals(grammar.getStartSymbol())) {
+						// Akcija[s, END] = Prihvati()
+						Logger.log("\t\tPrihvati");
+						actionsTable.get(sIndex).put("#END#", "Prihvati");
+					} else {
+						// 3b
+						for (TerminalSymbol ai : item.getTerminalSymbols()) {
+							String old = actionsTable.get(sIndex).get(ai);
+							if (old != null) {
+								int oldIndex = Integer.parseInt(old.substring(1));
+								if (old.charAt(0) == 'r') {
+									if (oldIndex == prodIndex)
+										continue;
+									System.err.println("Reduciraj/reduciraj nejednoznacnost u " + s + ", " + item
+											+ " izmedju " + old + " i " + ("r" + prodIndex)
+											+ " rijeseno u korist one s manjim indeksom");
+									if (oldIndex < prodIndex)
+										continue;
+								} else if (old.charAt(0) == 's') {
+									System.err.println("Pomakni/reduciraj nejednoznacnost u " + s + ", " + item
+											+ " izmedju " + old + " i " + ("r" + prodIndex)
+											+ " rijeseno u korist pomakni");
+								}
+							}
+							Logger.log("\t\t[s, " + ai + "] = r" + prodIndex);
+							// Akcija[s, ai] = Reduciraj(produkcija)
+							actionsTable.get(sIndex).put(ai.toString(), "r" + prodIndex);
+						}
+					}
+				}
+
+				// shift
+				for (Entry<String, Transition> transitionEntry : entry.getValue().entrySet()) {
+					String a = transitionEntry.getKey();
+					State t = transitionEntry.getValue().getDestination();
+					int tIndex = stateNumbers.get(t);
+
+					Logger.log("\t\ta=" + a + ", t=" + tIndex);
+
+					// 3a
+					if (item.getDotPosition() < item.getRightHandSide().size()) {
+						Symbol activeSymbol = item.getRightHandSide().get(item.getDotPosition());
+						Logger.log("\t\t -->" + activeSymbol + " ?= " + a + " ==== " + activeSymbol.equals(a));
+						if (activeSymbol.equals(a) && a.charAt(0) != '<') {
+							// Akcija[s, a] = Pomakni(t) u PPJ, ili s't' u UTR,
+							// kao
+							// shift
+							String old = actionsTable.get(sIndex).get(a);
+							if (old != null) {
+								if (old.charAt(0) == 'r') {
+									System.err
+											.println("Pomakni/reduciraj nejednoznacnost u " + s + ", " + item
+													+ " izmedju " + old + " i " + ("s" + tIndex)
+													+ " rijeseno u korist pomakni");
+								}
+							}
+							Logger.log("\t\t[s, a]=" + "s" + tIndex);
+							actionsTable.get(sIndex).put(a, "s" + tIndex);
+							// pomakni pregazi sve nejednoznacnosti ako ih ima
+						}
+					}
+				}
+			}
+		}
+		HashSet<String> syncStr = new HashSet<String>();
+		for (TerminalSymbol syncSymbol : grammar.getSync())
+			syncStr.add(syncSymbol.toString());
+			
+		return new ParserTable(actionsTable, aTransitions, parserStartState, syncStr);
+	}
+
+	public static class ParserTable implements Serializable {
+		private static final long serialVersionUID = 4322541186108105988L;
+
+		ArrayList<HashMap<String, String>> actionsTable;
+		// <brojStanja, < Znak,imeAKcije > >
+		ArrayList<HashMap<String, ArrayList<String>>> productions;
+		// brojStanja, < L ili R, lijeva Ili desna strana produkcije >
+		HashSet<String> sync;
+		int parserStartState;
+
+		/**
+		 * @param actionsTable
+		 * @param productions
+		 * @param parserStartState
+		 */
+		public ParserTable(ArrayList<HashMap<String, String>> actionsTable,
+				ArrayList<HashMap<String, ArrayList<String>>> productions, int parserStartState, HashSet<String> sync) {
+			this.actionsTable = actionsTable;
+			this.productions = productions;
+			this.parserStartState = parserStartState;
+			this.sync = sync;
+		}
+
+		public ArrayList<HashMap<String, String>> getActionsTable() {
+			return actionsTable;
+		}
+
+		public int getParserStartState() {
+			return parserStartState;
+		}
+
+		public ArrayList<HashMap<String, ArrayList<String>>> getProductions() {
+			return productions;
 		}
 		
-		Map<Integer, Map <String, String>> actionsTable; // <brojStanja, < Znak, imeAKcije > > 
-		Map<Integer, Map <String, List<String>>> aTransitions;  // brojStanja, < L ili R, lijeva Ili desna strana produkcije >
-		
-		// 3a
-		
-		// 3b
-		
-		// 3c
+		public HashSet<String> getSync() {
+			return sync;
+		}
+
+		public void print() {
+			for (int i = 0; i < actionsTable.size(); ++i)
+				System.err.println(actionsTable.get(i));
+		}
+
 	}
-	
+
 	/**
 	 * Za debag svrhe, ne shvaćati preozbiljno
 	 */
 	@Override
 	public String toString() {
-		String str="    ";
-		for (Symbol s: symbols) {
-			str+=s.getValue()+" ";
+		String str = "    ";
+		for (Symbol s : symbols) {
+			str += s.getValue() + " ";
 		}
-		str+="\n";
-		for (int i=0; i<startsWithSymbol[0].length; i++) {
-			str+=symbols.get(i).getValue()+"  ";
-			for (int j=0; j<startsWithSymbol[0].length; j++) {
-				//čupić bi me tuko zbog ovog
-				str+=startsWithSymbol[i][j]+" ";
+		str += "\n";
+		for (int i = 0; i < startsWithSymbol[0].length; i++) {
+			str += symbols.get(i).getValue() + "  ";
+			for (int j = 0; j < startsWithSymbol[0].length; j++) {
+				// čupić bi me tuko zbog ovog
+				str += startsWithSymbol[i][j] + " ";
 			}
-			//i ovog
-			str+="\n";
+			// i ovog
+			str += "\n";
 		}
-		
-		for (Production p: grammar.getProductions()) {
-			str+=startsWithSet(p.getRightHandSide())+"\n";
+
+		for (Production p : grammar.getProductions()) {
+			str += startsWithSet(p.getRightHandSide()) + "\n";
 		}
-		
+
 		return str;
 	}
 }

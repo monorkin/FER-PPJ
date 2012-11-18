@@ -156,6 +156,8 @@ public class DFAConvert {
 		
 		Logger.log("======= END CONVERSION ========");
 		
+		System.err.println("converted to dfa with " + dfaStates.size() + " states and " + dfaTransitions.size() +"  transitions");
+		
 		return new DFA(dfaStates, dfaTransitions, dfaAcceptables, dfaStartState);
 	}
 

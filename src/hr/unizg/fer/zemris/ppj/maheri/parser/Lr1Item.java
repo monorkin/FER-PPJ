@@ -19,17 +19,6 @@ public class Lr1Item extends LrItem {
 
 	private final Set<TerminalSymbol> terminalSymbols;
 
-	public Lr1Item(NonTerminalSymbol symbol, List<Symbol> production, int dotPosition) {
-		super(symbol, production, dotPosition);
-		Set<TerminalSymbol> t = new HashSet<TerminalSymbol>();
-		t.add(new TerminalSymbol("#"));
-		this.terminalSymbols = t;
-	}
-
-	public Lr1Item(LrItem item) {
-		this(item.getLeftHandSide(), item.getRightHandSide(), item.getDotPosition());
-	}
-
 	public Lr1Item(LrItem item, Set<TerminalSymbol> set) {
 		super(item.getLeftHandSide(), item.getRightHandSide(), item.getDotPosition());
 		this.terminalSymbols = set;

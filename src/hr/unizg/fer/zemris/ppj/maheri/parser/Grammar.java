@@ -25,14 +25,16 @@ public class Grammar {
 	private final Set<NonTerminalSymbol> nonterminalSymbols;
 	private final Set<TerminalSymbol> terminalSymbols;
 	private final Map<NonTerminalSymbol, Set<Production>> map;
+	private final Set<TerminalSymbol> sync; 
 	private NonTerminalSymbol startSymbol;
 
 	public Grammar(List<Production> productions, Set<NonTerminalSymbol> nonterminalSymbols,
-			Set<TerminalSymbol> terminalSymbols, NonTerminalSymbol startSymbol) {
+			Set<TerminalSymbol> terminalSymbols, NonTerminalSymbol startSymbol, Set<TerminalSymbol> sync) {
 		this.productions = productions;
 		this.terminalSymbols = terminalSymbols;
 		this.nonterminalSymbols = nonterminalSymbols;
 		this.startSymbol = startSymbol;
+		this.sync = sync;
 		map = new HashMap<NonTerminalSymbol, Set<Production>>();
 		for (Production p : productions) {
 			if (map.get(p.getLeftHandSide()) == null) {
@@ -42,6 +44,10 @@ public class Grammar {
 			t.add(p);
 			map.put(p.getLeftHandSide(), t);
 		}
+	}
+	
+	public Set<TerminalSymbol> getSync() {
+		return sync;
 	}
 
 	public final Set<NonTerminalSymbol> getNonterminalSymbols() {
