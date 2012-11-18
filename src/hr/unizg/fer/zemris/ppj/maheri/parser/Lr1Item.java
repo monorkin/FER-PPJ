@@ -21,6 +21,8 @@ public class Lr1Item extends LrItem {
 	public Lr1Item(LrItem item, Set<TerminalSymbol> set) {
 		super(item.getLeftHandSide(), item.getRightHandSide(), item.getDotPosition());
 		this.terminalSymbols = set;
+//		if (terminalSymbols.isEmpty())
+//			terminalSymbols.add(new TerminalSymbol("#END#"));
 	}
 
 	public Set<TerminalSymbol> getTerminalSymbols() {
@@ -42,17 +44,15 @@ public class Lr1Item extends LrItem {
 	@Override
 	public String toString() {
 		StringBuilder syms = new StringBuilder();
-		if (terminalSymbols.isEmpty()) {
-			syms.append(Symbol.END);
-			syms.append(" ");
-		} else {
+//		if (terminalSymbols.isEmpty()) {
+//		} else {
 			ArrayList<Symbol> ts = new ArrayList<Symbol>(terminalSymbols);
 			Collections.sort(ts);
 			for (Symbol s : ts) {
 				syms.append(s.toString());
 				syms.append(" ");
 			}
-		}
+//		}
 		return String.format("%s{%s}", super.toString(), syms);
 	}
 	

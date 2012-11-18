@@ -5,7 +5,7 @@ public abstract class Symbol implements Comparable<Symbol> {
 	public static final String DOT = "*";
 	public static final String ARROW = "->";
 	public static final char BLANK = ' ';
-	public static final String END = "#";
+	public static final String END = "#END#";
 
 	private final String value;
 	private final boolean terminal;

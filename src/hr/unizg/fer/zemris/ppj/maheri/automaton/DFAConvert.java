@@ -79,7 +79,6 @@ public class DFAConvert {
 		Logger.log("=============================================");
 
 		while (!configurationQueue.isEmpty()) {
-			System.err.println("todo: " + configurationQueue.size());
 			Set<State> stateConfiguration = configurationQueue.pop();
 			State dfaState = dfaStateQueue.pop();
 			

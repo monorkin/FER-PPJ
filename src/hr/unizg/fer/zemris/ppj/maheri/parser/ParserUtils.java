@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -88,16 +89,22 @@ public class ParserUtils {
 		// End starts directly with
 
 		// Starts with
+
 		for (int i = 0; i < symbols.size(); i++) {
 			for (int j = 0; j < symbols.size(); j++) {
 				if (i == j) {
 					startsWithSymbol[i][j] = '*';
 					continue;
 				}
-				if (startsWithSymbol[i][j] == '1') {
-					for (int k = 0; k < symbols.size(); k++) {
-						if (startsWithSymbol[j][k] == '1')
-							startsWithSymbol[i][k] = '*';
+
+			}
+		}
+		
+		for (int k = 0; k < symbols.size(); ++k) {
+			for (int i = 0; i < symbols.size(); ++i) {
+				for (int j = 0; j < symbols.size(); ++j) {
+					if (startsWithSymbol[i][k] != '0' && startsWithSymbol[k][j] != '0'){
+						startsWithSymbol[i][j] = '1';
 					}
 				}
 			}
@@ -217,7 +224,7 @@ public class ParserUtils {
 		Set<Transition> transitions = new HashSet<Transition>();
 
 		Map<State, Map<String, Transition>> allInOne = new HashMap<State, Map<String, Transition>>();
-		
+
 		Set<Lr1Item> doneItems = new HashSet<Lr1Item>();
 
 		int debugNumTran = 0;
@@ -322,14 +329,14 @@ public class ParserUtils {
 					if (stringEmpty) {
 						t.addAll(item.getTerminalSymbols());
 					}
-					
+
 					Set<LrItem> items = LrItem.getStartingItemForSymbol(activeSymbol, lrItems);
 					Set<State> epsilonDests = new HashSet<State>();
-					
+
 					boolean anyNew = false;
 					boolean[][] markerArray = new boolean[2][items.size()];
 					int i = 0;
-					
+
 					for (LrItem titem : items) {
 						Lr1Item new1Item = new Lr1Item(titem, t);
 						State newState = autStates.get(new1Item);
@@ -350,11 +357,11 @@ public class ParserUtils {
 							newState = newState2;
 							stateIsNew = false;
 						}
-						
+
 						markerArray[0][i++] = stateIsNew;
 						if (stateIsNew)
 							anyNew = true;
-						
+
 						epsilonDests.add(newState);
 					}
 					Logger.log("\t===lookahead set======");
@@ -366,17 +373,17 @@ public class ParserUtils {
 					Logger.log("\t== Nonterminal symbol " + activeSymbol + " on right hand side");
 					Logger.log("\t== \tDestination T = \t===\t\t" + t);
 					Logger.log("\t===end lookahead set===");
-					
+
 					Logger.log("\tFound these items to connect: ");
 					i = 0;
 					for (LrItem titem : items) {
-						Logger.log((markerArray[0][i++] ? "NEW\t\t" : "\t\t" ) + titem);
+						Logger.log((markerArray[0][i++] ? "NEW\t\t" : "\t\t") + titem);
 					}
-					
+
 					Transition trans = new Transition(state, Automaton.EPSILON, new ArrayList<State>(epsilonDests));
 					transitions.add(trans);
 					if (changed && 1 + 1 == 2)
-					break;
+						break;
 
 					Map<String, Transition> map = allInOne.get(state);
 					Transition oldNext = map.get(Automaton.EPSILON);
@@ -395,13 +402,13 @@ public class ParserUtils {
 			autStates.putAll(addedStates);
 
 		}
-		
+
 		int numTran = 0;
-		
+
 		for (Transition t : transitions) {
 			numTran += t.getDestinations().size();
 		}
-		
+
 		for (Transition tr : transitions) {
 			boolean foundOrigin = false;
 			for (State st : autStates.values()) {
@@ -424,17 +431,47 @@ public class ParserUtils {
 				}
 			}
 		}
-		
-		
+
+		for (State state : autStates.values()) {
+			System.out.println(toString((Lr1Item) state.getData()));
+		}
+
 		System.err.println("Made enfa with " + autStates.size() + " states and " + transitions.size()
 				+ " (compacted) transitions, noncompacted is " + numTran);
-//		throw new Error();
+		// throw new Error();
 
 		ArrayList<State> stateList = new ArrayList<State>(autStates.values());
 		ArrayList<Transition> transitionsList = new ArrayList<Transition>(transitions);
 		Collections.sort(stateList);
 		List<State> acceptableStates = stateList;
 		return new eNfa(stateList, symbols, transitionsList, startState, acceptableStates);
+	}
+
+	private String toString(Lr1Item item) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(item.getLeftHandSide());
+		builder.append(": ");
+		int i = 0;
+
+		Iterator<Symbol> it = item.getRightHandSide().iterator();
+		while (it.hasNext()) {
+			if (i == item.getDotPosition())
+				builder.append(" . ");
+			builder.append(it.next());
+			builder.append(' ');
+			++i;
+		}
+		if (i == item.getDotPosition())
+			builder.append(" .");
+
+		builder.append("\n");
+		Iterator<TerminalSymbol> it2 = item.getTerminalSymbols().iterator();
+		while (it2.hasNext()) {
+			builder.append(it2.next());
+			builder.append(' ');
+		}
+
+		return builder.toString();
 	}
 
 	@SuppressWarnings("unchecked")
