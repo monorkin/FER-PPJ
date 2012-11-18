@@ -1,11 +1,8 @@
 package hr.unizg.fer.zemris.ppj.maheri.parser;
 
-import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**

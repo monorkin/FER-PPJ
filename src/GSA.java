@@ -1,6 +1,4 @@
-import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerState;
 import hr.unizg.fer.zemris.ppj.maheri.parser.InputProcessor;
-import hr.unizg.fer.zemris.ppj.maheri.parser.LRparser;
 import hr.unizg.fer.zemris.ppj.maheri.parser.ParserUtils;
 import hr.unizg.fer.zemris.ppj.maheri.parser.ParserUtils.ParserTable;
 
@@ -10,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 

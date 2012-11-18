@@ -394,6 +394,7 @@ public class ParserUtils {
 		return new eNfa(stateList, symbols, transitionsList, startState, acceptableStates);
 	}
 
+	@SuppressWarnings("unchecked")
 	public ParserTable makeParser() {
 		DFA theDFA = DFAConvert.fromENFA(automatonFromGrammar());
 

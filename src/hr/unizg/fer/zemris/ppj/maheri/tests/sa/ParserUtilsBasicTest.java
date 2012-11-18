@@ -5,17 +5,12 @@ import static org.junit.Assert.*;
 import hr.unizg.fer.zemris.ppj.maheri.parser.Grammar;
 import hr.unizg.fer.zemris.ppj.maheri.parser.InputProcessor;
 import hr.unizg.fer.zemris.ppj.maheri.parser.ParserUtils;
-import hr.unizg.fer.zemris.ppj.maheri.parser.Production;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
-import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;

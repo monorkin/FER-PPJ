@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import hr.unizg.fer.zemris.ppj.maheri.automaton.DFA;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.DFAConvert;
-import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegexToAutomaton;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;

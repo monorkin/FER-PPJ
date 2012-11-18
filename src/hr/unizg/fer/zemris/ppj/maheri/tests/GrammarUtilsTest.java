@@ -2,15 +2,12 @@ package hr.unizg.fer.zemris.ppj.maheri.tests;
 
 import hr.unizg.fer.zemris.ppj.maheri.parser.Grammar;
 import hr.unizg.fer.zemris.ppj.maheri.parser.ParserUtils;
-import hr.unizg.fer.zemris.ppj.maheri.parser.Production;
 import hr.unizg.fer.zemris.ppj.maheri.parser.InputProcessor;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
-import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

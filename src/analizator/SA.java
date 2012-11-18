@@ -5,9 +5,6 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerState;
 import hr.unizg.fer.zemris.ppj.maheri.parser.LRparser;
 import hr.unizg.fer.zemris.ppj.maheri.parser.ParserUtils.ParserTable;
 
@@ -17,7 +14,7 @@ public class SA {
 		
 		ParserTable table = null;
 		try {
-			FileInputStream file = new FileInputStream("analizator/lr1.ser");
+			FileInputStream file = new FileInputStream("lr1.ser");
 			ObjectInputStream oin = new ObjectInputStream(file);
 			table = (ParserTable) oin.readObject();
 			oin.close();

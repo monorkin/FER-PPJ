@@ -3,7 +3,6 @@ package hr.unizg.fer.zemris.ppj.maheri.automaton;
 import hr.unizg.fer.zemris.ppj.maheri.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +30,7 @@ public class DFAConvert {
 		return ret;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static DFA fromENFA(eNfa eAut) {
 //		Set<String> dfaSymbols = new HashSet<String>(eAut.getSymbols());
 		Set<State> dfaStates = new HashSet<State>();
@@ -219,6 +219,7 @@ public class DFAConvert {
 	}
 	
 	static class SetIndexMerger implements DataMerger {
+		@SuppressWarnings("unchecked")
 		@Override
 		public Object merge(Object a, Object b) {
 			Set<Integer> as = (Set<Integer>)a;

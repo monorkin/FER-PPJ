@@ -1,7 +1,5 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
-import hr.unizg.fer.zemris.ppj.maheri.Logger;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
