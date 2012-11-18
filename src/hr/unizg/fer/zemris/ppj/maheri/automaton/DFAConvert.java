@@ -53,7 +53,7 @@ public class DFAConvert {
 		for (State s : nfaTransitions.keySet()) {
 			Set<Integer> set = new HashSet<Integer>(stateDataIndex);
 			set.add(i);
-			System.err.println("Converted " + s.getData() + " to " + set.toString());
+//			System.err.println("Converted " + s.getData() + " to " + set.toString());
 			s.setData(set);
 			++i;
 		}
