@@ -259,10 +259,11 @@ public class ParserUtils {
 
 					Lr1Item next1Item = new Lr1Item(nextItem, item.getTerminalSymbols());
 					State nextState = autStates.get(next1Item);
+					State nextState2 = addedStates.get(next1Item);
 
 					boolean stateIsNew = false;
 
-					if (nextState == null) {
+					if (nextState == null && nextState2 == null) {
 						nextState = new State(next1Item.toString());
 						nextState.setData(next1Item);
 						changed = true;
@@ -270,6 +271,13 @@ public class ParserUtils {
 						addedStates.put(next1Item, nextState);
 
 						allInOne.put(state, new HashMap<String, Transition>());
+					} else if (nextState2 == null) {
+						// exists in autStates == old state
+						stateIsNew = false;
+					} else if (nextState == null) {
+						// doesnt exist in autState = new state
+						nextState = nextState2;
+						stateIsNew = false;
 					}
 					Transition next = new Transition(state, x.getValue(), Arrays.asList(nextState));
 					boolean addedTransition = transitions.add(next);
@@ -325,14 +333,22 @@ public class ParserUtils {
 					for (LrItem titem : items) {
 						Lr1Item new1Item = new Lr1Item(titem, t);
 						State newState = autStates.get(new1Item);
+						State newState2 = addedStates.get(new1Item);
 
 						boolean stateIsNew = false;
-						if (newState == null) {
+						if (newState == null && newState2 == null) {
 							newState = new State(new1Item.toString());
 							newState.setData(new1Item);
 							changed = true;
 							stateIsNew = true;
 							addedStates.put(new1Item, newState);
+						} else if (newState2 == null) {
+							// state is in added
+							stateIsNew = false;
+						} else if (newState == null) {
+							// just added
+							newState = newState2;
+							stateIsNew = false;
 						}
 						
 						markerArray[0][i++] = stateIsNew;
@@ -359,6 +375,8 @@ public class ParserUtils {
 					
 					Transition trans = new Transition(state, Automaton.EPSILON, new ArrayList<State>(epsilonDests));
 					transitions.add(trans);
+					if (changed && 1 + 1 == 2)
+					break;
 
 					Map<String, Transition> map = allInOne.get(state);
 					Transition oldNext = map.get(Automaton.EPSILON);
@@ -377,11 +395,36 @@ public class ParserUtils {
 			autStates.putAll(addedStates);
 
 		}
+		
 		int numTran = 0;
 		
 		for (Transition t : transitions) {
 			numTran += t.getDestinations().size();
 		}
+		
+		for (Transition tr : transitions) {
+			boolean foundOrigin = false;
+			for (State st : autStates.values()) {
+				if (tr.getOrigin() == st)
+					foundOrigin = true;
+			}
+			if (!foundOrigin) {
+				throw new Error("One of transition origins is not a state " + tr.getOrigin());
+			}
+		}
+		for (Transition tr : transitions) {
+			for (State dt : tr.getDestinations()) {
+				boolean foundDest = false;
+				for (State st : autStates.values()) {
+					if (dt == st)
+						foundDest = true;
+				}
+				if (!foundDest) {
+					throw new Error("One of transition destinations is not a state " + dt + " for transition " + tr);
+				}
+			}
+		}
+		
 		
 		System.err.println("Made enfa with " + autStates.size() + " states and " + transitions.size()
 				+ " (compacted) transitions, noncompacted is " + numTran);
