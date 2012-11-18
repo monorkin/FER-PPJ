@@ -1,5 +1,6 @@
 package hr.unizg.fer.zemris.ppj.maheri.parser;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.NonTerminalSymbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
@@ -50,10 +51,10 @@ public class InputProcessor {
 		
 		s = lines[2];
 
-		s = s.replaceAll("%Sym ", "");
+		s = s.replaceAll("%Syn ", "");
 		tmpsyms = s.split("\\s+");
 		for (String ii : tmpsyms) {
-			tsymbols.add(new TerminalSymbol(ii));
+			sync.add(new TerminalSymbol(ii));
 		}
 
 		ArrayList<Symbol> allSymbols = new ArrayList<Symbol>();
@@ -69,6 +70,8 @@ public class InputProcessor {
 				productions.add(productionFromString(currSymbol, s.substring(1), allSymbols));
 			}
 		}
+		
+		Logger.log("Sync is " + sync);
 
 		return new Grammar(productions, new HashSet<NonTerminalSymbol>(nsymbols),
 				new HashSet<TerminalSymbol>(tsymbols), nsymbols.get(0), sync);

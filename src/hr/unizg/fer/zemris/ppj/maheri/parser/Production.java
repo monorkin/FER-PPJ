@@ -49,6 +49,7 @@ public class Production {
 		if (rightSide.size() > 0) {
 			for (Symbol s : rightSide) {
 				sb.append(s);
+				sb.append(' ');
 			}
 		} else {
 			sb.append(EPSILON);

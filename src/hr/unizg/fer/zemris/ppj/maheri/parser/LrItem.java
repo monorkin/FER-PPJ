@@ -51,9 +51,28 @@ public class LrItem extends Production {
 				break;
 			}
 			sb.append(pv.get(i));
+			sb.append(' ');
 		}
 
 		return sb.toString();
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode() * 101 + getDotPosition() ;
+	}
+
+	@Override
+	public boolean equals(Object that) {
+		if (this == that)
+			return true;
+		if (that instanceof LrItem) {
+			LrItem thatItem = (LrItem) that;
+			return thatItem.getDotPosition() == this.getDotPosition()
+					&& thatItem.getLeftHandSide().equals(this.getLeftHandSide())
+					&& thatItem.getRightHandSide().equals(this.getRightHandSide());
+		}
+		return false;
 	}
 
 	public final int getDotPosition() {

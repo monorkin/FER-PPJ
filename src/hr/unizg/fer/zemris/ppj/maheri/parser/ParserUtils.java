@@ -175,6 +175,21 @@ public class ParserUtils {
 			}
 		}
 
+		{
+			for (LrItem item1 : lrItems) {
+				for (LrItem item2 : lrItems) {
+					if (item1 != item2 && item1.equals(item2)) {
+						System.err.println("Sanity check failed: wrong lritem equals");
+						System.err.println(item1 + " ?= " + item2);
+					}
+					if (item1 != item2 && item1.hashCode() != item2.hashCode() && item1.equals(item2)) {
+						System.err.println("Sanity check failed: wrong lritem equals");
+						System.err.println(item1 + " ?= " + item2);
+					}
+				}
+			}
+		}
+
 		/*
 		 * Make start state
 		 */
@@ -201,17 +216,29 @@ public class ParserUtils {
 
 		Set<Transition> transitions = new HashSet<Transition>();
 
+		Map<State, Map<String, Transition>> allInOne = new HashMap<State, Map<String, Transition>>();
+		
+		Set<Lr1Item> doneItems = new HashSet<Lr1Item>();
+
+		int debugNumTran = 0;
+
 		/*
 		 * Additional transitions - these must be done after the first pass, as
 		 * not all states were available until now
 		 */
 		boolean changed = true;
 		while (changed) {
+			Logger.log("\nNew iteration");
+			Logger.log("-------------\n");
 			changed = false;
 			Map<Lr1Item, State> addedStates = new HashMap<Lr1Item, State>();
 			for (Entry<Lr1Item, State> pair : autStates.entrySet()) {
 				Lr1Item item = pair.getKey();
 				State state = pair.getValue();
+				if (doneItems.contains(item)) {
+					continue;
+				}
+				Logger.log("\tWorking with state:\n\t\t" + state);
 
 				final Symbol activeSymbol;
 				final int dotPosition = item.getDotPosition();
@@ -220,31 +247,54 @@ public class ParserUtils {
 				} else {
 					activeSymbol = null;
 				}
-				Logger.log("Item: " + item);
-				Logger.log("\tActive symbol " + activeSymbol);
+				Logger.log("\tActive symbol is: " + activeSymbol);
 
 				/*
 				 * Rule 4.b - skipping over a symbol
 				 */
 				LrItem nextItem = LrItem.getItemWithNextDot(item, lrItems);
+				Logger.log("\tItem with next dot position is:\n\t\t" + nextItem);
 				if (nextItem != null) {
 					Symbol x = item.getRightHandSide().get(dotPosition);
-					Logger.log("\tNext item: " + nextItem);
 
 					Lr1Item next1Item = new Lr1Item(nextItem, item.getTerminalSymbols());
 					State nextState = autStates.get(next1Item);
+
+					boolean stateIsNew = false;
+
 					if (nextState == null) {
 						nextState = new State(next1Item.toString());
 						nextState.setData(next1Item);
 						changed = true;
+						stateIsNew = true;
 						addedStates.put(next1Item, nextState);
-					}
-					Transition next = new Transition(state, x.getValue(), Arrays.asList(new State[] { nextState }));
-					transitions.add(next);
 
-					Logger.log("\t\tTransition: " + next);
+						allInOne.put(state, new HashMap<String, Transition>());
+					}
+					Transition next = new Transition(state, x.getValue(), Arrays.asList(nextState));
+					boolean addedTransition = transitions.add(next);
+
+					Map<String, Transition> map = allInOne.get(state);
+					Transition oldNext = map.get(x.getValue());
+
+					if (oldNext != null && !oldNext.equals(next)) {
+						System.err.println("INFO: Have similar old nonepsilon transition!!!");
+						System.err.println("### " + oldNext + " ### ");
+						System.err.println("### " + next + " ### ");
+						map.put(x.getValue(), next);
+					}
+
+					if (addedTransition) {
+						Logger.log("\t---dotskip-----");
+						Logger.log("\t-- \tAdding transition = :\n\t-- \t" + next);
+						if (stateIsNew) {
+							Logger.log("NEW\t++ \tThis is a new state, MARKed it for addition");
+						}
+						Logger.log("\t---end dotskip---");
+					} else {
+					}
+
 				} else {
-					Logger.log("\tNo next transition");
 				}
 
 				/*
@@ -252,68 +302,91 @@ public class ParserUtils {
 				 */
 
 				if (activeSymbol != null && !activeSymbol.isTerminal()) {
-					Logger.log("\tNonterminal symbol " + activeSymbol + " on right hand side");
 					int len = item.getRightHandSide().size();
 					List<Symbol> remainingSymbols = new ArrayList<Symbol>();
 					for (int i = dotPosition + 1; i < len; ++i) {
 						remainingSymbols.add(item.getRightHandSide().get(i));
 					}
-					Logger.log("\tRemaining symbols :" + remainingSymbols);
+					boolean stringEmpty = isStringEmpty(remainingSymbols);
 					Set<TerminalSymbol> t = new HashSet<TerminalSymbol>();
-					// if (remainingSymbols.size() > 0) {
 					Set<TerminalSymbol> startsWith = startsWithSet(remainingSymbols);
-					Logger.log("\tAnalyzing aplicable terminal symbols:");
-					Logger.log("\t\tStarts with: " + startsWith);
 					t.addAll(startsWith);
-					if (isStringEmpty(remainingSymbols)) {
-						Logger.log("\t\tRemainder is an empty one.");
-						Logger.log("\t\t\tAdding: " + item.getTerminalSymbols());
+					if (stringEmpty) {
 						t.addAll(item.getTerminalSymbols());
 					}
-					Logger.log("\tDestination T = " + t);
-
-					Logger.log("\tInitial productions for " + activeSymbol);
+					
 					Set<LrItem> items = LrItem.getStartingItemForSymbol(activeSymbol, lrItems);
-					for (LrItem titem : items) {
-						Logger.log("\t\t" + titem);
-					}
-
-					Logger.log("\tNew productions:");
-
 					Set<State> epsilonDests = new HashSet<State>();
+					
+					boolean anyNew = false;
+					boolean[][] markerArray = new boolean[2][items.size()];
+					int i = 0;
+					
 					for (LrItem titem : items) {
 						Lr1Item new1Item = new Lr1Item(titem, t);
-						Logger.log("\t\t\t" + new1Item);
-
 						State newState = autStates.get(new1Item);
+
+						boolean stateIsNew = false;
 						if (newState == null) {
-							Logger.log("\t\t\t\tAdding to current items");
 							newState = new State(new1Item.toString());
 							newState.setData(new1Item);
 							changed = true;
+							stateIsNew = true;
 							addedStates.put(new1Item, newState);
 						}
-						Logger.log("Adding transition to " + newState);
+						
+						markerArray[0][i++] = stateIsNew;
+						if (stateIsNew)
+							anyNew = true;
+						
 						epsilonDests.add(newState);
 					}
-
+					Logger.log("\t===lookahead set======");
+					Logger.log("\t== Remaining symbols:\n\t===\t" + remainingSymbols);
+					Logger.log("\t== \tStarts with: " + startsWith);
+					if (stringEmpty) {
+						Logger.log("\t== \tRemainder is an empty one, merging with original");
+					}
+					Logger.log("\t== Nonterminal symbol " + activeSymbol + " on right hand side");
+					Logger.log("\t== \tDestination T = \t===\t\t" + t);
+					Logger.log("\t===end lookahead set===");
+					
+					Logger.log("\tFound these items to connect: ");
+					i = 0;
+					for (LrItem titem : items) {
+						Logger.log((markerArray[0][i++] ? "NEW\t\t" : "\t\t" ) + titem);
+					}
+					
 					Transition trans = new Transition(state, Automaton.EPSILON, new ArrayList<State>(epsilonDests));
 					transitions.add(trans);
-					// }
+
+					Map<String, Transition> map = allInOne.get(state);
+					Transition oldNext = map.get(Automaton.EPSILON);
+
+					if (oldNext != null && !oldNext.equals(trans)) {
+						System.err.println("INFO: Have similar old epsilon transition!!!");
+						System.err.println("### " + oldNext + " ### ");
+						System.err.println("### " + trans + " ### ");
+						map.put(Automaton.EPSILON, trans);
+					}
 
 				}
+				doneItems.add(item);
+				Logger.log("\n");
 			}
 			autStates.putAll(addedStates);
 
 		}
-
-		Logger.log("Final transitions:");
+		int numTran = 0;
+		
 		for (Transition t : transitions) {
-			Logger.log("\t" + t);
+			numTran += t.getDestinations().size();
 		}
-
+		
 		System.err.println("Made enfa with " + autStates.size() + " states and " + transitions.size()
-				+ " (compacted) transitions");
+				+ " (compacted) transitions, noncompacted is " + numTran);
+//		throw new Error();
+
 		ArrayList<State> stateList = new ArrayList<State>(autStates.values());
 		ArrayList<Transition> transitionsList = new ArrayList<Transition>(transitions);
 		Collections.sort(stateList);
@@ -425,6 +498,7 @@ public class ParserUtils {
 									System.err.println("Pomakni/reduciraj nejednoznacnost u " + s + ", " + item
 											+ " izmedju " + old + " i " + ("r" + prodIndex)
 											+ " rijeseno u korist pomakni");
+									continue;
 								}
 							}
 							Logger.log("\t\t[s, " + ai + "] = r" + prodIndex);
@@ -470,7 +544,7 @@ public class ParserUtils {
 		HashSet<String> syncStr = new HashSet<String>();
 		for (TerminalSymbol syncSymbol : grammar.getSync())
 			syncStr.add(syncSymbol.toString());
-			
+
 		return new ParserTable(actionsTable, aTransitions, parserStartState, syncStr);
 	}
 
@@ -508,7 +582,7 @@ public class ParserUtils {
 		public ArrayList<HashMap<String, ArrayList<String>>> getProductions() {
 			return productions;
 		}
-		
+
 		public HashSet<String> getSync() {
 			return sync;
 		}

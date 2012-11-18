@@ -157,15 +157,17 @@ public class LRparser {
 					System.err.print(possible + " , ");
 				}
 				System.err.println("]");
+				Logger.log("Looking for " + sync);
 				while (counter < tInput.size() && ! sync.contains(tInput.get(counter).split(" ")[0])) {
+					Logger.log("Skipping symbol " + tInput.get(counter));
 					counter++;
-					Logger.log(".");
 				}
 				String sym = tInput.get(counter).split(" ")[0];
 				while (tStack.look() != null && tAction.get(tState).get(sym) == null) {
+					Logger.log("in state " + tState);
 					tStack.print();
 					lifoStackItem top = tStack.pop();
-					tState = top.getState();
+					tState = tStack.look().getState();
 					if (top.isSubtreee())
 						treeBranches.remove(treeBranches.size()-1);
 				}

@@ -27,7 +27,7 @@ public class GSA {
 		
 		ParserTable table = new ParserUtils(InputProcessor.parseInput(inputLines.toArray(new String[0]))).makeParser();
 		
-		FileOutputStream stream = new FileOutputStream("src/analizator/lr1.ser");
+		FileOutputStream stream = new FileOutputStream("analizator/lr1.ser");
 		ObjectOutputStream oStream = new ObjectOutputStream(stream);
 		System.err.println("About to begin serialization");
 		try {

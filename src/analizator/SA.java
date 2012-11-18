@@ -17,7 +17,7 @@ public class SA {
 		
 		ParserTable table = null;
 		try {
-			FileInputStream file = new FileInputStream("src/analizator/lr1.ser");
+			FileInputStream file = new FileInputStream("analizator/lr1.ser");
 			ObjectInputStream oin = new ObjectInputStream(file);
 			table = (ParserTable) oin.readObject();
 			oin.close();

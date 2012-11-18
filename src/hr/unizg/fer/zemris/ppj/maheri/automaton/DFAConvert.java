@@ -3,6 +3,7 @@ package hr.unizg.fer.zemris.ppj.maheri.automaton;
 import hr.unizg.fer.zemris.ppj.maheri.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,10 +38,27 @@ public class DFAConvert {
 		
 		Set<State> acceptable = new HashSet<State>(eAut.getAcceptableStates());
 		Set<State> dfaAcceptables = new HashSet<State>();
-
+		
+		System.err.println("Preparing nfa descriptio...");
 		HashMap<State, HashMap<String, Transition>> nfaTransitions = prepareTransitions(eAut);
+		System.err.println("Prepared automaton description.");
+		
+		ArrayList<Object> stateData = new ArrayList<Object>();
+		int stateDataIndex = 0;
+		for (State s : nfaTransitions.keySet()) {
+			stateData.add(s.getData());
+			++stateDataIndex;
+		}
+		int i = 0;
+		for (State s : nfaTransitions.keySet()) {
+			Set<Integer> set = new HashSet<Integer>(stateDataIndex);
+			set.add(i);
+			System.err.println("Converted " + s.getData() + " to " + set.toString());
+			s.setData(set);
+			++i;
+		}
 
-		DataMerger merger = new SetDataMerger();
+		DataMerger merger = new SetIndexMerger();
 
 		LinkedList<Set<State>> configurationQueue = new LinkedList<Set<State>>();
 		LinkedList<State> dfaStateQueue = new LinkedList<State>();
@@ -61,6 +79,7 @@ public class DFAConvert {
 		Logger.log("=============================================");
 
 		while (!configurationQueue.isEmpty()) {
+			System.err.println("todo: " + configurationQueue.size());
 			Set<State> stateConfiguration = configurationQueue.pop();
 			State dfaState = dfaStateQueue.pop();
 			
@@ -135,9 +154,13 @@ public class DFAConvert {
 					dfaStateQueue.addLast(newDfaState);
 				}
 			}
-
-
-
+		}
+		
+		for (State state : dfaStates) {
+			Set<Object> original = new HashSet<Object>();
+			for (int index : (Set<Integer>)state.getData())
+				original.add(stateData.get(index));
+			state.setData(original);
 		}
 
 		Logger.log("ENFA has " + eAut.getStates().size() + " states and " + eAut.getTransitions().size() + " transitions");
@@ -193,6 +216,18 @@ public class DFAConvert {
 
 	interface DataMerger {
 		Object merge(Object a, Object b);
+	}
+	
+	static class SetIndexMerger implements DataMerger {
+		@Override
+		public Object merge(Object a, Object b) {
+			Set<Integer> as = (Set<Integer>)a;
+			Set<Integer> bs = (Set<Integer>)b;
+			Set<Integer> ret = new HashSet<Integer>(as);
+			ret.addAll(bs);
+			return ret;
+		}
+		
 	}
 
 	@SuppressWarnings("unchecked")
