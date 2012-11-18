@@ -5,7 +5,9 @@ import hr.unizg.fer.zemris.ppj.maheri.parser.InputProcessor;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils;
 import hr.unizg.fer.zemris.ppj.maheri.tests.TestUtils.TestData;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,12 +45,12 @@ public class SAInputProcessorTest {
 	@Test
 	public void test() {
 		String[] output = InputProcessor.parseInput(input.toArray(new String[0])).toString().split("\n");
-		for (int i = 0; i < expectedOutput.size(); ++i) {
-			System.err.println(output[i]);
-		}
-		for (int i = 0; i < expectedOutput.size(); ++i) {
-			assertEquals(expectedOutput.get(i), output[i]);
-		}
+
+		HashSet<String> set1 = new HashSet<String>(Arrays.asList(output));
+		HashSet<String> set2 = new HashSet<String>(expectedOutput);
+
+		assertEquals(set1, set2);
+
 	}
 
 }
