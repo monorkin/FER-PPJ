@@ -84,15 +84,27 @@ public class GrammarToAutomatonTest {
 	@Test
 	public void testTransitionList() {
 		int i = 0;
+		outer:
 		for (Transition t : automaton.getTransitions()) {
-			Logger.log(toString(t));
-//			assertEquals(expectedOutput.get(i++), toString(t));
+			Logger.log("Searching for "+t);
+			for(String output : expectedOutput) {
+				if(output.equals(toString(t))) {
+					Logger.log("Found: "+toString(t));
+					continue outer;
+				} else {
+//					Logger.log("");
+//					Logger.log(output);
+//					Logger.log(toString(t));
+				}
+			}
+			Logger.log("Not found: "+toString(t));
+			assertFalse(true);
 		}
 	}
 
 	private static String toString(Transition t) {
 		return String.format("%s >>> %s >>> %s", t.getOrigin(), t.getKey() == "" ? "$" : t.getKey(),
-				t.getDestinations());
+				t.getDestinations().iterator().next());
 	}
 
 }

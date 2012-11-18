@@ -3,6 +3,8 @@ package hr.unizg.fer.zemris.ppj.maheri.parser;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -44,12 +46,14 @@ public class Lr1Item extends LrItem {
 			syms.append(Symbol.END);
 			syms.append(" ");
 		} else {
-			for (Symbol s : terminalSymbols) {
+			ArrayList<Symbol> ts = new ArrayList<Symbol>(terminalSymbols);
+			Collections.sort(ts);
+			for (Symbol s : ts) {
 				syms.append(s.toString());
 				syms.append(" ");
 			}
 		}
-		return String.format("%s {%s}", super.toString(), syms);
+		return String.format("%s{%s}", super.toString(), syms);
 	}
 	
 }

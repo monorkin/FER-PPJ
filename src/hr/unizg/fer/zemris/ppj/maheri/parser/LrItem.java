@@ -51,7 +51,6 @@ public class LrItem extends Production {
 				break;
 			}
 			sb.append(pv.get(i));
-			sb.append(' ');
 		}
 
 		return sb.toString();
