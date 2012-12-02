@@ -53,6 +53,8 @@ public class State implements Comparable<State>, Serializable {
 
 	@Override
 	public int hashCode() {
+		if (this.toString() == null)
+			return super.hashCode();	
 		return this.toString().hashCode();
 	}
 
