@@ -31,8 +31,6 @@ import java.util.Map;
 public class GLA {
 
 	public static void main(String[] args) throws IOException {
-		// Kad main postane velik, moze se grupirati u metode ili konstruktore
-		// nekih klasa koje ce isplivati kao potrebne...
 
 		List<String> inputLines = new LinkedList<String>();
 
@@ -47,7 +45,6 @@ public class GLA {
 		List<String> tokenNames;
 		List<LexerRuleDescriptionText> lexerRuleDesciptions;
 
-		// TODO implement this class
 		InputProcessor ip = new InputProcessor(inputLines);
 
 		regularDefinitionLines = ip.getRegularDefinitions();
@@ -56,8 +53,6 @@ public class GLA {
 		tokenNames = ip.getTokenNames();
 		lexerRuleDesciptions = ip.getLexerRules();
 
-		// HERE STARTS CONSTRUCTION OF THE LEXER, BRACE FOR SHITSTORM OF
-		// EXCEPTIONS
 		Map<String, LexerState> lexerStates = new HashMap<String, LexerState>();
 
 		for (LexerRuleDescriptionText r : lexerRuleDesciptions) {

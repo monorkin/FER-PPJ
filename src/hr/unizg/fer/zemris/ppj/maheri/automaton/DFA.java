@@ -19,7 +19,6 @@ public class DFA {
 		return allInOne;
 	}
 	
-// interface Automaton ima hrpu nekih lista koje smetaju samo, pa ga ovo ne implementira
 	
 	public DFA(Collection<State> states, Collection<Transition> transitions, Collection<State> acceptables, State start) {
 		Set<State> statesSet = new HashSet<State>(states);

@@ -88,12 +88,6 @@ public class InputProcessor {
 	            				extra.add(value);
 	            				value = it.next();
 	            			}
-	            			/*
-	            			System.err.printf("state = <%s>, regex = /%s/, action = [%s], ", activeState, regex, action);
-	            			for (String s : extra)
-	            				System.err.print(s + " ... ");
-	            			System.err.println();
-	            			*/
 	            			LexerRules.add(new LexerRuleDescriptionText(activeState, resolver.resolve(regex), action, extra));
 	            			
 	            			break;

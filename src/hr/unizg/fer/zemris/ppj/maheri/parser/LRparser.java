@@ -23,7 +23,7 @@ public class LRparser {
 
 	private int startState;
 	
-	/*
+	/**
 	 * Inicijalizacija
 	 * Prima ulazni niz znakova, te Map<Integer, Map<String, String>> 
 	 * Objasnjenje ::: Integer = broj retka; Mapa = sadrzaj retka -> prvi string = naslov stupca (znak) -> drugi string = akcija

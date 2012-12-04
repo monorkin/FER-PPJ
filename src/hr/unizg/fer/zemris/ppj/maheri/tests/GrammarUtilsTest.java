@@ -49,48 +49,4 @@ public class GrammarUtilsTest {
 	}
 
 
-//	/**
-//	 * @param args
-//	 */
-//	public static void main(String[] args) {
-//
-//		nonTerminal.add(new NonTerminalSymbol("<A>"));
-//		nonTerminal.add(new NonTerminalSymbol("<B>"));
-//		nonTerminal.add(new NonTerminalSymbol("<C>"));
-//		nonTerminal.add(new NonTerminalSymbol("<D>"));
-//		nonTerminal.add(new NonTerminalSymbol("<E>"));
-//		
-//		terminal.add(new TerminalSymbol("a"));
-//		terminal.add(new TerminalSymbol("b"));
-//		terminal.add(new TerminalSymbol("c"));
-//		terminal.add(new TerminalSymbol("d"));
-//		terminal.add(new TerminalSymbol("e"));
-//		terminal.add(new TerminalSymbol("f"));
-//		
-//		List<Production> prods = new ArrayList<Production>();
-//		
-//		List<Symbol> syms1 = new ArrayList<Symbol>();
-//		syms1.add(getNT("<B>"));
-//		syms1.add(getNT("<C>"));
-//		syms1.add(getT("c"));
-//		prods.add(new Production(getNT("<A>"), syms1));
-//		
-//		List<Symbol> syms2 = new ArrayList<Symbol>();
-//		syms1.add(getT("e"));
-//		syms1.add(getNT("<D>"));
-//		syms1.add(getNT("<B>"));
-//		prods.add(new Production(getNT("<A>"), syms2));
-//		
-//		prods.add(new Production(getNT("<A>"), new ArrayList<Symbol>()));
-//
-//	}
-//	
-//	private static TerminalSymbol getT(String str) {
-//		return new TerminalSymbol(str);
-//	}
-//	
-//	private static NonTerminalSymbol getNT(String str) {
-//		return new NonTerminalSymbol(str);
-//	}
-
 }

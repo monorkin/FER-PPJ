@@ -198,10 +198,8 @@ public class RegexToAutomaton {
 		List<State> states = new LinkedList<State>();
 		List<String> symbols = new LinkedList<String>();
 		List<Transition> transitions = new LinkedList<Transition>();
-		// TODO determine the starting state and acceptable states
 		List<State> acceptableStates = new LinkedList<State>();
 
-		// Generate state list
 		for (String s : nfa.stateNames) {
 			states.add(new State(s));
 		}
@@ -215,9 +213,6 @@ public class RegexToAutomaton {
 		for (String origin : nfa.transitionsForState.keySet()) {
 			Map<String, List<String>> transitionMap = nfa.transitionsForState.get(origin);
 			for (String key : transitionMap.keySet()) {
-//				if (key.length() == 0)
-//					key = Automaton.EPSILON;
-				// DO MAGIC HERE ?
 				List<State> destinations = new LinkedList<State>();
 				for (String s : transitionMap.get(key)) {
 					destinations.add(State.getByName(s, states));

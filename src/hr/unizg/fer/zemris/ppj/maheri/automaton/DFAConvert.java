@@ -32,7 +32,6 @@ public class DFAConvert {
 
 	@SuppressWarnings("unchecked")
 	public static DFA fromENFA(eNfa eAut) {
-//		Set<String> dfaSymbols = new HashSet<String>(eAut.getSymbols());
 		Set<State> dfaStates = new HashSet<State>();
 		Set<Transition> dfaTransitions = new HashSet<Transition>();
 		

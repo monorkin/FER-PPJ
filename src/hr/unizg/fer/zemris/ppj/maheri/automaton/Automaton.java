@@ -20,7 +20,6 @@ public abstract class Automaton implements Serializable {
 	/**
 	 * A constant marking the symbol used for representing epsilon transitions
 	 */
-	// public static final String EPSILON = "$";
 	public static final String EPSILON = "";
 
 	public Automaton(List<State> states, List<String> symbols, List<Transition> transitions, State startingState,

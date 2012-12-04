@@ -97,7 +97,6 @@ public class RegDefResolver {
 			String value = resolve(rhs);
 			
 			map.put(name, value.toString());
-//			System.out.println(line + " ### [" + name + "], " + value);
 		}
 	}
 
