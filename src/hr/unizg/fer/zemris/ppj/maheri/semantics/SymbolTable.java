@@ -1,8 +1,11 @@
 package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Class which stores info about program identifiers (e.g. variable types),
@@ -12,12 +15,20 @@ import java.util.List;
  * 
  */
 public class SymbolTable {
+	public static final SymbolTable GLOBAL = new SymbolTable(null);
+	
 	private final HashMap<String, SymbolEntry> map = new HashMap<String, SymbolEntry>();
 	private final SymbolTable parentScope;
 	
-	public static final SymbolTable GLOBAL = new SymbolTable(null);
+	private final List<SymbolTable> nested = new ArrayList<SymbolTable>();
 	
-	protected final List<SymbolTable> nested = new ArrayList<SymbolTable>();
+	protected Set<Entry<String,SymbolEntry>> getEntries() {
+		return Collections.unmodifiableSet(map.entrySet());
+	}
+	
+	protected List<SymbolTable> getNested() {
+		return Collections.unmodifiableList(nested);
+	}
 
 	/**
 	 * Construct symbol table. The parent scope must be specified if table being
@@ -212,7 +223,6 @@ abstract class NumericType extends PrimitiveType {
 
 	@Override
 	public boolean canConvertExplicit(Type target) {
-		// XXX
 		if (canConvertImplicit(target))
 			return true;
 		/*

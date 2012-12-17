@@ -7,6 +7,8 @@ import hr.unizg.fer.zemris.ppj.maheri.semantics.SymbolTable.SymbolEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class SemanticsAnalyzer {
 	private Node generativeTree;
@@ -33,7 +35,7 @@ public class SemanticsAnalyzer {
 	public void checkAttributes() {
 		SymbolTable symbolTable = SymbolTable.GLOBAL;
 		try {
-			check(generativeTree, symbolTable);
+			checkSubtree(generativeTree, symbolTable);
 		} catch (SemanticsException e) {
 			System.out.println(errorString(e.getErrorNode()));
 			System.err.println(e.getMessage());
@@ -42,7 +44,7 @@ public class SemanticsAnalyzer {
 
 	public void checkFunctions() {
 		/*
-		 * TODO 4.4.7 Provjere nakon obilaska stabla
+		 * 4.4.7 Provjere nakon obilaska stabla
 		 * 
 		 * Konačno, nakon obilaska stabla i provjere svih navedenih semantičkih
 		 * pravila, semantički analizator treba provjeriti još dva pravila
@@ -63,27 +65,44 @@ public class SemanticsAnalyzer {
 		// definition.
 		// then check this value
 		try {
-			SymbolEntry mainEntry = SymbolTable.GLOBAL.get("main");
-			if (mainEntry == null)
-				throw new SemanticsException("main function undeclared", null);
-			FunctionType mainType = (FunctionType) mainEntry.getType();
-			if (!mainType.getReturnType().equals(IntType.INSTANCE))
-				throw new SemanticsException("main function must return int", null);
-			if (!mainType.getParameterTypes().getTypes().isEmpty())
-				throw new SemanticsException("main function takes no arguments", null);
+			checkMain();
 		} catch (SemanticsException e) {
 			System.out.println("main");
 			System.err.println(e.getMessage());
 		}
 		
 		try {
-			
+			checkFunctionsAreDefined(SymbolTable.GLOBAL);
 		} catch (SemanticsException e) {
-			
+			System.out.println("funkcija");
+			System.err.println(e.getMessage());
 		}
 	}
+	
+	private static void checkMain() {
+		SymbolEntry mainEntry = SymbolTable.GLOBAL.get("main");
+		if (mainEntry == null)
+			throw new SemanticsException("main function undeclared", null);
+		FunctionType mainType = (FunctionType) mainEntry.getType();
+		if (!mainType.getReturnType().equals(IntType.INSTANCE))
+			throw new SemanticsException("main function must return int", null);
+		if (!mainType.getParameterTypes().getTypes().isEmpty())
+			throw new SemanticsException("main function takes no arguments", null);
+	}
+	
+	private static void checkFunctionsAreDefined(SymbolTable table) {
+		for (Entry<String, SymbolEntry> entry : table.getEntries()) {
+			SymbolEntry s = entry.getValue();
+			String funcName = entry.getKey();
+			if (s.getType() instanceof FunctionType && !SymbolTable.GLOBAL.get(funcName).isDefined()) {
+				throw new SemanticsException("Declaration of function which is not defined in global scope", null);
+			}
+		}
+		for (SymbolTable nested : table.getNested())
+			checkFunctionsAreDefined(nested);
+	}
 
-	private static void check(Node l, SymbolTable table) throws SemanticsException {
+	private static void checkSubtree(Node l, SymbolTable table) throws SemanticsException {
 		PPJCProduction production = determineProduction(l);
 		List<Node> r = l.getChildren();
 
@@ -178,7 +197,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) r.get(1);
 
 			// provjeri(izraz)
-			check(izraz, table);
+			checkSubtree(izraz, table);
 
 			// tip ← izraz.tip
 			// l-izraz ← izraz.l-izraz
@@ -191,7 +210,7 @@ public class SemanticsAnalyzer {
 		case POSTFIX_IZRAZ_1: {
 			NonterminalNode primarniIzraz = (NonterminalNode) r.get(0);
 
-			check(primarniIzraz, table);
+			checkSubtree(primarniIzraz, table);
 
 			l.setAttribute(Attribute.TIP, primarniIzraz.getAttribute(Attribute.TIP));
 			l.setAttribute(Attribute.L_IZRAZ, primarniIzraz.getAttribute(Attribute.L_IZRAZ));
@@ -204,7 +223,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) r.get(2);
 
 			// 1. provjeri (<postfiks_izraz>)
-			check(postfiksIzraz, table);
+			checkSubtree(postfiksIzraz, table);
 			Type t = (Type) postfiksIzraz.getAttribute(Attribute.TIP);
 			if (!(t instanceof ArrayType)) {
 				// 2. <postfiks_izraz>.tip = niz (X )
@@ -213,7 +232,7 @@ public class SemanticsAnalyzer {
 
 			ArrayType nizX = (ArrayType) t;
 			// 3. provjeri (<izraz>)
-			check(izraz, table);
+			checkSubtree(izraz, table);
 
 			Type indexType = (Type) izraz.getAttribute(Attribute.TIP);
 			if (!indexType.canConvertImplicit(IntType.INSTANCE)) {
@@ -232,7 +251,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode postfiksIzraz = (NonterminalNode) r.get(0);
 
 			// 1. provjeri (<postfiks_izraz>)
-			check(postfiksIzraz, table);
+			checkSubtree(postfiksIzraz, table);
 			// 2. <postfiks_izraz>.tip = funkcija(void → pov )
 			Type t = (Type) postfiksIzraz.getAttribute(Attribute.TIP);
 			if (!(t instanceof FunctionType)) {
@@ -255,9 +274,9 @@ public class SemanticsAnalyzer {
 			NonterminalNode listaArgumenata = (NonterminalNode) r.get(2);
 
 			// 1. provjeri (<postfiks_izraz>)
-			check(postfiksIzraz, table);
+			checkSubtree(postfiksIzraz, table);
 			// 2. provjeri (<lista_argumenata>)
-			check(listaArgumenata, table);
+			checkSubtree(listaArgumenata, table);
 
 			Type t = (Type) postfiksIzraz.getAttribute(Attribute.TIP);
 			if (!(t instanceof FunctionType)) {
@@ -287,7 +306,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode postfiksIzraz = (NonterminalNode) r.get(0);
 
 			// 1. provjeri (<postfiks_izraz>)
-			check(postfiksIzraz, table);
+			checkSubtree(postfiksIzraz, table);
 
 			// 2. <postfiks_izraz>.l-izraz = 1 i <postfiks_izraz>.tip ∼ int
 			Type type = (Type) postfiksIzraz.getAttribute(Attribute.TIP);
@@ -308,7 +327,7 @@ public class SemanticsAnalyzer {
 		case LISTA_ARGUMENATA_1: {
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(0);
 
-			check(izrazPridruzivanja, table);
+			checkSubtree(izrazPridruzivanja, table);
 
 			Type type = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
 			TypeList list = new TypeList(Arrays.asList(type));
@@ -320,8 +339,8 @@ public class SemanticsAnalyzer {
 			NonterminalNode listaArgumenata = (NonterminalNode) r.get(0);
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(2);
 
-			check(listaArgumenata, table);
-			check(izrazPridruzivanja, table);
+			checkSubtree(listaArgumenata, table);
+			checkSubtree(izrazPridruzivanja, table);
 
 			Type type = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
 			TypeList list = (TypeList) l.getAttribute(Attribute.TIPOVI);
@@ -335,7 +354,7 @@ public class SemanticsAnalyzer {
 		case UNARNI_IZRAZ_1: {
 			NonterminalNode postfiksIzraz = (NonterminalNode) r.get(0);
 
-			check(postfiksIzraz, table);
+			checkSubtree(postfiksIzraz, table);
 
 			l.setAttribute(Attribute.TIP, postfiksIzraz.getAttribute(Attribute.TIP));
 			l.setAttribute(Attribute.L_IZRAZ, postfiksIzraz.getAttribute(Attribute.L_IZRAZ));
@@ -347,7 +366,7 @@ public class SemanticsAnalyzer {
 		case UNARNI_IZRAZ_3: {
 			NonterminalNode unarniIzraz = (NonterminalNode) r.get(1);
 
-			check(unarniIzraz, table);
+			checkSubtree(unarniIzraz, table);
 
 			l.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			l.setAttribute(Attribute.L_IZRAZ, false);
@@ -357,7 +376,7 @@ public class SemanticsAnalyzer {
 		case UNARNI_IZRAZ_4: {
 			NonterminalNode castIzraz = (NonterminalNode) r.get(1);
 
-			check(castIzraz, table);
+			checkSubtree(castIzraz, table);
 
 			Type castType = (Type) castIzraz.getAttribute(Attribute.TIP);
 
@@ -397,7 +416,7 @@ public class SemanticsAnalyzer {
 		case CAST_IZRAZ_1: {
 			NonterminalNode unarniIzraz = (NonterminalNode) r.get(0);
 
-			check(unarniIzraz, table);
+			checkSubtree(unarniIzraz, table);
 
 			l.setAttribute(Attribute.TIP, unarniIzraz.getAttribute(Attribute.TIP));
 			l.setAttribute(Attribute.L_IZRAZ, unarniIzraz.getAttribute(Attribute.L_IZRAZ));
@@ -408,8 +427,8 @@ public class SemanticsAnalyzer {
 			NonterminalNode imeTipa = (NonterminalNode) r.get(1);
 			NonterminalNode castIzraz = (NonterminalNode) r.get(3);
 
-			check(imeTipa, table);
-			check(castIzraz, table);
+			checkSubtree(imeTipa, table);
+			checkSubtree(castIzraz, table);
 
 			Type from = (Type) castIzraz.getAttribute(Attribute.TIP);
 			Type to = (Type) imeTipa.getAttribute(Attribute.TIP);
@@ -424,7 +443,7 @@ public class SemanticsAnalyzer {
 		case IME_TIPA_1: {
 			NonterminalNode specifikatorTipa = (NonterminalNode) r.get(0);
 
-			check(specifikatorTipa, table);
+			checkSubtree(specifikatorTipa, table);
 
 			l.setAttribute(Attribute.TIP, specifikatorTipa.getAttribute(Attribute.TIP));
 			break;
@@ -433,7 +452,7 @@ public class SemanticsAnalyzer {
 		case IME_TIPA_2: {
 			NonterminalNode specifikatorTipa = (NonterminalNode) r.get(1);
 
-			check(specifikatorTipa, table);
+			checkSubtree(specifikatorTipa, table);
 			Type type = (Type) specifikatorTipa.getAttribute(Attribute.TIP);
 			if (type instanceof VoidType) {
 				throw new SemanticsException("const void is disallowed", l);
@@ -571,12 +590,12 @@ public class SemanticsAnalyzer {
 			NonterminalNode postfiksIzraz = (NonterminalNode) r.get(0);
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(2);
 
-			check(postfiksIzraz, table);
+			checkSubtree(postfiksIzraz, table);
 
 			boolean lvalue = (Boolean) postfiksIzraz.getAttribute(Attribute.L_IZRAZ);
 			if (!lvalue)
 				throw new SemanticsException("Non-lvalue assignment", l);
-			check(izrazPridruzivanja, table);
+			checkSubtree(izrazPridruzivanja, table);
 
 			Type rhsType = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
 			Type lhsType = (Type) postfiksIzraz.getAttribute(Attribute.TIP);
@@ -595,8 +614,8 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) r.get(0);
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(2);
 
-			check(izraz, table);
-			check(izrazPridruzivanja, table);
+			checkSubtree(izraz, table);
+			checkSubtree(izrazPridruzivanja, table);
 
 			l.setAttribute(Attribute.TIP, izrazPridruzivanja.getAttribute(Attribute.TIP));
 			l.setAttribute(Attribute.L_IZRAZ, false);
@@ -611,9 +630,9 @@ public class SemanticsAnalyzer {
 			 * Svaki blok je odvojeni djelokrug, a nelokalnim imenima se
 			 * pristupa u ugnijezdujucem bloku
 			 */
-			// FIXME ?
+			// FIXME maybe some attributes need to be forwarded (PETLJA)? Or retrofit into SymbolTable?
 
-			check(listaNaredbi, table);
+			checkSubtree(listaNaredbi, table);
 			break;
 		}
 		// <slozena_naredba> ::= L_VIT_ZAGRADA <lista_deklaracija>
@@ -626,10 +645,10 @@ public class SemanticsAnalyzer {
 			 * Svaki blok je odvojeni djelokrug, a nelokalnim imenima se
 			 * pristupa u ugnijezdujucem bloku
 			 */
-			// / FIXME ?
+			// FIXME maybe some attributes need to be forwarded (PETLJA)? Or retrofit into SymbolTable?
 
-			check(listaDeklaracija, table);
-			check(listaNaredbi, table);
+			checkSubtree(listaDeklaracija, table);
+			checkSubtree(listaNaredbi, table);
 			break;
 		}
 
@@ -637,7 +656,7 @@ public class SemanticsAnalyzer {
 		case LISTA_NAREDBI_1: {
 			NonterminalNode naredba = (NonterminalNode) r.get(0);
 
-			check(naredba, table);
+			checkSubtree(naredba, table);
 			break;
 		}
 		// lista_naredbi> ::= <lista_naredbi> <naredba>
@@ -645,15 +664,15 @@ public class SemanticsAnalyzer {
 			NonterminalNode listaNaredbi = (NonterminalNode) r.get(0);
 			NonterminalNode naredba = (NonterminalNode) r.get(1);
 
-			check(listaNaredbi, table);
-			check(naredba, table);
+			checkSubtree(listaNaredbi, table);
+			checkSubtree(naredba, table);
 			break;
 		}
 
 		// <naredba> ::= <izraz_naredba>
 		case NAREDBA_2: {
 			NonterminalNode u = (NonterminalNode) r.get(0);
-			check(u, table);
+			checkSubtree(u, table);
 			break;
 		}
 		// <naredba> ::= <slozena_naredba> | <naredba_grananja>
@@ -666,7 +685,7 @@ public class SemanticsAnalyzer {
 			// naredba prosiruje u bilo sto osim <izraz_naredba>
 			NonterminalNode u = (NonterminalNode) r.get(0);
 			u.setAttribute(Attribute.PETLJA, l.getAttribute(Attribute.PETLJA));
-			check(u, table);
+			checkSubtree(u, table);
 			break;
 		}
 
@@ -679,7 +698,7 @@ public class SemanticsAnalyzer {
 		case IZRAZ_NAREDBA_2: {
 			NonterminalNode izraz = (NonterminalNode) r.get(0);
 
-			check(izraz, table);
+			checkSubtree(izraz, table);
 
 			l.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			break;
@@ -690,11 +709,11 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) r.get(2);
 			NonterminalNode naredba = (NonterminalNode) r.get(4);
 
-			check(izraz, table);
+			checkSubtree(izraz, table);
 			Type izrazType = (Type) izraz.getAttribute(Attribute.TIP);
 			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
 				throw new SemanticsException("If-condition expression has invalid type", l);
-			check(naredba, table);
+			checkSubtree(naredba, table);
 
 			break;
 		}
@@ -705,12 +724,12 @@ public class SemanticsAnalyzer {
 			NonterminalNode naredba1 = (NonterminalNode) r.get(4);
 			NonterminalNode naredba2 = (NonterminalNode) r.get(6);
 
-			check(izraz, table);
+			checkSubtree(izraz, table);
 			Type izrazType = (Type) izraz.getAttribute(Attribute.TIP);
 			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
 				throw new SemanticsException("If-condition expression has invalid type", l);
-			check(naredba1, table);
-			check(naredba2, table);
+			checkSubtree(naredba1, table);
+			checkSubtree(naredba2, table);
 			break;
 		}
 
@@ -719,14 +738,14 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) r.get(2);
 			NonterminalNode naredba = (NonterminalNode) r.get(4);
 
-			check(izraz, table);
+			checkSubtree(izraz, table);
 			Type izrazType = (Type) izraz.getAttribute(Attribute.TIP);
 			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
 				throw new SemanticsException("While-loop condition is of invalid type", l);
 
 			naredba.setAttribute(Attribute.PETLJA, true); // FIXME ?
 
-			check(naredba, table);
+			checkSubtree(naredba, table);
 			break;
 		}
 		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1
@@ -736,8 +755,8 @@ public class SemanticsAnalyzer {
 			NonterminalNode izrazNaredba2 = (NonterminalNode) r.get(3);
 			NonterminalNode naredba = (NonterminalNode) r.get(5);
 
-			check(izrazNaredba1, table);
-			check(izrazNaredba2, table);
+			checkSubtree(izrazNaredba1, table);
+			checkSubtree(izrazNaredba2, table);
 
 			Type type = (Type) izrazNaredba2.getAttribute(Attribute.TIP);
 			if (!type.canConvertImplicit(IntType.INSTANCE))
@@ -745,7 +764,7 @@ public class SemanticsAnalyzer {
 
 			naredba.setAttribute(Attribute.PETLJA, true); // FIXME ?
 
-			check(naredba, table);
+			checkSubtree(naredba, table);
 			break;
 		}
 		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1
@@ -756,25 +775,25 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) r.get(4);
 			NonterminalNode naredba = (NonterminalNode) r.get(6);
 
-			check(izrazNaredba1, table);
-			check(izrazNaredba2, table);
+			checkSubtree(izrazNaredba1, table);
+			checkSubtree(izrazNaredba2, table);
 
 			Type type = (Type) izrazNaredba2.getAttribute(Attribute.TIP);
 			if (!type.canConvertImplicit(IntType.INSTANCE))
 				throw new SemanticsException("For-loop condition of invalid type", l);
 
-			check(izraz, table);
+			checkSubtree(izraz, table);
 
 			naredba.setAttribute(Attribute.PETLJA, true); // FIXME ?
 
-			check(naredba, table);
+			checkSubtree(naredba, table);
 			break;
 		}
 
 		// naredba_skoka> ::= (KR_CONTINUE | KR_BREAK) TOCKAZAREZ
 		case NAREDBA_SKOKA_1:
 		case NAREDBA_SKOKA_2: {
-			// TODO maybe better using symboltable and scope
+			// FIXME ?
 			boolean insideLoop = (Boolean) l.getAttribute(Attribute.PETLJA);
 			if (!insideLoop) {
 				throw new SemanticsException("break/continue in non-loop scope", l);
@@ -783,33 +802,33 @@ public class SemanticsAnalyzer {
 		}
 		// <naredba_skoka> ::= KR_RETURN TOCKAZAREZ
 		case NAREDBA_SKOKA_3: {
-			// TODO check current function return type thru symboltable
+			// FIXME check current function return type thru symboltable
 			break;
 		}
 		// <naredba_skoka> ::= KR_RETURN <izraz> TOCKAZAREZ
 		case NAREDBA_SKOKA_4: {
-			// TODO check current function return type thru symboltable
+			// FIXME check current function return type thru symboltable
 			break;
 		}
 
 		// <prijevodna_jedinica> ::= <vanjska_deklaracija>
 		case PRIJEVODNA_JEDINICA_1: {
 			NonterminalNode vanjskaDeklaracija = (NonterminalNode) r.get(0);
-			check(vanjskaDeklaracija, table);
+			checkSubtree(vanjskaDeklaracija, table);
 			break;
 		}
 		// <prijevodna_jedinica> ::= <prijevodna_jedinica> <vanjska_deklaracija>
 		case PRIJEVODNA_JEDINICA_2: {
 			NonterminalNode prijevodnaJedinica = (NonterminalNode) r.get(0);
 			NonterminalNode vanjskaDeklaracija = (NonterminalNode) r.get(1);
-			check(prijevodnaJedinica, table);
-			check(vanjskaDeklaracija, table);
+			checkSubtree(prijevodnaJedinica, table);
+			checkSubtree(vanjskaDeklaracija, table);
 			break;
 		}
 		// <vanjska_deklaracija> ::= <definicija_funkcije> | <deklaracija>
 		case VANJSKA_DEKLARACIJA_1:
 		case VANJSKA_DEKLARACIJA_2: {
-			check((NonterminalNode) r.get(0), table);
+			checkSubtree((NonterminalNode) r.get(0), table);
 			break;
 		}
 
@@ -824,7 +843,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode slozenaNaredba = (NonterminalNode) r.get(5);
 
 			// 1. provjeri (<ime_tipa>)
-			check(imeTipa, table);
+			checkSubtree(imeTipa, table);
 
 			// 2. <ime_tipa>.tip = const(T )
 			if (imeTipa.getAttribute(Attribute.TIP) instanceof ConstType) {
@@ -861,7 +880,7 @@ public class SemanticsAnalyzer {
 			SymbolTable inner = table.createNested();
 
 			// 6. provjeri (<slozena_naredba>)
-			check(slozenaNaredba, inner);
+			checkSubtree(slozenaNaredba, inner);
 
 			break;
 		}
@@ -874,7 +893,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode slozenaNaredba = (NonterminalNode) r.get(5);
 
 			// 1. provjeri (<ime_tipa>)
-			check(imeTipa, table);
+			checkSubtree(imeTipa, table);
 
 			// 2. <ime_tipa>.tip = const(T )
 			if (imeTipa.getAttribute(Attribute.TIP) instanceof ConstType) {
@@ -891,7 +910,7 @@ public class SemanticsAnalyzer {
 			}
 
 			// 4. provjeri (<lista_parametara>)
-			check(listaParametara, table);
+			checkSubtree(listaParametara, table);
 
 			// 5. ako postoji deklaracija imena IDN.ime u globalnom djelokrugu
 			// onda
@@ -920,7 +939,7 @@ public class SemanticsAnalyzer {
 
 			// FIXME add something so return check works
 
-			check(slozenaNaredba, inner);
+			checkSubtree(slozenaNaredba, inner);
 
 			break;
 		}
@@ -929,7 +948,7 @@ public class SemanticsAnalyzer {
 		case LISTA_PARAMETARA_1: {
 			NonterminalNode deklaracijaParametra = (NonterminalNode) r.get(0);
 
-			check(deklaracijaParametra, table);
+			checkSubtree(deklaracijaParametra, table);
 
 			l.setAttribute(Attribute.IMENA, Arrays.asList((String) deklaracijaParametra.getAttribute(Attribute.IME)));
 			l.setAttribute(Attribute.TIPOVI,
@@ -942,8 +961,8 @@ public class SemanticsAnalyzer {
 			NonterminalNode listaParametara = (NonterminalNode) r.get(0);
 			NonterminalNode deklaracijaParametra = (NonterminalNode) r.get(3);
 
-			check(listaParametara, table);
-			check(deklaracijaParametra, table);
+			checkSubtree(listaParametara, table);
+			checkSubtree(deklaracijaParametra, table);
 
 			@SuppressWarnings("unchecked")
 			List<String> names = (List<String>) listaParametara.getAttribute(Attribute.IMENA);
@@ -968,7 +987,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode imeTipa = (NonterminalNode) r.get(0);
 			TerminalNode idn = (TerminalNode) r.get(1);
 
-			check(imeTipa, table);
+			checkSubtree(imeTipa, table);
 
 			Type type = (Type) imeTipa.getAttribute(Attribute.TIP);
 			if (type instanceof VoidType)
@@ -984,7 +1003,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode imeTipa = (NonterminalNode) r.get(0);
 			TerminalNode idn = (TerminalNode) r.get(1);
 
-			check(imeTipa, table);
+			checkSubtree(imeTipa, table);
 
 			Type type = (Type) imeTipa.getAttribute(Attribute.TIP);
 			if (type instanceof VoidType)
@@ -997,13 +1016,13 @@ public class SemanticsAnalyzer {
 
 		// <lista_deklaracija> ::= <deklaracija>
 		case LISTA_DEKLARACIJA_1: {
-			check(r.get(0), table);
+			checkSubtree(r.get(0), table);
 			break;
 		}
 		// <lista_deklaracija> ::= <lista_deklaracija> <deklaracija>
 		case LISTA_DEKLARACIJA_2: {
-			check(r.get(0), table);
-			check(r.get(1), table);
+			checkSubtree(r.get(0), table);
+			checkSubtree(r.get(1), table);
 			break;
 		}
 
@@ -1012,11 +1031,11 @@ public class SemanticsAnalyzer {
 			NonterminalNode imeTipa = (NonterminalNode) r.get(0);
 			NonterminalNode listaInitDeklaratora = (NonterminalNode) r.get(1);
 
-			check(imeTipa, table);
+			checkSubtree(imeTipa, table);
 
 			Type type = (Type) imeTipa.getAttribute(Attribute.TIP);
 			listaInitDeklaratora.setAttribute(Attribute.NTIP, type);
-			check(listaInitDeklaratora, table);
+			checkSubtree(listaInitDeklaratora, table);
 			break;
 		}
 
@@ -1024,7 +1043,7 @@ public class SemanticsAnalyzer {
 		case LISTA_INIT_DEKLARATORA_1: {
 			NonterminalNode initDeklarator = (NonterminalNode) r.get(0);
 			initDeklarator.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
-			check(initDeklarator, table);
+			checkSubtree(initDeklarator, table);
 			break;
 		}
 		// <lista_init_deklaratora> ::= <lista_init_deklaratora> ZAREZ
@@ -1034,10 +1053,10 @@ public class SemanticsAnalyzer {
 			NonterminalNode initDeklarator = (NonterminalNode) r.get(2);
 
 			listaInitDeklaratora.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
-			check(listaInitDeklaratora, table);
+			checkSubtree(listaInitDeklaratora, table);
 
 			initDeklarator.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
-			check(initDeklarator, table);
+			checkSubtree(initDeklarator, table);
 			break;
 		}
 
@@ -1045,7 +1064,7 @@ public class SemanticsAnalyzer {
 		case INIT_DEKLARATOR_1: {
 			NonterminalNode izravniDeklarator = (NonterminalNode) r.get(0);
 			izravniDeklarator.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
-			check(izravniDeklarator, table);
+			checkSubtree(izravniDeklarator, table);
 
 			Type type = (Type) izravniDeklarator.getAttribute(Attribute.TIP);
 			if (type instanceof ConstType)
@@ -1062,10 +1081,10 @@ public class SemanticsAnalyzer {
 		case INIT_DEKLARATOR_2: {
 			NonterminalNode izravniDeklarator = (NonterminalNode) r.get(0);
 			izravniDeklarator.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
-			check(izravniDeklarator, table);
+			checkSubtree(izravniDeklarator, table);
 
 			NonterminalNode inicijalizator = (NonterminalNode) r.get(2);
-			check(inicijalizator, table);
+			checkSubtree(inicijalizator, table);
 
 			Type type = (Type) izravniDeklarator.getAttribute(Attribute.TIP);
 
@@ -1161,7 +1180,7 @@ public class SemanticsAnalyzer {
 			TerminalNode idn = (TerminalNode) r.get(0);
 			NonterminalNode listaParametara = (NonterminalNode) r.get(2);
 
-			check(listaParametara, table);
+			checkSubtree(listaParametara, table);
 
 			Type ntype = (Type) l.getAttribute(Attribute.NTIP);
 			Type type = new FunctionType(ntype, (TypeList) listaParametara.getAttribute(Attribute.TIPOVI));
@@ -1184,7 +1203,7 @@ public class SemanticsAnalyzer {
 		case INICIJALIZATOR_1: {
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(0);
 
-			check(izrazPridruzivanja, table);
+			checkSubtree(izrazPridruzivanja, table);
 
 			Node n = izrazPridruzivanja;
 			while (n.getChildren() != null && n.getChildren().size() == 1)
@@ -1211,7 +1230,7 @@ public class SemanticsAnalyzer {
 		case INICIJALIZATOR_2: {
 			NonterminalNode listaIzrazaPridruzivanja = (NonterminalNode) r.get(1);
 
-			check(listaIzrazaPridruzivanja, table);
+			checkSubtree(listaIzrazaPridruzivanja, table);
 
 			l.setAttribute(Attribute.BR_ELEM, listaIzrazaPridruzivanja.getAttribute(Attribute.BR_ELEM));
 			l.setAttribute(Attribute.TIPOVI, listaIzrazaPridruzivanja.getAttribute(Attribute.TIPOVI));
@@ -1222,7 +1241,7 @@ public class SemanticsAnalyzer {
 		case LISTA_IZRAZA_PRIDRUZIVANJA_1: {
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(0);
 
-			check(izrazPridruzivanja, table);
+			checkSubtree(izrazPridruzivanja, table);
 
 			l.setAttribute(Attribute.BR_ELEM, 1);
 			l.setAttribute(Attribute.TIPOVI,
@@ -1235,8 +1254,8 @@ public class SemanticsAnalyzer {
 			NonterminalNode listaIzrazaPridruzivanja = (NonterminalNode) r.get(0);
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(2);
 
-			check(listaIzrazaPridruzivanja, table);
-			check(izrazPridruzivanja, table);
+			checkSubtree(listaIzrazaPridruzivanja, table);
+			checkSubtree(izrazPridruzivanja, table);
 
 			int c = (Integer) listaIzrazaPridruzivanja.getAttribute(Attribute.BR_ELEM);
 			TypeList list = (TypeList) listaIzrazaPridruzivanja.getAttribute(Attribute.TIPOVI);
@@ -1279,11 +1298,11 @@ public class SemanticsAnalyzer {
 		NonterminalNode b = (NonterminalNode) parent.getChildren().get(2);
 		TerminalNode op = (TerminalNode) parent.getChildren().get(1);
 
-		check(a, syms);
+		checkSubtree(a, syms);
 		Type aType = (Type) a.getAttribute(Attribute.TIP);
 		if (!aType.canConvertImplicit(IntType.INSTANCE))
 			throw new SemanticsException("Left operand to '" + op.getText() + "' is of invalid type", parent);
-		check(b, syms);
+		checkSubtree(b, syms);
 		Type bType = (Type) b.getAttribute(Attribute.TIP);
 		if (!bType.canConvertImplicit(IntType.INSTANCE))
 			throw new SemanticsException("Right operand to '" + op.getText() + "' is of invalid type", parent);
@@ -1318,7 +1337,7 @@ public class SemanticsAnalyzer {
 	private static void checkExpressionUnitProduction(Node op, SymbolTable syms) {
 		NonterminalNode innerOp = (NonterminalNode) op.getChildren().get(0);
 
-		check(innerOp, syms);
+		checkSubtree(innerOp, syms);
 
 		op.setAttribute(Attribute.TIP, innerOp.getAttribute(Attribute.TIP));
 		op.setAttribute(Attribute.L_IZRAZ, innerOp.getAttribute(Attribute.L_IZRAZ));
