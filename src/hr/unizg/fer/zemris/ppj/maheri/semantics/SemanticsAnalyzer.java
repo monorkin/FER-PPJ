@@ -36,11 +36,14 @@ public class SemanticsAnalyzer {
 		 * zadovoljeno, semantički analizator treba na standardni izlaz ispisati
 		 * samo funkcija u vlastiti redak i završiti s radom.
 		 */
-		// probably need FunctionsTable which stores function prototypes, or
-		// adapt SymbolTable and Type to have functions as types .
+		// #1 can be checked in symbol table, global scope
+
+		// #2 add entry to symbol table which will be updated on function
+		// definition.
+		// then check this value
 	}
 
-	private static void check(Node l, SymbolTable table) {
+	private static void check(Node l, SymbolTable table) throws SemanticsException {
 		PPJCProduction production = determineProduction(l);
 		List<Node> r = l.getChildren();
 
@@ -61,7 +64,6 @@ public class SemanticsAnalyzer {
 			// l-izraz ← IDN.l-izraz
 			l.setAttribute(Attribute.TIP, idn.getAttribute(Attribute.TIP));
 			l.setAttribute(Attribute.L_IZRAZ, idn.getAttribute(Attribute.L_IZRAZ));
-
 			break;
 		}
 		// <primarni_izraz> ::= BROJ
@@ -271,7 +273,6 @@ public class SemanticsAnalyzer {
 			Type type = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
 			TypeList list = new TypeList(Arrays.asList(type));
 			l.setAttribute(Attribute.TIPOVI, list);
-
 			break;
 		}
 		// <lista_argumenata> ::= <lista_argumenata> ZAREZ <izraz_pridruzivanja>
@@ -335,15 +336,19 @@ public class SemanticsAnalyzer {
 		 * produkcije ovdje nisu navedene.
 		 */
 		case UNARNI_OPERATOR_1: {
+			// u semantickoj analizi ne treba nista provjeriti,
 			break;
 		}
 		case UNARNI_OPERATOR_2: {
+			// u semantickoj analizi ne treba nista provjeriti,
 			break;
 		}
 		case UNARNI_OPERATOR_3: {
+			// u semantickoj analizi ne treba nista provjeriti,
 			break;
 		}
 		case UNARNI_OPERATOR_4: {
+			// u semantickoj analizi ne treba nista provjeriti,
 			break;
 		}
 
@@ -414,12 +419,7 @@ public class SemanticsAnalyzer {
 
 		// <multiplikativni_izraz> ::= <cast_izraz>
 		case MULTIPLIKATIVNI_IZRAZ_1: {
-			NonterminalNode castIzraz = (NonterminalNode) r.get(0);
-
-			check(castIzraz, table);
-
-			l.setAttribute(Attribute.TIP, castIzraz.getAttribute(Attribute.TIP));
-			l.setAttribute(Attribute.L_IZRAZ, castIzraz.getAttribute(Attribute.L_IZRAZ));
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
 		// <multiplikativni_izraz> ::= <multiplikativni_izraz> (OP_PUTA |
@@ -427,64 +427,26 @@ public class SemanticsAnalyzer {
 		case MULTIPLIKATIVNI_IZRAZ_2:
 		case MULTIPLIKATIVNI_IZRAZ_3:
 		case MULTIPLIKATIVNI_IZRAZ_4: {
-			NonterminalNode multiplikativniIzraz = (NonterminalNode) r.get(0);
-			NonterminalNode castIzraz = (NonterminalNode) r.get(2);
-
-			check(multiplikativniIzraz, table);
-			Type mType = (Type) multiplikativniIzraz.getAttribute(Attribute.TIP);
-			if (!mType.canConvertImplicit(IntType.INSTANCE))
-				throw new SemanticsException("Left operand is not int-compatible", l);
-
-			check(castIzraz, table);
-			Type cType = (Type) castIzraz.getAttribute(Attribute.TIP);
-			if (!cType.canConvertImplicit(IntType.INSTANCE))
-				throw new SemanticsException("Right operand is not int-compatible", l);
-
-			l.setAttribute(Attribute.TIP, IntType.INSTANCE);
-			l.setAttribute(Attribute.L_IZRAZ, false);
+			checkIntBinaryOperator(l, table);
 			break;
 		}
 
 		// <aditivni_izraz> ::= <multiplikativni_izraz>
 		case ADITIVNI_IZRAZ_1: {
-			NonterminalNode multiplikativniIzraz = (NonterminalNode) r.get(0);
-
-			check(multiplikativniIzraz, table);
-
-			l.setAttribute(Attribute.TIP, multiplikativniIzraz.getAttribute(Attribute.TIP));
-			l.setAttribute(Attribute.L_IZRAZ, multiplikativniIzraz.getAttribute(Attribute.L_IZRAZ));
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
 		// <aditivni_izraz> ::= <aditivni_izraz> (PLUS | MINUS)
 		// <multiplikativni_izraz>
 		case ADITIVNI_IZRAZ_2:
 		case ADITIVNI_IZRAZ_3: {
-			NonterminalNode aditivniIzraz = (NonterminalNode) r.get(0);
-			NonterminalNode multiplikativniIzraz = (NonterminalNode) r.get(2);
-
-			check(aditivniIzraz, table);
-			Type aType = (Type) aditivniIzraz.getAttribute(Attribute.TIP);
-			if (!aType.canConvertImplicit(IntType.INSTANCE))
-				throw new SemanticsException("Left operand is not int-compatible", l);
-
-			check(multiplikativniIzraz, table);
-			Type mType = (Type) multiplikativniIzraz.getAttribute(Attribute.TIP);
-			if (!mType.canConvertImplicit(IntType.INSTANCE))
-				throw new SemanticsException("Right operand is not int-compatible", l);
-
-			l.setAttribute(Attribute.TIP, IntType.INSTANCE);
-			l.setAttribute(Attribute.L_IZRAZ, false);
+			checkIntBinaryOperator(l, table);
 			break;
 		}
 
 		// <odnosni_izraz> ::= <aditivni_izraz>
 		case ODNOSNI_IZRAZ_1: {
-			NonterminalNode aditivniIzraz = (NonterminalNode) r.get(0);
-
-			check(aditivniIzraz, table);
-
-			l.setAttribute(Attribute.TIP, aditivniIzraz.getAttribute(Attribute.TIP));
-			l.setAttribute(Attribute.L_IZRAZ, aditivniIzraz.getAttribute(Attribute.L_IZRAZ));
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
 		// <odnosni_izraz> ::= <odnosni_izraz> (OP_LT | OP_GT | OP_LTE | OP_GTE)
@@ -493,80 +455,109 @@ public class SemanticsAnalyzer {
 		case ODNOSNI_IZRAZ_3:
 		case ODNOSNI_IZRAZ_4:
 		case ODNOSNI_IZRAZ_5: {
-			NonterminalNode odnosniIzraz = (NonterminalNode) r.get(0);
-			NonterminalNode aditivniIzraz = (NonterminalNode) r.get(2);
-
-			check(odnosniIzraz, table);
-			Type oType = (Type) odnosniIzraz.getAttribute(Attribute.TIP);
-			if (!oType.canConvertImplicit(IntType.INSTANCE))
-				throw new SemanticsException("Left operand is not int-compatible", l);
-
-			check(aditivniIzraz, table);
-			Type aType = (Type) aditivniIzraz.getAttribute(Attribute.TIP);
-			if (!aType.canConvertImplicit(IntType.INSTANCE))
-				throw new SemanticsException("Right operand is not int-compatible", l);
-
-			l.setAttribute(Attribute.TIP, IntType.INSTANCE);
-			l.setAttribute(Attribute.L_IZRAZ, false);
+			checkIntBinaryOperator(l, table);
 			break;
 		}
 
+		// <jednakosni_izraz> ::= <odnosni_izraz>
 		case JEDNAKOSNI_IZRAZ_1: {
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
-		case JEDNAKOSNI_IZRAZ_2: {
-			break;
-		}
+		// <jednakosni_izraz> ::= <jednakosni_izraz> (OP_EQ | OP_NEQ)
+		// <odnosni_izraz>
+		case JEDNAKOSNI_IZRAZ_2:
 		case JEDNAKOSNI_IZRAZ_3: {
+			checkIntBinaryOperator(l, table);
 			break;
 		}
 
+		// <bin_i_izraz> ::= <jednakosni_izraz>
 		case BIN_I_IZRAZ_1: {
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
+		// <bin_i_izraz> ::= <bin_i_izraz> OP_BIN_I <jednakosni_izraz>
 		case BIN_I_IZRAZ_2: {
+			checkIntBinaryOperator(l, table);
 			break;
 		}
 
 		case BIN_XILI_IZRAZ_1: {
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
 		case BIN_XILI_IZRAZ_2: {
+			checkIntBinaryOperator(l, table);
 			break;
 		}
 
 		case BIN_ILI_IZRAZ_1: {
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
 		case BIN_ILI_IZRAZ_2: {
+			checkIntBinaryOperator(l, table);
 			break;
 		}
 
 		case LOG_I_IZRAZ_1: {
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
 		case LOG_I_IZRAZ_2: {
+			checkIntBinaryOperator(l, table);
 			break;
 		}
 
 		case LOG_ILI_IZRAZ_1: {
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
 		case LOG_ILI_IZRAZ_2: {
+			checkIntBinaryOperator(l, table);
 			break;
 		}
 
+		// <izraz_pridruzivanja> ::= <log_ili_izraz>
 		case IZRAZ_PRIDRUZIVANJA_1: {
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
+		// <izraz_pridruzivanja> ::= <postfiks_izraz> OP_PRIDRUZI <izraz_pridruzivanja>
 		case IZRAZ_PRIDRUZIVANJA_2: {
+			NonterminalNode postfiksIzraz = (NonterminalNode) r.get(0);
+			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(2);
+			
+			check(postfiksIzraz, table);
+			
+			boolean lvalue = (Boolean) postfiksIzraz.getAttribute(Attribute.L_IZRAZ);
+			if (!lvalue)
+				throw new SemanticsException("Non-lvalue assignment", l);
+			check(izrazPridruzivanja, table);
+			
+			Type rhsType = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
+			Type lhsType = (Type) postfiksIzraz.getAttribute(Attribute.TIP);
+			if (!rhsType.canConvertImplicit(lhsType))
+				throw new SemanticsException("Incompatible types in assignment", l);
 			break;
 		}
-
+		
+		// <izraz> ::= <izraz_pridruzivanja>
 		case IZRAZ_1: {
+			checkExpressionUnitProduction(l, table);
 			break;
 		}
+		// <izraz> ::= <izraz> ZAREZ <izraz_pridruzivanja>
 		case IZRAZ_2: {
+			NonterminalNode izraz = (NonterminalNode) r.get(0);
+			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(2);
+			
+			check(izraz, table);
+			check(izrazPridruzivanja, table);
+			
+			l.setAttribute(Attribute.TIP, izrazPridruzivanja.getAttribute(Attribute.TIP));
+			l.setAttribute(Attribute.L_IZRAZ, false);
 			break;
 		}
 
@@ -579,6 +570,7 @@ public class SemanticsAnalyzer {
 			 * pristupa u ugnijezdujucem bloku
 			 */
 			SymbolTable newTable = new SymbolTable(table);
+			// FIXME ?
 
 			check(listaNaredbi, newTable);
 			break;
@@ -594,6 +586,7 @@ public class SemanticsAnalyzer {
 			 * pristupa u ugnijezdujucem bloku
 			 */
 			SymbolTable newTable = new SymbolTable(table);
+			/// FIXME ?
 
 			check(listaDeklaracija, newTable);
 			check(listaNaredbi, newTable);
@@ -652,10 +645,31 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
+		// <naredba_grananja> ::= KR_IF L_ZAGRADA <izraz> D_ZAGRADA <naredba>
 		case NAREDBA_GRANANJA_1: {
+			NonterminalNode izraz = (NonterminalNode) r.get(2);
+			NonterminalNode naredba = (NonterminalNode) r.get(4);
+			
+			check(izraz, table);
+			Type izrazType = (Type) izraz.getAttribute(Attribute.TIP);
+			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
+				throw new SemanticsException("If-condition expression has invalid type", l);
+			check(naredba, table);
+			
 			break;
 		}
+		// <naredba_grananja> ::= KR_IF L_ZAGRADA <izraz> D_ZAGRADA <naredba> KR_ELSE <naredba>
 		case NAREDBA_GRANANJA_2: {
+			NonterminalNode izraz = (NonterminalNode) r.get(2);
+			NonterminalNode naredba1 = (NonterminalNode) r.get(4);
+			NonterminalNode naredba2 = (NonterminalNode) r.get(6);
+			
+			check(izraz, table);
+			Type izrazType = (Type) izraz.getAttribute(Attribute.TIP);
+			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
+				throw new SemanticsException("If-condition expression has invalid type", l);
+			check(naredba1, table);
+			check(naredba2, table);
 			break;
 		}
 
@@ -669,18 +683,20 @@ public class SemanticsAnalyzer {
 			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
 				throw new SemanticsException("While-loop condition is of invalid type", l);
 
-			naredba.setAttribute(Attribute.PETLJA, true);
+			naredba.setAttribute(Attribute.PETLJA, true); // FIXME ?
 
 			check(naredba, table);
 			break;
 		}
 		case NAREDBA_PETLJE_2: {
+			// TODO
 			break;
 		}
 		case NAREDBA_PETLJE_3: {
+			// TODO
 			break;
 		}
-		
+
 		// naredba_skoka> ::= (KR_CONTINUE | KR_BREAK) TOCKAZAREZ
 		case NAREDBA_SKOKA_1:
 		case NAREDBA_SKOKA_2: {
@@ -789,6 +805,80 @@ public class SemanticsAnalyzer {
 			break;
 		}
 		}
+	}
+
+	/**
+	 * Helper function: common case is production for operations or relations
+	 * between two elements, where both operands must be int-compatible, and
+	 * result is int. This helper function handles that case:
+	 * 
+	 * <ol>
+	 * <li>Left operand is checked recursively</li>
+	 * <li>Left operand type is checked to be int-compatible</li>
+	 * <li>Right operand is checked recursively</li>
+	 * <li>Right operand type is checked to be int-compatible</li>
+	 * </ol>
+	 * 
+	 * <ul>
+	 * <li>result type is set to int</li>
+	 * <li>result is not lvalue</li>
+	 * </ul>
+	 * 
+	 * @param parent
+	 *            node which represents a production as described
+	 * @param syms
+	 *            symbol table
+	 * @throws SemanticsException
+	 *             if any checks fail
+	 */
+	private static void checkIntBinaryOperator(Node parent, SymbolTable syms) throws SemanticsException {
+		NonterminalNode a = (NonterminalNode) parent.getChildren().get(0);
+		NonterminalNode b = (NonterminalNode) parent.getChildren().get(2);
+		TerminalNode op = (TerminalNode) parent.getChildren().get(1);
+
+		check(a, syms);
+		Type aType = (Type) a.getAttribute(Attribute.TIP);
+		if (!aType.canConvertImplicit(IntType.INSTANCE))
+			throw new SemanticsException("Left operand to '" + op.getText() + "' is of invalid type", parent);
+		check(b, syms);
+		Type bType = (Type) b.getAttribute(Attribute.TIP);
+		if (!bType.canConvertImplicit(IntType.INSTANCE))
+			throw new SemanticsException("Right operand to '" + op.getText() + "' is of invalid type", parent);
+
+		parent.setAttribute(Attribute.TIP, IntType.INSTANCE);
+		parent.setAttribute(Attribute.L_IZRAZ, false);
+	}
+
+	/**
+	 * Helper function: common case is production for choosing another binary
+	 * int operator of higher precedence, which is a unit production, e.g.: <br />
+	 * <code>&lt;addition&gt; ::= &lt;multiplication&gt;</code>
+	 * 
+	 * This function handles that case doing the following.
+	 * 
+	 * <ol>
+	 * <li>Inner operation is checked recursively</li>
+	 * </ol>
+	 * 
+	 * <ul>
+	 * <li>result type is set to that of inner operation</li>
+	 * <li>result is lvalue iff inner operation is lvalue</li>
+	 * </ul>
+	 * 
+	 * @param op
+	 *            node which represents a production as described
+	 * @param syms
+	 *            symbol table
+	 * @throws SemanticsException
+	 *             if any checks fail
+	 */
+	private static void checkExpressionUnitProduction(Node op, SymbolTable syms) {
+		NonterminalNode innerOp = (NonterminalNode) r.get(0);
+
+		check(innerOp, syms);
+
+		op.setAttribute(Attribute.TIP, innerOp.getAttribute(Attribute.TIP));
+		op.setAttribute(Attribute.L_IZRAZ, innerOp.getAttribute(Attribute.L_IZRAZ));
 	}
 
 	private static PPJCProduction determineProduction(Node node) {

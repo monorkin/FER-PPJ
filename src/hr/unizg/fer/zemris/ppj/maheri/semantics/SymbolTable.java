@@ -14,6 +14,7 @@ import java.util.List;
 public class SymbolTable {
 	private final HashMap<String, SymbolEntry> map = new HashMap<String, SymbolEntry>();
 	private final SymbolTable parentScope;
+	private final SymbolTable globalScope;
 
 	/**
 	 * Construct symbol table. The parent scope must be specified if table being
@@ -25,12 +26,17 @@ public class SymbolTable {
 	 */
 	public SymbolTable(SymbolTable parentScope) {
 		this.parentScope = parentScope;
+
+		SymbolTable globalScope = this;
+		while (globalScope.parentScope != null)
+			globalScope = globalScope.parentScope;
+		this.globalScope = globalScope;
 	}
 
 	/**
-	 * Get data about symbol by giving its name. If the symbol is not defined in
-	 * this scope, parent scope is searched. If no scope (including global)
-	 * contains symbol, <code>null</code> is returned.
+	 * Get data about symbol by giving its name, in all scopes. If the symbol is
+	 * not defined in local scope, parent scope is searched. If no scope
+	 * (including global) contains symbol, <code>null</code> is returned.
 	 * 
 	 * @param symbolName
 	 *            name of symbol
@@ -42,6 +48,32 @@ public class SymbolTable {
 		if (entry == null && parentScope != null)
 			return parentScope.get(symbolName);
 		return entry;
+	}
+
+	/**
+	 * Get data about symbol by giving its name, in local scope only. If the
+	 * symbol is not defined in this scope, <code>null</code> is returned.
+	 * 
+	 * @param symbolName
+	 *            name of symbol
+	 * @return entry describing symbol, or <code>null</code> if no such symbol
+	 *         in local scope
+	 */
+	public SymbolEntry getLocal(String symbolName) {
+		return map.get(symbolName);
+	}
+
+	/**
+	 * Get data about a symbol in global scope. If symbol is not defined,
+	 * <code>null</code> is returned
+	 * 
+	 * @param symbolName
+	 *            name of symbol
+	 * @return entry describing global symbol, or <code>null</code> if no such
+	 *         symbol in global scope
+	 */
+	public SymbolEntry getGlobal(String symbolName) {
+		return globalScope.map.get(symbolName);
 	}
 
 	/**
@@ -57,7 +89,7 @@ public class SymbolTable {
 	 * @throws IllegalStateException
 	 *             if symbol exists in current scope
 	 */
-	public void add(String symbolName, SymbolEntry data) {
+	public void addLocal(String symbolName, SymbolEntry data) {
 		if (symbolName == null || data == null)
 			throw new IllegalArgumentException("null arguments");
 		if (map.get(symbolName) != null)
@@ -73,11 +105,9 @@ public class SymbolTable {
 	public static class SymbolEntry {
 		// add extra data for each symbol ?
 		private final Type type;
-		private final boolean lvalue;
 
-		public SymbolEntry(Type symbolType, boolean lvalue) {
+		public SymbolEntry(Type symbolType) {
 			this.type = symbolType;
-			this.lvalue = lvalue;
 		}
 
 		/**
@@ -88,30 +118,26 @@ public class SymbolTable {
 		}
 
 		public boolean isLvalue() {
-			return lvalue;
+			/*
+			 * Od zavrsnih znakova gramatike, jedino IDN (identifikator) moze
+			 * biti l-izraz i to samo ako predstavlja varijablu brojevnog tipa
+			 * (char ili int) bez const-kvalifikatora. Identifikator koji
+			 * predstavlja funkciju ili niz nije l-izraz.
+			 */
+			return type instanceof NumericType;
+		}
+		
+		// used for functions
+		private boolean defined = false;
+		
+		public void markDefined() {
+			this.defined = true;
+		}
+		
+		public boolean isDefined() {
+			return defined;
 		}
 	}
-
-	// public static class Type {
-	// public static final Type INTEGER = new Type();
-	// public static final Type CHAR = new Type();
-	//
-	// public static final Type ARRAY = new Type();
-	//
-	// private final boolean isConst;
-	//
-	// private Type arrayType(Type enclosing) {
-	//
-	// }
-	//
-	// public Type(boolean isConst) {
-	// this.isConst = isConst;
-	// }
-	//
-	// private Type() {
-	// this.isConst = false;
-	// }
-	// }
 
 }
 
@@ -155,7 +181,7 @@ abstract class Type {
 
 class VoidType extends Type {
 	public static final VoidType INSTANCE = new VoidType();
-	
+
 	private VoidType() {
 	}
 }
@@ -303,7 +329,7 @@ class TypeList extends Type {
 	public TypeList(List<Type> types) {
 		this.types = new ArrayList<Type>(types);
 	}
-	
+
 	public ArrayList<Type> getTypes() {
 		return types;
 	}
@@ -330,7 +356,8 @@ class FunctionType extends Type {
 	public boolean canConvertImplicit(Type v) {
 		if (v instanceof FunctionType) {
 			FunctionType func = (FunctionType) v;
-			return returnType.canConvertImplicit(func.returnType) && parameterTypes.canConvertImplicit(func.parameterTypes);
+			return returnType.canConvertImplicit(func.returnType)
+					&& parameterTypes.canConvertImplicit(func.parameterTypes);
 		}
 		return false;
 	}
