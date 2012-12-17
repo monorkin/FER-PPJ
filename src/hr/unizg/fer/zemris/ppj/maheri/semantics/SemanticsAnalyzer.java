@@ -330,7 +330,7 @@ public class SemanticsAnalyzer {
 
 		/*
 		 * Nezavrsni znak <unarni_operator> generira aritmeticke (PLUS i MINUS),
-		 * bitovne (OP_TILDA) i logiˇke (OP_NEG) prefiks unarne operatore. Kako
+		 * bitovne (OP_TILDA) i logicke (OP_NEG) prefiks unarne operatore. Kako
 		 * u ovim produkcijama u semantickoj analizi ne treba nista provjeriti,
 		 * produkcije ovdje nisu navedene.
 		 */
@@ -588,56 +588,67 @@ public class SemanticsAnalyzer {
 		case SLOZENA_NAREDBA_2: {
 			NonterminalNode listaDeklaracija = (NonterminalNode) r.get(1);
 			NonterminalNode listaNaredbi = (NonterminalNode) r.get(2);
-			
+
 			/*
 			 * Svaki blok je odvojeni djelokrug, a nelokalnim imenima se
 			 * pristupa u ugnijezdujucem bloku
 			 */
 			SymbolTable newTable = new SymbolTable(table);
-			
+
 			check(listaDeklaracija, newTable);
 			check(listaNaredbi, newTable);
 			break;
 		}
-		
-		//lista_naredbi> ::= <naredba>
+
+		// lista_naredbi> ::= <naredba>
 		case LISTA_NAREDBI_1: {
 			NonterminalNode naredba = (NonterminalNode) r.get(0);
-			
+
 			check(naredba, table);
 			break;
 		}
-		//lista_naredbi> ::= <lista_naredbi> <naredba>
+		// lista_naredbi> ::= <lista_naredbi> <naredba>
 		case LISTA_NAREDBI_2: {
 			NonterminalNode listaNaredbi = (NonterminalNode) r.get(0);
 			NonterminalNode naredba = (NonterminalNode) r.get(1);
-			
+
 			check(listaNaredbi, table);
 			check(naredba, table);
 			break;
 		}
 
-		case NAREDBA_1: {
-			break;
-		}
+		// <naredba> ::= <izraz_naredba>
 		case NAREDBA_2: {
+			NonterminalNode u = (NonterminalNode) r.get(0);
+			check(u, table);
 			break;
 		}
-
-		case NAREDBA_3: {
-			break;
-		}
-		case NAREDBA_4: {
-			break;
-		}
+		// <naredba> ::= <slozena_naredba> | <naredba_grananja>
+		// |<naredba_petlje> | <naredba_skoka>
+		case NAREDBA_1:
+		case NAREDBA_3:
+		case NAREDBA_4:
 		case NAREDBA_5: {
+			// treba forwardati svojstvo PETLJA radi continue i break, ako se
+			// naredba prosiruje u bilo sto osim <izraz_naredba>
+			NonterminalNode u = (NonterminalNode) r.get(0);
+			u.setAttribute(Attribute.PETLJA, l.getAttribute(Attribute.PETLJA));
+			check(u, table);
 			break;
 		}
 
+		// <izraz_naredba> ::= TOCKAZAREZ
 		case IZRAZ_NAREDBA_1: {
+			l.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			break;
 		}
+		// izraz_naredba> ::= <izraz> TOCKAZAREZ
 		case IZRAZ_NAREDBA_2: {
+			NonterminalNode izraz = (NonterminalNode) r.get(0);
+
+			check(izraz, table);
+
+			l.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			break;
 		}
 
@@ -648,7 +659,19 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
+		// <naredba_petlje> ::= KR_WHILE L_ZAGRADA <izraz> D_ZAGRADA <naredba>
 		case NAREDBA_PETLJE_1: {
+			NonterminalNode izraz = (NonterminalNode) r.get(2);
+			NonterminalNode naredba = (NonterminalNode) r.get(4);
+
+			check(izraz, table);
+			Type izrazType = (Type) izraz.getAttribute(Attribute.TIP);
+			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
+				throw new SemanticsException("While-loop condition is of invalid type", l);
+
+			naredba.setAttribute(Attribute.PETLJA, true);
+
+			check(naredba, table);
 			break;
 		}
 		case NAREDBA_PETLJE_2: {
@@ -657,17 +680,25 @@ public class SemanticsAnalyzer {
 		case NAREDBA_PETLJE_3: {
 			break;
 		}
-
-		case NAREDBA_SKOKA_1: {
-			break;
-		}
+		
+		// naredba_skoka> ::= (KR_CONTINUE | KR_BREAK) TOCKAZAREZ
+		case NAREDBA_SKOKA_1:
 		case NAREDBA_SKOKA_2: {
+			// TODO maybe better using symboltable and scope
+			boolean insideLoop = (Boolean) l.getAttribute(Attribute.PETLJA);
+			if (!insideLoop) {
+				throw new SemanticsException("break/continue in non-loop scope", l);
+			}
 			break;
 		}
+		// <naredba_skoka> ::= KR_RETURN TOCKAZAREZ
 		case NAREDBA_SKOKA_3: {
+			// TODO check current function return type thru symboltable
 			break;
 		}
+		// <naredba_skoka> ::= KR_RETURN <izraz> TOCKAZAREZ
 		case NAREDBA_SKOKA_4: {
+			// TODO check current function return type thru symboltable
 			break;
 		}
 

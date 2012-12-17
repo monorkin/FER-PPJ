@@ -47,9 +47,11 @@ public abstract class Node {
 
 	enum Attribute {
 		// a la uputa
-		BR_ELEM, CONST, IME, L_IZRAZ, NTIP, POV, TIP, TIPOVI, VRIJEDNOST
-		
-		
+		BR_ELEM, CONST, IME, L_IZRAZ, NTIP, POV, TIP, TIPOVI, VRIJEDNOST,
+
+		// moj
+		PETLJA
+
 	}
 
 }
