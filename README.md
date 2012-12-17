@@ -1,1 +1,4 @@
-Za pripremu za usmeno ispitivanje (ne znam kada) čitajte kod.
+3. Labos
+========
+In progress.  
+read mail for info.
