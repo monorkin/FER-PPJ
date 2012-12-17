@@ -35,6 +35,11 @@ public abstract class Node {
 	}
 
 	public Object getAttribute(Attribute key) {
+		Object ret = null;
+		//...
+		
+		if (ret == null)
+			throw new IllegalArgumentException("no such attribute");
 		throw new UnsupportedOperationException("unimplemented");
 	}
 
@@ -47,10 +52,15 @@ public abstract class Node {
 
 	enum Attribute {
 		// a la uputa
-		BR_ELEM, CONST, IME, L_IZRAZ, NTIP, POV, TIP, TIPOVI, VRIJEDNOST,
+		IME, TIP, L_IZRAZ, 
+		
+		TIPOVI, IMENA,
+		
+		// ?
+		NTIP, POV, BR_ELEM, VRIJEDNOST,
 
 		// moj
-		PETLJA
+		PETLJA,
 
 	}
 

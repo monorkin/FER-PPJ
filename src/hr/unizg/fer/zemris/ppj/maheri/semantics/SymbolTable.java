@@ -98,6 +98,24 @@ public class SymbolTable {
 	}
 
 	/**
+	 * If scope is global, add symbol to global scope.
+	 * 
+	 * @param symbolName
+	 *            name of symbol to add
+	 * @param data
+	 *            info about symmbol being added
+	 * @throws IllegalStateException
+	 *             if scope is not global, or global symbol of same name exists
+	 */
+	public void addGlobal(String symbolName, SymbolEntry data) {
+		if (this != globalScope)
+			throw new IllegalStateException("not in global scope");
+		if (getGlobal(symbolName) != null)
+			throw new IllegalStateException("symbol exists in global scope");
+		globalScope.map.put(symbolName, data);
+	}
+
+	/**
 	 * Class which stores info about symbols in table.
 	 * 
 	 * @author dosvald
@@ -126,14 +144,14 @@ public class SymbolTable {
 			 */
 			return type instanceof NumericType;
 		}
-		
+
 		// used for functions
 		private boolean defined = false;
-		
+
 		public void markDefined() {
 			this.defined = true;
 		}
-		
+
 		public boolean isDefined() {
 			return defined;
 		}
@@ -177,12 +195,19 @@ abstract class Type {
 		// default: no cast allowed
 		return false;
 	}
+	
+	public abstract boolean equals(Type t);
 }
 
 class VoidType extends Type {
 	public static final VoidType INSTANCE = new VoidType();
 
 	private VoidType() {
+	}
+	
+	@Override
+	public boolean equals(Type t) {
+		return this == t;
 	}
 }
 
@@ -226,6 +251,11 @@ class IntType extends NumericType {
 
 	private IntType() {
 	}
+	
+	@Override
+	public boolean equals(Type t) {
+		return this == t;
+	}
 }
 
 class CharType extends NumericType {
@@ -243,6 +273,11 @@ class CharType extends NumericType {
 		if (target instanceof IntType)
 			return true;
 		return super.canConvertImplicit(target);
+	}
+	
+	@Override
+	public boolean equals(Type t) {
+		return this == t;
 	}
 }
 
@@ -264,6 +299,13 @@ class ConstType extends PrimitiveType {
 		 * vrijednost tipa T
 		 */
 		return target == type;
+	}
+	
+	@Override
+	public boolean equals(Type t) {
+		if (t instanceof ConstType)
+			return type.equals(((ConstType)t).type);
+		return false;
 	}
 }
 
@@ -305,6 +347,13 @@ class ArrayType extends Type {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean equals(Type t) {
+		if (t instanceof ArrayType)
+			return elementType.equals(((ArrayType)t).elementType);
+		return false;
+	}
 }
 
 class TypeList extends Type {
@@ -322,6 +371,7 @@ class TypeList extends Type {
 				if (types.get(i).canConvertImplicit(tl.types.get(i)))
 					return false;
 			}
+			return true;
 		}
 		return false;
 	}
@@ -332,6 +382,20 @@ class TypeList extends Type {
 
 	public ArrayList<Type> getTypes() {
 		return types;
+	}
+	
+	@Override
+	public boolean equals(Type t) {
+		if (t instanceof TypeList) {
+			TypeList list = (TypeList) t;
+			if (types.size() != list.types.size())
+				return false;
+			for (int i = 0; i < types.size(); ++i)
+				if (!types.get(i).equals(list.types.get(i)))
+					return false;
+			return true;
+		}
+		return false;
 	}
 }
 
@@ -358,6 +422,15 @@ class FunctionType extends Type {
 			FunctionType func = (FunctionType) v;
 			return returnType.canConvertImplicit(func.returnType)
 					&& parameterTypes.canConvertImplicit(func.parameterTypes);
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean equals(Type t) {
+		if (t instanceof FunctionType) {
+			FunctionType ft = (FunctionType)t;
+			return returnType.equals(ft.returnType) && parameterTypes.equals(ft.parameterTypes);
 		}
 		return false;
 	}
