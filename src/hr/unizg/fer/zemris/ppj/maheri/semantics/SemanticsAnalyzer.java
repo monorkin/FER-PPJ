@@ -15,9 +15,29 @@ public class SemanticsAnalyzer {
 		this.generativeTree = tree;
 	}
 
+	private static String errorString(Node errorNode) {
+		if (errorNode.getChildren() == null) {
+			return errorNode.toString();
+		}
+		StringBuilder sb = new StringBuilder(errorNode.toString());
+		sb.append(" ::= ");
+		if (errorNode.getChildren().isEmpty()) {
+			return sb.append("$").toString();
+		}
+		for (Node c : errorNode.getChildren())
+			sb.append(c.toString()).append(" ");
+		sb.setLength(sb.length() - 1);
+		return sb.toString();
+	}
+
 	public void checkAttributes() {
-		SymbolTable table = new SymbolTable(null);
-		check(generativeTree, table);
+		SymbolTable symbolTable = SymbolTable.GLOBAL;
+		try {
+			check(generativeTree, symbolTable);
+		} catch (SemanticsException e) {
+			System.out.println(errorString(e.getErrorNode()));
+			System.err.println(e.getMessage());
+		}
 	}
 
 	public void checkFunctions() {
@@ -42,6 +62,25 @@ public class SemanticsAnalyzer {
 		// #2 add entry to symbol table which will be updated on function
 		// definition.
 		// then check this value
+		try {
+			SymbolEntry mainEntry = SymbolTable.GLOBAL.get("main");
+			if (mainEntry == null)
+				throw new SemanticsException("main function undeclared", null);
+			FunctionType mainType = (FunctionType) mainEntry.getType();
+			if (!mainType.getReturnType().equals(IntType.INSTANCE))
+				throw new SemanticsException("main function must return int", null);
+			if (!mainType.getParameterTypes().getTypes().isEmpty())
+				throw new SemanticsException("main function takes no arguments", null);
+		} catch (SemanticsException e) {
+			System.out.println("main");
+			System.err.println(e.getMessage());
+		}
+		
+		try {
+			
+		} catch (SemanticsException e) {
+			
+		}
 	}
 
 	private static void check(Node l, SymbolTable table) throws SemanticsException {
@@ -690,12 +729,45 @@ public class SemanticsAnalyzer {
 			check(naredba, table);
 			break;
 		}
+		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1
+		// <izraz_naredba>2 D_ZAGRADA <naredba>
 		case NAREDBA_PETLJE_2: {
-			// TODO
+			NonterminalNode izrazNaredba1 = (NonterminalNode) r.get(2);
+			NonterminalNode izrazNaredba2 = (NonterminalNode) r.get(3);
+			NonterminalNode naredba = (NonterminalNode) r.get(5);
+
+			check(izrazNaredba1, table);
+			check(izrazNaredba2, table);
+
+			Type type = (Type) izrazNaredba2.getAttribute(Attribute.TIP);
+			if (!type.canConvertImplicit(IntType.INSTANCE))
+				throw new SemanticsException("For-loop condition of invalit type", l);
+
+			naredba.setAttribute(Attribute.PETLJA, true); // FIXME ?
+
+			check(naredba, table);
 			break;
 		}
+		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1
+		// <izraz_naredba>2 <izraz> D_ZAGRADA <naredba>
 		case NAREDBA_PETLJE_3: {
-			// TODO
+			NonterminalNode izrazNaredba1 = (NonterminalNode) r.get(2);
+			NonterminalNode izrazNaredba2 = (NonterminalNode) r.get(3);
+			NonterminalNode izraz = (NonterminalNode) r.get(4);
+			NonterminalNode naredba = (NonterminalNode) r.get(6);
+
+			check(izrazNaredba1, table);
+			check(izrazNaredba2, table);
+
+			Type type = (Type) izrazNaredba2.getAttribute(Attribute.TIP);
+			if (!type.canConvertImplicit(IntType.INSTANCE))
+				throw new SemanticsException("For-loop condition of invalid type", l);
+
+			check(izraz, table);
+
+			naredba.setAttribute(Attribute.PETLJA, true); // FIXME ?
+
+			check(naredba, table);
 			break;
 		}
 
@@ -759,7 +831,9 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("Function return type cannot be const-qualified", l);
 			}
 			Type retType = (Type) imeTipa.getAttribute(Attribute.TIP);
-			SymbolEntry functionEntry = table.getGlobal(functionName.getText());
+//			if (table != SymbolTable.GLOBAL)
+//				throw new IllegalStateException("internal error, scope mixup");
+			SymbolEntry functionEntry = SymbolTable.GLOBAL.get(functionName.getText());
 			FunctionType fType = new FunctionType(retType, new TypeList(new ArrayList<Type>()));
 
 			if (functionEntry != null) {
@@ -778,13 +852,13 @@ public class SemanticsAnalyzer {
 			} else {
 				// 5. zabiljezi definiciju i deklaraciju funkcije
 				functionEntry = new SymbolEntry(fType);
-				table.addGlobal(functionName.getText(), functionEntry);
+				SymbolTable.GLOBAL.addLocal(functionName.getText(), functionEntry);
 			}
 			functionEntry.markDefined();
 
 			// FIXME add something for return check
 
-			SymbolTable inner = new SymbolTable(table);
+			SymbolTable inner = table.createNested();
 
 			// 6. provjeri (<slozena_naredba>)
 			check(slozenaNaredba, inner);
@@ -807,7 +881,7 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("Function return type cannot be const-qualified", l);
 			}
 			Type retType = (Type) imeTipa.getAttribute(Attribute.TIP);
-			SymbolEntry functionEntry = table.getGlobal(functionName.getText());
+			SymbolEntry functionEntry = SymbolTable.GLOBAL.get(functionName.getText());
 			FunctionType fType = new FunctionType(retType, (TypeList) listaParametara.getAttribute(Attribute.TIPOVI));
 
 			if (functionEntry != null && functionEntry.isDefined()) {
@@ -828,13 +902,13 @@ public class SemanticsAnalyzer {
 			} else {
 				// 6. zabiljezi definiciju i deklaraciju funkcije
 				functionEntry = new SymbolEntry(fType);
-				table.addGlobal(functionName.getText(), functionEntry);
+				SymbolTable.GLOBAL.addLocal(functionName.getText(), functionEntry);
 			}
 			functionEntry.markDefined();
 
 			// 7.
 
-			SymbolTable inner = new SymbolTable(table);
+			SymbolTable inner = table.createNested();
 
 			@SuppressWarnings("unchecked")
 			List<String> paramNames = (List<String>) listaParametara.getAttribute(Attribute.IMENA);

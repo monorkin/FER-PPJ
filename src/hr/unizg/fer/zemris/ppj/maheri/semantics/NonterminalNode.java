@@ -17,6 +17,5 @@ public class NonterminalNode extends Node {
 	public List<Node> getChildren() {
 		return children;
 	}
-	
 
 }

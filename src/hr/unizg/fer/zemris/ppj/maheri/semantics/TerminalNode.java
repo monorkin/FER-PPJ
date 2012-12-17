@@ -2,7 +2,6 @@ package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
 import java.util.List;
 
-import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
 import hr.unizg.fer.zemris.ppj.maheri.symbol.TerminalSymbol;
 
 /**

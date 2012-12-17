@@ -1,6 +1,5 @@
 package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import hr.unizg.fer.zemris.ppj.maheri.symbol.Symbol;
@@ -51,13 +50,14 @@ public abstract class Node {
 	}
 
 	enum Attribute {
-		// a la uputa
+		// variables, expressions
 		IME, TIP, L_IZRAZ, 
-		
+		 
+		// arg-lists and param-lists
 		TIPOVI, IMENA,
 		
-		// ?
-		NTIP, POV, BR_ELEM, VRIJEDNOST,
+		// initializers, arrays
+		NTIP, BR_ELEM,
 
 		// moj
 		PETLJA,

@@ -14,7 +14,10 @@ import java.util.List;
 public class SymbolTable {
 	private final HashMap<String, SymbolEntry> map = new HashMap<String, SymbolEntry>();
 	private final SymbolTable parentScope;
-	private final SymbolTable globalScope;
+	
+	public static final SymbolTable GLOBAL = new SymbolTable(null);
+	
+	protected final List<SymbolTable> nested = new ArrayList<SymbolTable>();
 
 	/**
 	 * Construct symbol table. The parent scope must be specified if table being
@@ -24,13 +27,18 @@ public class SymbolTable {
 	 *            symbol table of parent scope, or <code>null</code> if global
 	 *            scope
 	 */
-	public SymbolTable(SymbolTable parentScope) {
+	private SymbolTable(SymbolTable parentScope) {
 		this.parentScope = parentScope;
-
-		SymbolTable globalScope = this;
-		while (globalScope.parentScope != null)
-			globalScope = globalScope.parentScope;
-		this.globalScope = globalScope;
+	}
+	
+	/**
+	 * Create a nested symbol table (for nesting scopes)
+	 * @return the created scope
+	 */
+	public SymbolTable createNested() {
+		SymbolTable sub = new SymbolTable(this);
+		nested.add(sub);
+		return sub;
 	}
 
 	/**
@@ -64,19 +72,6 @@ public class SymbolTable {
 	}
 
 	/**
-	 * Get data about a symbol in global scope. If symbol is not defined,
-	 * <code>null</code> is returned
-	 * 
-	 * @param symbolName
-	 *            name of symbol
-	 * @return entry describing global symbol, or <code>null</code> if no such
-	 *         symbol in global scope
-	 */
-	public SymbolEntry getGlobal(String symbolName) {
-		return globalScope.map.get(symbolName);
-	}
-
-	/**
 	 * Add new symbol to current scope. If another symbol of same name exists,
 	 * {@link IllegalStateException} is thrown.
 	 * 
@@ -95,24 +90,6 @@ public class SymbolTable {
 		if (map.get(symbolName) != null)
 			throw new IllegalStateException("symbol exists in current scope");
 		map.put(symbolName, data);
-	}
-
-	/**
-	 * If scope is global, add symbol to global scope.
-	 * 
-	 * @param symbolName
-	 *            name of symbol to add
-	 * @param data
-	 *            info about symmbol being added
-	 * @throws IllegalStateException
-	 *             if scope is not global, or global symbol of same name exists
-	 */
-	public void addGlobal(String symbolName, SymbolEntry data) {
-		if (this != globalScope)
-			throw new IllegalStateException("not in global scope");
-		if (getGlobal(symbolName) != null)
-			throw new IllegalStateException("symbol exists in global scope");
-		globalScope.map.put(symbolName, data);
 	}
 
 	/**
@@ -152,6 +129,11 @@ public class SymbolTable {
 			this.defined = true;
 		}
 
+		/**
+		 * @return <code>true</code> if this entry describes a function which
+		 *         was defined (as opposed to only declared); <code>false</code>
+		 *         if non-function type or function is not defined
+		 */
 		public boolean isDefined() {
 			return defined;
 		}
@@ -195,7 +177,7 @@ abstract class Type {
 		// default: no cast allowed
 		return false;
 	}
-	
+
 	public abstract boolean equals(Type t);
 }
 
@@ -204,7 +186,7 @@ class VoidType extends Type {
 
 	private VoidType() {
 	}
-	
+
 	@Override
 	public boolean equals(Type t) {
 		return this == t;
@@ -251,7 +233,7 @@ class IntType extends NumericType {
 
 	private IntType() {
 	}
-	
+
 	@Override
 	public boolean equals(Type t) {
 		return this == t;
@@ -274,7 +256,7 @@ class CharType extends NumericType {
 			return true;
 		return super.canConvertImplicit(target);
 	}
-	
+
 	@Override
 	public boolean equals(Type t) {
 		return this == t;
@@ -300,11 +282,11 @@ class ConstType extends PrimitiveType {
 		 */
 		return target == type;
 	}
-	
+
 	@Override
 	public boolean equals(Type t) {
 		if (t instanceof ConstType)
-			return type.equals(((ConstType)t).type);
+			return type.equals(((ConstType) t).type);
 		return false;
 	}
 }
@@ -347,11 +329,11 @@ class ArrayType extends Type {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean equals(Type t) {
 		if (t instanceof ArrayType)
-			return elementType.equals(((ArrayType)t).elementType);
+			return elementType.equals(((ArrayType) t).elementType);
 		return false;
 	}
 }
@@ -383,7 +365,7 @@ class TypeList extends Type {
 	public ArrayList<Type> getTypes() {
 		return types;
 	}
-	
+
 	@Override
 	public boolean equals(Type t) {
 		if (t instanceof TypeList) {
@@ -425,11 +407,11 @@ class FunctionType extends Type {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean equals(Type t) {
 		if (t instanceof FunctionType) {
-			FunctionType ft = (FunctionType)t;
+			FunctionType ft = (FunctionType) t;
 			return returnType.equals(ft.returnType) && parameterTypes.equals(ft.parameterTypes);
 		}
 		return false;
