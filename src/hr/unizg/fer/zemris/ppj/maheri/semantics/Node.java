@@ -39,6 +39,7 @@ public abstract class Node {
 		
 		if (ret == null)
 			throw new IllegalArgumentException("no such attribute");
+		// TODO implement
 		throw new UnsupportedOperationException("unimplemented");
 	}
 
@@ -46,6 +47,7 @@ public abstract class Node {
 		if (value == null) {
 			throw new IllegalArgumentException("null attribute value");
 		}
+		// TODO implement
 		throw new UnsupportedOperationException("unimplemented");
 	}
 
