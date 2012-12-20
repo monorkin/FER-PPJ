@@ -25,7 +25,6 @@ public class GrammarUtilsTest {
 		try {
 			fajl=new FileInputStream("res/testdata/lab2parser/1.in");
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Scanner scan = new Scanner(fajl);

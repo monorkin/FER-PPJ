@@ -20,7 +20,7 @@ import java.util.Set;
 public class SemanticsAnalyzer {
 	private Node generativeTree;
 	private static Map<String, List<orderedProduction>> productions;
-	private static PPJCProduction[] productionIndexes;
+	private static PPJCProduction[] productionEnum;
 
 	private class orderedProduction {
 		String[] production;
@@ -43,7 +43,7 @@ public class SemanticsAnalyzer {
 		String curr = null;
 		int index = 0;
 		productions = new HashMap<String, List<SemanticsAnalyzer.orderedProduction>>();
-		productionIndexes = PPJCProduction.values();
+		productionEnum = PPJCProduction.values();
 		while (fr.hasNextLine()) {
 			String ln = fr.nextLine();
 			if (ln.equals("\n"))
@@ -2073,7 +2073,7 @@ public class SemanticsAnalyzer {
 				}
 			}
 			if (matchFound)
-				return productionIndexes[o.index];
+				return productionEnum[o.index];
 		}
 		throw new SemanticsException("OPET NEMA PRODUKCIJE JEBIGA", node);
 	}
