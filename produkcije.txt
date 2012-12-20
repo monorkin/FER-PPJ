@@ -19,6 +19,11 @@
 	OP_DEC <unarni_izraz>
 	OP_INC <unarni_izraz>
 	<unarni_operator> <cast_izraz>
+<unarni_operator>
+	PLUS
+	MINUS
+	OP_TILDA
+	OP_NEG
 <cast_izraz>
 	<unarni_izraz>
 	L_ZAGRADA <ime_tipa> D_ZAGRADA <cast_izraz>

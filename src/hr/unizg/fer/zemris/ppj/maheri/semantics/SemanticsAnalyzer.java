@@ -5,6 +5,7 @@ import static hr.unizg.fer.zemris.ppj.maheri.semantics.Node.Attribute;
 import hr.unizg.fer.zemris.ppj.maheri.parser.Production;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.SymbolTable.SymbolEntry;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -39,7 +40,12 @@ public class SemanticsAnalyzer {
 
 	public SemanticsAnalyzer(Node tree) {
 		this.generativeTree = tree;
-		Scanner fr = new Scanner("produkcije.txt");
+		Scanner fr = null;
+		try {
+			fr = new Scanner(new File("produkcije.txt"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		String curr = null;
 		int index = 0;
 		productions = new HashMap<String, List<SemanticsAnalyzer.orderedProduction>>();
@@ -57,6 +63,7 @@ public class SemanticsAnalyzer {
 				curr = ln;
 			}
 		}
+		fr.close();
 	}
 
 	private static String errorString(Node errorNode) {
@@ -2057,12 +2064,14 @@ public class SemanticsAnalyzer {
 	}
 
 	private static PPJCProduction determineProduction(Node node) {
+		System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " + node.getSymbol());
+
 		List<Node> children = node.getChildren();
 
 		List<orderedProduction> prods = productions.get(node.getSymbol().toString());
 
 		if (prods == null)
-			throw new SemanticsException("NEMA PRODUKCIJE", node);
+			throw new SemanticsException("NEMA PRODUKCIJE HURR", node);
 
 		for (orderedProduction o : prods) {
 			boolean matchFound = true;
@@ -2072,8 +2081,10 @@ public class SemanticsAnalyzer {
 					break;
 				}
 			}
-			if (matchFound)
+			if (matchFound) {
+				System.err.println("NAŠO PRODUKCIJU:" + productionEnum[o.index]);
 				return productionEnum[o.index];
+			}
 		}
 		throw new SemanticsException("OPET NEMA PRODUKCIJE JEBIGA", node);
 	}
