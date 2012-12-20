@@ -20,6 +20,7 @@ import java.util.Set;
 public class SemanticsAnalyzer {
 	private Node generativeTree;
 	private static Map<String, List<orderedProduction>> productions;
+	private static PPJCProduction[] productionIndexes;
 
 	private class orderedProduction {
 		String[] production;
@@ -42,6 +43,7 @@ public class SemanticsAnalyzer {
 		String curr = null;
 		int index = 0;
 		productions = new HashMap<String, List<SemanticsAnalyzer.orderedProduction>>();
+		productionIndexes = PPJCProduction.values();
 		while (fr.hasNextLine()) {
 			String ln = fr.nextLine();
 			if (ln.equals("\n"))
@@ -2071,24 +2073,9 @@ public class SemanticsAnalyzer {
 				}
 			}
 			if (matchFound)
-				return PPJCProduction.values()[o.index];
+				return productionIndexes[o.index];
 		}
 		throw new SemanticsException("OPET NEMA PRODUKCIJE JEBIGA", node);
 	}
-
-	//
-	// private static boolean isThat(List<Node> toCheck, Node... checkWith) {
-	//
-	// if (toCheck.size() != checkWith.length)
-	// return false;
-	//
-	// for (int i = 0; i < checkWith.length; i++) {
-	// if
-	// (!toCheck.get(i).getSymbol().toString().equals(checkWith[i].getSymbol().toString()))
-	// return false;
-	// }
-	//
-	// return true;
-	// }
 
 }
