@@ -2,19 +2,59 @@ package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
 import static hr.unizg.fer.zemris.ppj.maheri.semantics.Node.Attribute;
 
+import hr.unizg.fer.zemris.ppj.maheri.parser.Production;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.SymbolTable.SymbolEntry;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.Set;
 
 public class SemanticsAnalyzer {
 	private Node generativeTree;
+	private static Map<String, List<orderedProduction>> productions;
+
+	private class orderedProduction {
+		String[] production;
+		int index;
+
+		/**
+		 * @param production
+		 * @param index
+		 */
+		public orderedProduction(String[] production, int index) {
+			this.production = production;
+			this.index = index;
+		}
+
+	}
 
 	public SemanticsAnalyzer(Node tree) {
 		this.generativeTree = tree;
+		Scanner fr = new Scanner("produkcije.txt");
+		String curr = null;
+		int index = 0;
+		productions = new HashMap<String, List<SemanticsAnalyzer.orderedProduction>>();
+		while (fr.hasNextLine()) {
+			String ln = fr.nextLine();
+			if (ln.equals("\n"))
+				continue;
+			if (ln.startsWith("\t")) {
+				if (productions.get(curr) == null)
+					productions.put(curr, new ArrayList<SemanticsAnalyzer.orderedProduction>());
+				productions.get(curr).add(new orderedProduction(ln.substring(1).split("\\s+"), index));
+				index++;
+			} else {
+				curr = ln;
+			}
+		}
 	}
 
 	private static String errorString(Node errorNode) {
@@ -70,7 +110,7 @@ public class SemanticsAnalyzer {
 			System.out.println("main");
 			System.err.println(e.getMessage());
 		}
-		
+
 		try {
 			checkFunctionsAreDefined(SymbolTable.GLOBAL);
 		} catch (SemanticsException e) {
@@ -78,7 +118,7 @@ public class SemanticsAnalyzer {
 			System.err.println(e.getMessage());
 		}
 	}
-	
+
 	private static void checkMain() {
 		SymbolEntry mainEntry = SymbolTable.GLOBAL.get("main");
 		if (mainEntry == null)
@@ -89,7 +129,7 @@ public class SemanticsAnalyzer {
 		if (!mainType.getParameterTypes().getTypes().isEmpty())
 			throw new SemanticsException("main function takes no arguments", null);
 	}
-	
+
 	private static void checkFunctionsAreDefined(SymbolTable table) {
 		for (Entry<String, SymbolEntry> entry : table.getEntries()) {
 			SymbolEntry s = entry.getValue();
@@ -133,7 +173,8 @@ public class SemanticsAnalyzer {
 			try {
 				int intValue = Integer.parseInt(broj.getText());
 				// ovaj int se nigdje ne koristi
-				// vjerojatno se ne treba ovdje koristiti, tek u generiranju koda
+				// vjerojatno se ne treba ovdje koristiti, tek u generiranju
+				// koda
 			} catch (NumberFormatException nf) {
 				throw new SemanticsException("Invalid integer constant value " + broj.getText(), l);
 			}
@@ -148,19 +189,22 @@ public class SemanticsAnalyzer {
 		case PRIMARNI_IZRAZ_3: {
 			TerminalNode znak = (TerminalNode) r.get(0);
 
-			/* 1. znak je ispravan tj.
-			 * ppjC dozvoljava iskljucivo znakove '\t', '\n', '\0', '\'', '\"' i '\\'
-			 * sve ostale konstante predstavljaju gresku
-			 * Nadalje znak " se moze pojaviti neprefiksiran s istim znacenjem
-			 *   (pretpostavljam da misle na 'Ide patka preko "Save" i nosi pismo...'
-			 *    tu nemoramo escapeati " jer je okruzen sa ' koji imaju vecu "tezinu")
+			/*
+			 * 1. znak je ispravan tj. ppjC dozvoljava iskljucivo znakove '\t',
+			 * '\n', '\0', '\'', '\"' i '\\' sve ostale konstante predstavljaju
+			 * gresku Nadalje znak " se moze pojaviti neprefiksiran s istim
+			 * znacenjem (pretpostavljam da misle na 'Ide patka preko "Save" i
+			 * nosi pismo...' tu nemoramo escapeati
+			 * " jer je okruzen sa ' koji imaju vecu "tezinu")
 			 */
 			String charValue = znak.getText();
 			if (charValue.length() > 3) {
 				String[] ok = new String[] { "'\\n'", "'\\t'", "'\\0'", "'\\''", "'\\\"'", "'\\\\'" };
 				// zasto je tu sve \\x umjesto \x i zasto je sve u '' ?
-				// ' ' navodnici sluze jer koliko znam u leksickoj analizi se u ZNAK sprema s navodnicima pa i getText daje s navodnicima
-				// backslash treba jer u getText pise BACKSLASH pa onda n, a ne NOVIRED kao jedan znak
+				// ' ' navodnici sluze jer koliko znam u leksickoj analizi se u
+				// ZNAK sprema s navodnicima pa i getText daje s navodnicima
+				// backslash treba jer u getText pise BACKSLASH pa onda n, a ne
+				// NOVIRED kao jedan znak
 				boolean found = false;
 				for (String s : ok)
 					if (s.equals(charValue))
@@ -180,13 +224,17 @@ public class SemanticsAnalyzer {
 		case PRIMARNI_IZRAZ_4: {
 			TerminalNode niz = (TerminalNode) r.get(0);
 
-			/* 1. konstantni niz znakova je ispravan
-			 * Konstantni znakovni nizovi (uniformni znak NIZ_ZNAKOVA) su tipa niz(const(char))
-			 * i implicitno zavrsavaju znakom '\0' (kao u C -u). Ispravni konstantni znakovini nizovi
-			 * pocinju i zavrsavaju dvostrukim navodnikom (ovo je osigurano leksickom analizom), i
-			 * mogu sadrzavati sve ispisive ASCII znakove, a znakom \ mogu biti prefiksirani samo znakovi
-			 * '\t', '\n', '\0', '\'', '\"' i '\\'. Slicno kao za znakove konstante, leksicka analiza ce
-			 * propustiti neke konstantme znakovne nizove koji nisu ispravni, npr. nizove "\" i "\x"
+			/*
+			 * 1. konstantni niz znakova je ispravan Konstantni znakovni nizovi
+			 * (uniformni znak NIZ_ZNAKOVA) su tipa niz(const(char)) i
+			 * implicitno zavrsavaju znakom '\0' (kao u C -u). Ispravni
+			 * konstantni znakovini nizovi pocinju i zavrsavaju dvostrukim
+			 * navodnikom (ovo je osigurano leksickom analizom), i mogu
+			 * sadrzavati sve ispisive ASCII znakove, a znakom \ mogu biti
+			 * prefiksirani samo znakovi '\t', '\n', '\0', '\'', '\"' i '\\'.
+			 * Slicno kao za znakove konstante, leksicka analiza ce propustiti
+			 * neke konstantme znakovne nizove koji nisu ispravni, npr. nizove
+			 * "\" i "\x"
 			 */
 			String stringValue = niz.getText();
 			boolean esc = false;
@@ -240,18 +288,19 @@ public class SemanticsAnalyzer {
 			l.setAttribute(Attribute.L_IZRAZ, primarniIzraz.getAttribute(Attribute.L_IZRAZ));
 			break;
 		}
-		// <postfiks_izraz> ::= <postfiks_izraz> L_UGL_ZAGRADA <izraz> D_UGL_ZAGRADA
+		// <postfiks_izraz> ::= <postfiks_izraz> L_UGL_ZAGRADA <izraz>
+		// D_UGL_ZAGRADA
 		// nesto[nesto] - ocekujemo indeksiranje niza
 		case POSTFIX_IZRAZ_2: {
 			NonterminalNode postfiksIzraz = (NonterminalNode) r.get(0);
 			NonterminalNode izraz = (NonterminalNode) r.get(2);
 
-			 /* Izbjegavamo indeksiranje niza kao polje, odnosno:
-			  * 		int a[10];
-			  * 		a[1][2]; -- nije validan izraz
-			  * Niz nemozemo dvostruko indeksirati, ergo javljamo gresku.
-			  */
-			
+			/*
+			 * Izbjegavamo indeksiranje niza kao polje, odnosno: int a[10];
+			 * a[1][2]; -- nije validan izraz Niz nemozemo dvostruko
+			 * indeksirati, ergo javljamo gresku.
+			 */
+
 			// 1. provjeri (<postfiks_izraz>)
 			checkSubtree(postfiksIzraz, table);
 			Type t = (Type) postfiksIzraz.getAttribute(Attribute.TIP);
@@ -261,7 +310,7 @@ public class SemanticsAnalyzer {
 			}
 
 			ArrayType nizX = (ArrayType) t;
-			
+
 			// 3. provjeri (<izraz>)
 			checkSubtree(izraz, table);
 
@@ -284,7 +333,7 @@ public class SemanticsAnalyzer {
 
 			// 1. provjeri (<postfiks_izraz>)
 			checkSubtree(postfiksIzraz, table);
-			
+
 			// 2. <postfiks_izraz>.tip = funkcija(void --> pov )
 			Type t = (Type) postfiksIzraz.getAttribute(Attribute.TIP);
 			if (!(t instanceof FunctionType)) {
@@ -302,7 +351,8 @@ public class SemanticsAnalyzer {
 			l.setAttribute(Attribute.L_IZRAZ, false);
 			break;
 		}
-		// <postfiks_izraz> ::= <postfiks_izraz> L_ZAGRADA <lista_argumenata> D_ZAGRADA
+		// <postfiks_izraz> ::= <postfiks_izraz> L_ZAGRADA <lista_argumenata>
+		// D_ZAGRADA
 		// nesto(nesto, nesto, ...) - ocekujemo funkciju koja ima argumente,
 		// argumente typecatama u oblik koji je zadan u funkciji
 		case POSTFIX_IZRAZ_4: {
@@ -311,7 +361,7 @@ public class SemanticsAnalyzer {
 
 			// 1. provjeri (<postfiks_izraz>)
 			checkSubtree(postfiksIzraz, table);
-			
+
 			// 2. provjeri (<lista_argumenata>)
 			checkSubtree(listaArgumenata, table);
 
@@ -341,16 +391,18 @@ public class SemanticsAnalyzer {
 		case POSTFIX_IZRAZ_5:
 		case POSTFIX_IZRAZ_6: {
 			NonterminalNode postfiksIzraz = (NonterminalNode) r.get(0);
-			
+
 			/*
-			 * I prefiks i postfiks inkrement operatori u dijelu promjene vrijednosti varijable imaju
-			 * znacenje kao naredba v = (v.tip)(v + 1);. Za dekrement operatore znacenje je
-			 * isto uz zamjenu operatora zbrajanja s operatorom oduzimanja. Drugim rijecima,
-			 * moguce je inkrementirati ili dekrementirati varijable tipova int i char. Provjera
-			 * vrijednosti svojstva l-izraz u tocki dva osigurava da se radi o varijabli bez const-
-			 * kvalifikatora, a zajedno s drugim uvjetom osigurava se da se radi o varijabli brojevnog 
-			 * tipa. Vazno je uociti da rezultat primjene ovih operatora vise nije l-izraz, nego
-			 * je vrijednost tipa int.
+			 * I prefiks i postfiks inkrement operatori u dijelu promjene
+			 * vrijednosti varijable imaju znacenje kao naredba v = (v.tip)(v +
+			 * 1);. Za dekrement operatore znacenje je isto uz zamjenu operatora
+			 * zbrajanja s operatorom oduzimanja. Drugim rijecima, moguce je
+			 * inkrementirati ili dekrementirati varijable tipova int i char.
+			 * Provjera vrijednosti svojstva l-izraz u tocki dva osigurava da se
+			 * radi o varijabli bez const- kvalifikatora, a zajedno s drugim
+			 * uvjetom osigurava se da se radi o varijabli brojevnog tipa. Vazno
+			 * je uociti da rezultat primjene ovih operatora vise nije l-izraz,
+			 * nego je vrijednost tipa int.
 			 */
 
 			// 1. provjeri (<postfiks_izraz>)
@@ -372,20 +424,22 @@ public class SemanticsAnalyzer {
 			l.setAttribute(Attribute.L_IZRAZ, false);
 			break;
 		}
-		
-		/* <lista_argumenata>
-		 * Nezavrsni znak <lista_argumenata> generira listu argumenata za poziv funkcije, a za
-		 * razliku od nezavrsnih znakova koji generiraju izraze, imat ce svojsto tipovi koje predstavlja
-		 * listu tipova argumenata, s lijeva na desno.
+
+		/*
+		 * <lista_argumenata> Nezavrsni znak <lista_argumenata> generira listu
+		 * argumenata za poziv funkcije, a za razliku od nezavrsnih znakova koji
+		 * generiraju izraze, imat ce svojsto tipovi koje predstavlja listu
+		 * tipova argumenata, s lijeva na desno.
 		 */
 
 		// <lista_argumenata> ::= <izraz_pridruzivanja>
 		case LISTA_ARGUMENATA_1: {
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(0);
-			
+
 			/*
-			 * Ova produkcija generira krajnje lijevi (moguce i jedini) argument i postavlja njegov
-			 * tip kao jedini element liste u svojstvu tipovi.
+			 * Ova produkcija generira krajnje lijevi (moguce i jedini) argument
+			 * i postavlja njegov tip kao jedini element liste u svojstvu
+			 * tipovi.
 			 */
 
 			// 1. provjeri(izrazPridruzivanja)
@@ -393,7 +447,7 @@ public class SemanticsAnalyzer {
 
 			Type type = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
 			TypeList list = new TypeList(Arrays.asList(type));
-			
+
 			// tipovi <-- [ <izraz_pridruzivanja>.tip ]
 			l.setAttribute(Attribute.TIPOVI, list);
 			break;
@@ -402,16 +456,17 @@ public class SemanticsAnalyzer {
 		case LISTA_ARGUMENATA_2: {
 			NonterminalNode listaArgumenata = (NonterminalNode) r.get(0);
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(2);
-			
+
 			/*
-			 * Ova produkcija omogucuje nizanje argumenata odvojenih zarezom. Tip novog ar-
-			 * gumenta koji je predstavljen nezavrsnim znakom <izraz_pridruzivanja> dodaje
-			 * se na desni kraj liste tipova koji su odredeni za prethodne argumente.
+			 * Ova produkcija omogucuje nizanje argumenata odvojenih zarezom.
+			 * Tip novog ar- gumenta koji je predstavljen nezavrsnim znakom
+			 * <izraz_pridruzivanja> dodaje se na desni kraj liste tipova koji
+			 * su odredeni za prethodne argumente.
 			 */
 
 			// 1. provjeri(<lista_argumenata>)
 			checkSubtree(listaArgumenata, table);
-			
+
 			// 2. provjeri(<izraz_pridruzivanja>)
 			checkSubtree(izrazPridruzivanja, table);
 
@@ -419,15 +474,17 @@ public class SemanticsAnalyzer {
 			TypeList list = (TypeList) l.getAttribute(Attribute.TIPOVI);
 			list.getTypes().add(type);
 
-			// tipovi <-- <lista_argumenata>.tipovi + [ <izraz_pridruzivanja>.tip ]
+			// tipovi <-- <lista_argumenata>.tipovi + [
+			// <izraz_pridruzivanja>.tip ]
 			l.setAttribute(Attribute.TIPOVI, list);
 			break;
 		}
 
-		/* <unarni_izraz>
-		 * Nezavrsni znak <unarni_izraz> generira izraze s opcionalnim prefils unarnim operatorima
+		/*
+		 * <unarni_izraz> Nezavrsni znak <unarni_izraz> generira izraze s
+		 * opcionalnim prefils unarnim operatorima
 		 */
-		
+
 		// unarni_izraz> ::= <postfiks_izraz>
 		case UNARNI_IZRAZ_1: {
 			NonterminalNode postfiksIzraz = (NonterminalNode) r.get(0);
@@ -446,12 +503,13 @@ public class SemanticsAnalyzer {
 		case UNARNI_IZRAZ_2:
 		case UNARNI_IZRAZ_3: {
 			NonterminalNode unarniIzraz = (NonterminalNode) r.get(1);
-			
-			//Prefiks inkrement i dekrement imaju analogna semanticka pravila postfiks inacicama istih operatora
+
+			// Prefiks inkrement i dekrement imaju analogna semanticka pravila
+			// postfiks inacicama istih operatora
 
 			// 1. provjeri(unarniIzraz)
 			checkSubtree(unarniIzraz, table);
-			
+
 			// 2. <unarni_izraz>.l-izraz = 1 i <unarni_izraz>.tip ~ int
 			// Falio je kod za tocku 2
 			Type type = (Type) unarniIzraz.getAttribute(Attribute.TIP);
@@ -472,15 +530,17 @@ public class SemanticsAnalyzer {
 		// <unarni_izraz> ::= <unarni_operator> <cast_izraz>
 		case UNARNI_IZRAZ_4: {
 			NonterminalNode castIzraz = (NonterminalNode) r.get(1);
-			
+
 			/*
-			 * Unarni operatori primjenjivi su na vrijednosti tipa int sto se provjerava u tocki 2, a
-			 * rezultat je opet tipa int. Iako je u produkciji nezavrsni znak <unarni_operator>,
-			 * nije potrebno provjeravati nikakva semanticka pravila u toj grani stabla jer taj
-			 * nezavrsni znak jednostavno generira neki od unarnih operatora (sto je prikazano u
-			 * nastavku). Konacno, bez obzira na to je li <cast_izraz> l-izraz ili ne, rezultat
-			 * primjene unarnog operatora je samo vrijednost i nije l-izraz. Na primjer, naredba
-			 * +a = 3; je semanticki neispravna zbog ovog pravila.
+			 * Unarni operatori primjenjivi su na vrijednosti tipa int sto se
+			 * provjerava u tocki 2, a rezultat je opet tipa int. Iako je u
+			 * produkciji nezavrsni znak <unarni_operator>, nije potrebno
+			 * provjeravati nikakva semanticka pravila u toj grani stabla jer
+			 * taj nezavrsni znak jednostavno generira neki od unarnih operatora
+			 * (sto je prikazano u nastavku). Konacno, bez obzira na to je li
+			 * <cast_izraz> l-izraz ili ne, rezultat primjene unarnog operatora
+			 * je samo vrijednost i nije l-izraz. Na primjer, naredba +a = 3; je
+			 * semanticki neispravna zbog ovog pravila.
 			 */
 
 			// 1. provjeri(cast_izraz)
@@ -523,8 +583,9 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
-		// Nezavrsni znak <cast_izraz> generira izraze s opcionalnim cast operatorom.
-		
+		// Nezavrsni znak <cast_izraz> generira izraze s opcionalnim cast
+		// operatorom.
+
 		// <cast_izraz> ::= <unarni_izraz>
 		case CAST_IZRAZ_1: {
 			NonterminalNode unarniIzraz = (NonterminalNode) r.get(0);
@@ -545,7 +606,7 @@ public class SemanticsAnalyzer {
 
 			// 1. provjeri(imeTipa)
 			checkSubtree(imeTipa, table);
-			
+
 			// 2. provjeri(castIzraz)
 			checkSubtree(castIzraz, table);
 
@@ -556,24 +617,27 @@ public class SemanticsAnalyzer {
 			if (!from.canConvertExplicit(to)) {
 				throw new SemanticsException("Invalid cast", l);
 			}
-			
+
 			// tip <-- ime_tipa.tip
 			// l-izraz <-- 0
-			// nigdje se ne sprema? cini mi se da fali "l.setAttribute(Att...." pa sam ih dodao dolje
+			// nigdje se ne sprema? cini mi se da fali "l.setAttribute(Att...."
+			// pa sam ih dodao dolje
 			// OK
 			l.setAttribute(Attribute.TIP, imeTipa.getAttribute(Attribute.TIP));
 			l.setAttribute(Attribute.L_IZRAZ, false);
 
 			break;
 		}
-		
-		/* <ime tipa>
-		 * Nezavrsni znak <ime_tipa> generira imena opcionalno const-kvalificiranih brojevnih ti-
-		 * pova i kljucnu rijec void. U ovim produkcijama ce se izracunati izvedeno svojstvo tip
-		 * koje se koristi u produkcijama gdje se <ime_tipa> pojavljuje s desne strane i dodatno ce
-		 * se onemoguciti tip const void (koji je sintaksno ispravan, ali nema smisla).
+
+		/*
+		 * <ime tipa> Nezavrsni znak <ime_tipa> generira imena opcionalno
+		 * const-kvalificiranih brojevnih ti- pova i kljucnu rijec void. U ovim
+		 * produkcijama ce se izracunati izvedeno svojstvo tip koje se koristi u
+		 * produkcijama gdje se <ime_tipa> pojavljuje s desne strane i dodatno
+		 * ce se onemoguciti tip const void (koji je sintaksno ispravan, ali
+		 * nema smisla).
 		 */
-		
+
 		// <ime_tipa> ::= <specifikator_tipa>
 		case IME_TIPA_1: {
 			NonterminalNode specifikatorTipa = (NonterminalNode) r.get(0);
@@ -591,7 +655,7 @@ public class SemanticsAnalyzer {
 
 			// 1. provjeri(specifikatorTipa)
 			checkSubtree(specifikatorTipa, table);
-			
+
 			// 2. specifikatorTipa.tip != void
 			Type type = (Type) specifikatorTipa.getAttribute(Attribute.TIP);
 			if (type instanceof VoidType) {
@@ -602,13 +666,14 @@ public class SemanticsAnalyzer {
 			l.setAttribute(Attribute.TIP, new ConstType((NumericType) specifikatorTipa.getAttribute(Attribute.TIP)));
 			break;
 		}
-		
-		/* <specifikator tipa>
-		 * Nezavrsni znak <specifikator_tipa> generira jedan od tri zavrsna znaka KR_VOID,
-		 * KR_CHAR i KR_INT. U semantickoj analizi cemo iz zavrsnog znaka odrediti vrijednost svoj-
-		 * stva tip nezavrsnog znaka, ali u ovim produkcijama ne moze doci do semanticke pogreske.
+
+		/*
+		 * <specifikator tipa> Nezavrsni znak <specifikator_tipa> generira jedan
+		 * od tri zavrsna znaka KR_VOID, KR_CHAR i KR_INT. U semantickoj analizi
+		 * cemo iz zavrsnog znaka odrediti vrijednost svoj- stva tip nezavrsnog
+		 * znaka, ali u ovim produkcijama ne moze doci do semanticke pogreske.
 		 */
-		
+
 		// <specifikator_tipa> ::= KR_VOID
 		case SPECIFIKATOR_TIPA_1: {
 			// tip <-- void
@@ -628,16 +693,18 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
-		/* <multiplikativni izraz>
-		 * Nezavrsni znak <multiplikativni_izraz> generira izraze u kojima se opcionalno ko-
-		 * riste operatori mnozenja, dijeljenja i ostatka. Struktura produkcija osigurava da sva tri
-		 * operatora imaju isti prioritet i to manji od unarnih (prefiks i postfiks) operatora, a veci
-		 * od ostalih operatora. Nadalje, lijeva asocijativnost ovih operatora osigurana je lijevom
-		 * rekurzijom u produkcijama.
-		 * Svi ostali binarni operatori u jeziku (cija pravila su prikazana kasnije) ostvareni su
-		 * slicnim produkcijama i provjeravaju se slicna pravila.
-		*/
-		
+		/*
+		 * <multiplikativni izraz> Nezavrsni znak <multiplikativni_izraz>
+		 * generira izraze u kojima se opcionalno ko- riste operatori mnozenja,
+		 * dijeljenja i ostatka. Struktura produkcija osigurava da sva tri
+		 * operatora imaju isti prioritet i to manji od unarnih (prefiks i
+		 * postfiks) operatora, a veci od ostalih operatora. Nadalje, lijeva
+		 * asocijativnost ovih operatora osigurana je lijevom rekurzijom u
+		 * produkcijama. Svi ostali binarni operatori u jeziku (cija pravila su
+		 * prikazana kasnije) ostvareni su slicnim produkcijama i provjeravaju
+		 * se slicna pravila.
+		 */
+
 		// <multiplikativni_izraz> ::= <cast_izraz>
 		case MULTIPLIKATIVNI_IZRAZ_1: {
 			// 1. provjeri(cast_izraz)
@@ -646,7 +713,8 @@ public class SemanticsAnalyzer {
 			checkExpressionUnitProduction(l, table);
 			break;
 		}
-		// <multiplikativni_izraz> ::= <multiplikativni_izraz> (OP_PUTA | OP_DIJELI | OP_MOD) <cast_izraz>
+		// <multiplikativni_izraz> ::= <multiplikativni_izraz> (OP_PUTA |
+		// OP_DIJELI | OP_MOD) <cast_izraz>
 		case MULTIPLIKATIVNI_IZRAZ_2:
 		case MULTIPLIKATIVNI_IZRAZ_3:
 		case MULTIPLIKATIVNI_IZRAZ_4: {
@@ -660,11 +728,11 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
-		/* <aditivni izraz>
-		 * Nezavrsni znak <aditivni_izraz> generira izraze u kojima se opcionalno koriste opera-
-		 * tori zbrajanja i oduzimanja.
+		/*
+		 * <aditivni izraz> Nezavrsni znak <aditivni_izraz> generira izraze u
+		 * kojima se opcionalno koriste opera- tori zbrajanja i oduzimanja.
 		 */
-		
+
 		// <aditivni_izraz> ::= <multiplikativni_izraz>
 		case ADITIVNI_IZRAZ_1: {
 			// 1. provjeri(<multiplikativni_izraz>)
@@ -673,7 +741,8 @@ public class SemanticsAnalyzer {
 			checkExpressionUnitProduction(l, table);
 			break;
 		}
-		// <aditivni_izraz> ::= <aditivni_izraz> (PLUS | MINUS) <multiplikativni_izraz>
+		// <aditivni_izraz> ::= <aditivni_izraz> (PLUS | MINUS)
+		// <multiplikativni_izraz>
 		case ADITIVNI_IZRAZ_2:
 		case ADITIVNI_IZRAZ_3: {
 			// 1. provjeri(<aditivni_izraz>)
@@ -685,11 +754,12 @@ public class SemanticsAnalyzer {
 			checkIntBinaryOperator(l, table);
 			break;
 		}
-		
-		/* <odnosni izraz>
-		 * Nezavrssni znak <odnosni_izraz> generira izraze u kojima se opcionalno koriste od-
-		 * nosni operatori < (uniformni znak OP_LT), > (uniformni znak OP_GT), <= (uniformni znak
-		 * OP_LTE) i >= (uniformni znak OP_GTE).
+
+		/*
+		 * <odnosni izraz> Nezavrssni znak <odnosni_izraz> generira izraze u
+		 * kojima se opcionalno koriste od- nosni operatori < (uniformni znak
+		 * OP_LT), > (uniformni znak OP_GT), <= (uniformni znak OP_LTE) i >=
+		 * (uniformni znak OP_GTE).
 		 */
 
 		// <odnosni_izraz> ::= <aditivni_izraz>
@@ -700,7 +770,8 @@ public class SemanticsAnalyzer {
 			checkExpressionUnitProduction(l, table);
 			break;
 		}
-		// <odnosni_izraz> ::= <odnosni_izraz> (OP_LT | OP_GT | OP_LTE | OP_GTE) <aditivni_izraz>
+		// <odnosni_izraz> ::= <odnosni_izraz> (OP_LT | OP_GT | OP_LTE | OP_GTE)
+		// <aditivni_izraz>
 		case ODNOSNI_IZRAZ_2:
 		case ODNOSNI_IZRAZ_3:
 		case ODNOSNI_IZRAZ_4:
@@ -715,11 +786,12 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
-		/* <jednakosni izraz>
-		 * Nezavrsni znak <jednakosni_izraz> generira izraze u kojima se opcionalno koriste jed-
-		 * nakosni operatori == (uniformni znak OP_EQ) i != (uniformni znak OP_NEQ).
+		/*
+		 * <jednakosni izraz> Nezavrsni znak <jednakosni_izraz> generira izraze
+		 * u kojima se opcionalno koriste jed- nakosni operatori == (uniformni
+		 * znak OP_EQ) i != (uniformni znak OP_NEQ).
 		 */
-		
+
 		// <jednakosni_izraz> ::= <odnosni_izraz>
 		case JEDNAKOSNI_IZRAZ_1: {
 			// tip <-- <odnosni_izraz>.tip
@@ -741,11 +813,12 @@ public class SemanticsAnalyzer {
 			checkIntBinaryOperator(l, table);
 			break;
 		}
-		
-		/* <bin i izraz>
-		 * Nezavrsni znak <bin_i_izraz> generira izraze u kojima se opcionalno koristi bitovni
-		 * operator & (uniformni znak OP_BIN_I). Bitovni operatori imaju razlicite prioritete pa
-		 * zato svaki operator ima pripadni nezavrsni znak.
+
+		/*
+		 * <bin i izraz> Nezavrsni znak <bin_i_izraz> generira izraze u kojima
+		 * se opcionalno koristi bitovni operator & (uniformni znak OP_BIN_I).
+		 * Bitovni operatori imaju razlicite prioritete pa zato svaki operator
+		 * ima pripadni nezavrsni znak.
 		 */
 
 		// <bin_i_izraz> ::= <jednakosni_izraz>
@@ -768,11 +841,12 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
-		/* <bin xili izraz>
-		 * Nezavrsni znak <bin_xili_izraz> generira izraze u kojima se opcionalno koristi bitovni
-		 * operator ^ (uniformni znak OP_BIN_XILI)
+		/*
+		 * <bin xili izraz> Nezavrsni znak <bin_xili_izraz> generira izraze u
+		 * kojima se opcionalno koristi bitovni operator ^ (uniformni znak
+		 * OP_BIN_XILI)
 		 */
-		
+
 		// <bin_xili_izraz> ::= <bin_i_izraz>
 		case BIN_XILI_IZRAZ_1: {
 			// tip <-- <bin_i_izraz>.tip
@@ -793,11 +867,12 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
-		/* <bin ili izraz>
-		 * Nezavrsni znak <bin_ili_izraz> generira izraze u kojima se opcionalno koristi bitovni
-		 * operator | (uniformni znak OP_BIN_ILI).
+		/*
+		 * <bin ili izraz> Nezavrsni znak <bin_ili_izraz> generira izraze u
+		 * kojima se opcionalno koristi bitovni operator | (uniformni znak
+		 * OP_BIN_ILI).
 		 */
-		
+
 		// <bin_ili_izraz> ::= <bin_xili_izraz>
 		case BIN_ILI_IZRAZ_1: {
 			// tip <-- <bin_xili_izraz>.tip
@@ -817,17 +892,19 @@ public class SemanticsAnalyzer {
 			checkIntBinaryOperator(l, table);
 			break;
 		}
-		
-		/* <log i izraz>
-		 * Nezavrsni znak <log_i_izraz> generira izraze u kojima se opcionalno koristi logicki ope-
-		 * rator konjunkcije && (uniformni znak OP_I). Slicno kao za bitovne operatore, kako logicki
-		 * operatori imaju razlicite prioritete svakom je pridruzen vlastiti nezavrsni znak.
+
+		/*
+		 * <log i izraz> Nezavrsni znak <log_i_izraz> generira izraze u kojima
+		 * se opcionalno koristi logicki ope- rator konjunkcije && (uniformni
+		 * znak OP_I). Slicno kao za bitovne operatore, kako logicki operatori
+		 * imaju razlicite prioritete svakom je pridruzen vlastiti nezavrsni
+		 * znak.
 		 */
 		// <log_i_izraz> ::= <bin_ili_izraz>
 		case LOG_I_IZRAZ_1: {
-			//tip <-- <bin_ili_izraz>.tip
-			//l-izraz <-- <bin_ili_izraz>.l-izraz
-			//1. provjeri(<bin_ili_izraz>)
+			// tip <-- <bin_ili_izraz>.tip
+			// l-izraz <-- <bin_ili_izraz>.l-izraz
+			// 1. provjeri(<bin_ili_izraz>)
 			checkExpressionUnitProduction(l, table);
 			break;
 		}
@@ -843,9 +920,10 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
-		/* <log ili izraz>
-		 * Nezavrsni znak <log_ili_izraz> generira izraze u kojima se opcionalno koristi logicki
-		 * operator disjunkcije || (uniformni znak OP_ILI).
+		/*
+		 * <log ili izraz> Nezavrsni znak <log_ili_izraz> generira izraze u
+		 * kojima se opcionalno koristi logicki operator disjunkcije ||
+		 * (uniformni znak OP_ILI).
 		 */
 		// <log_ili_izraz> ::= <log_i_izraz>
 		case LOG_ILI_IZRAZ_1: {
@@ -867,22 +945,25 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
-		/* <izraz pridruzivanja>
-		 * Nezavrsni znak <izraz_pridruzivanja> generira izraze u kojima se neka vrijednost opci-
-		 * onalno pridruzuje varijabli koristeci operator pridruzivanja = (uniformni znak OP_PRIDRUZI).
-		 * Za razliku od prethodno prikazanih binarnih operatora, operator pridruzivanja je desno
-		 * asocijativan sto je u gramatici osigurano primjenom desne rekurzije. Desna asocijativnost
-		 * omogucuje nizanje pridruzivanja, npr. a = b = c = 42;.
+		/*
+		 * <izraz pridruzivanja> Nezavrsni znak <izraz_pridruzivanja> generira
+		 * izraze u kojima se neka vrijednost opci- onalno pridruzuje varijabli
+		 * koristeci operator pridruzivanja = (uniformni znak OP_PRIDRUZI). Za
+		 * razliku od prethodno prikazanih binarnih operatora, operator
+		 * pridruzivanja je desno asocijativan sto je u gramatici osigurano
+		 * primjenom desne rekurzije. Desna asocijativnost omogucuje nizanje
+		 * pridruzivanja, npr. a = b = c = 42;.
 		 */
 		// <izraz_pridruzivanja> ::= <log_ili_izraz>
 		case IZRAZ_PRIDRUZIVANJA_1: {
-			// tip   <log_ili_izraz>.tip
-			// l-izraz   <log_ili_izraz>.l-izraz
+			// tip <log_ili_izraz>.tip
+			// l-izraz <log_ili_izraz>.l-izraz
 			// 1. provjeri(<log_ili_izraz>)
 			checkExpressionUnitProduction(l, table);
 			break;
 		}
-		// <izraz_pridruzivanja> ::= <postfiks_izraz> OP_PRIDRUZI <izraz_pridruzivanja>
+		// <izraz_pridruzivanja> ::= <postfiks_izraz> OP_PRIDRUZI
+		// <izraz_pridruzivanja>
 		case IZRAZ_PRIDRUZIVANJA_2: {
 			NonterminalNode postfiksIzraz = (NonterminalNode) r.get(0);
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) r.get(2);
@@ -894,7 +975,7 @@ public class SemanticsAnalyzer {
 			if (!lvalue)
 				// 2. <postfiks_izraz>.l-izraz = 1
 				throw new SemanticsException("Non-lvalue assignment", l);
-			
+
 			// 3. provjeri(<izraz_pridruzivanja>)
 			checkSubtree(izrazPridruzivanja, table);
 
@@ -903,18 +984,18 @@ public class SemanticsAnalyzer {
 			if (!rhsType.canConvertImplicit(lhsType))
 				// 4. <izraz_pridruzivanja>.tip ~ <postfiks_izraz>.tip
 				throw new SemanticsException("Incompatible types in assignment", l);
-			
+
 			// tip <-- <postfiks_izraz>.tip
 			// l-izraz <-- 0
 			l.setAttribute(Attribute.TIP, postfiksIzraz.getAttribute(Attribute.TIP));
 			l.setAttribute(Attribute.L_IZRAZ, false);
 			break;
 		}
-		
-		/* <izraz>
-		 * Nezavrsni znak <izraz> omogucuje opcionalno nizanje izraza koristeci operator , (unifor-
-		 * mni znak ZAREZ). Vrijednost takvog slozenog izraza jednaka je vrijednosti krajnje desnog
-		 * izraza u nizu.
+
+		/*
+		 * <izraz> Nezavrsni znak <izraz> omogucuje opcionalno nizanje izraza
+		 * koristeci operator , (unifor- mni znak ZAREZ). Vrijednost takvog
+		 * slozenog izraza jednaka je vrijednosti krajnje desnog izraza u nizu.
 		 */
 
 		// <izraz> ::= <izraz_pridruzivanja>
@@ -932,7 +1013,7 @@ public class SemanticsAnalyzer {
 
 			// 1. provjeri(<izraz>)
 			checkSubtree(izraz, table);
-			
+
 			// 2. provjeri(<izraz_pridruzivanja>)
 			checkSubtree(izrazPridruzivanja, table);
 
@@ -942,49 +1023,57 @@ public class SemanticsAnalyzer {
 			l.setAttribute(Attribute.L_IZRAZ, false);
 			break;
 		}
-		
-		/* <slozena naredba>
-		 * Nezavrsni znak <slozena_naredba> predstavlja blok naredbi koji opcionalno pocinje lis-
-		 * tom deklaracija. Svaki blok je odvojeni djelokrug, a nelokalnim imenima se pristupa u
-		 * ugnijezdujucem bloku (i potencijalno tako dalje sve do globalnog djelokruga).
+
+		/*
+		 * <slozena naredba> Nezavrsni znak <slozena_naredba> predstavlja blok
+		 * naredbi koji opcionalno pocinje lis- tom deklaracija. Svaki blok je
+		 * odvojeni djelokrug, a nelokalnim imenima se pristupa u ugnijezdujucem
+		 * bloku (i potencijalno tako dalje sve do globalnog djelokruga).
 		 */
 
 		// <slozena_naredba> ::= L_VIT_ZAGRADA <lista_naredbi> D_VIT_ZAGRADA
 		case SLOZENA_NAREDBA_1: {
 			NonterminalNode listaNaredbi = (NonterminalNode) r.get(1);
-			
-			/* Ova produkcija generira blok koji nema vlastite deklaracije (ali neka od naredbi u
-			 * bloku moze biti novi blok koji ima lokalne deklaracije).
+
+			/*
+			 * Ova produkcija generira blok koji nema vlastite deklaracije (ali
+			 * neka od naredbi u bloku moze biti novi blok koji ima lokalne
+			 * deklaracije).
 			 */
 
 			/*
 			 * Svaki blok je odvojeni djelokrug, a nelokalnim imenima se
 			 * pristupa u ugnijezdujucem bloku
 			 */
-			// FIXME maybe some attributes need to be forwarded (PETLJA)? Or retrofit into SymbolTable?
+			// FIXME maybe some attributes need to be forwarded (PETLJA)? Or
+			// retrofit into SymbolTable?
 
 			// 1. provjeri(<lista_naredbi>)
 			checkSubtree(listaNaredbi, table);
 			break;
 		}
-		// <slozena_naredba> ::= L_VIT_ZAGRADA <lista_deklaracija> <lista_naredbi> D_VIT_ZAGRADA
+		// <slozena_naredba> ::= L_VIT_ZAGRADA <lista_deklaracija>
+		// <lista_naredbi> D_VIT_ZAGRADA
 		case SLOZENA_NAREDBA_2: {
 			NonterminalNode listaDeklaracija = (NonterminalNode) r.get(1);
 			NonterminalNode listaNaredbi = (NonterminalNode) r.get(2);
-			
-			/* S druge strane, ova produkcija generira blok s lokalnim deklaracijama. Kao i u
-			 * jeziku C, deklaracije su dozvoljene samo na pocetku bloka.
+
+			/*
+			 * S druge strane, ova produkcija generira blok s lokalnim
+			 * deklaracijama. Kao i u jeziku C, deklaracije su dozvoljene samo
+			 * na pocetku bloka.
 			 */
 
 			/*
 			 * Svaki blok je odvojeni djelokrug, a nelokalnim imenima se
 			 * pristupa u ugnijezdujucem bloku
 			 */
-			// FIXME maybe some attributes need to be forwarded (PETLJA)? Or retrofit into SymbolTable?
+			// FIXME maybe some attributes need to be forwarded (PETLJA)? Or
+			// retrofit into SymbolTable?
 
 			// 1. provjeri(<lista_deklaracija>)
 			checkSubtree(listaDeklaracija, table);
-			
+
 			// 2. provjeri(<lista_naredbi>)
 			checkSubtree(listaNaredbi, table);
 			break;
@@ -992,11 +1081,11 @@ public class SemanticsAnalyzer {
 
 		// <lista naredbi>
 		// Nezavrsni znak <lista_naredbi> omogucuje nizanje naredbi u bloku.
-		
+
 		// lista_naredbi> ::= <naredba>
 		case LISTA_NAREDBI_1: {
 			NonterminalNode naredba = (NonterminalNode) r.get(0);
-			
+
 			// 1. provjeri(<naredba>)
 			checkSubtree(naredba, table);
 			break;
@@ -1008,18 +1097,20 @@ public class SemanticsAnalyzer {
 
 			// 1. provjeri(<lista_naredbi>)
 			checkSubtree(listaNaredbi, table);
-			
+
 			// 2. provjeri(<naredba>)
 			checkSubtree(naredba, table);
 			break;
 		}
 
-		/* <naredba>
-		 * Nezavrsni znak <naredba> generira blokove (<slozena_naredba>) i razlicite vrste jednos-
-		 * tavnih naredbi (<izraz_naredba>, <naredba_grananja>, <naredba_petlje> i <naredba_skoka>).
-		 * Kako su sve produkcije jedinicne (s desne strane imaju jedan nezavrsni znak) i u svim pro-
-		 * dukcijama se provjeravaju semanticka pravila na znaku s desne strane, produkcije ovdje
-		 * nisu prikazane.
+		/*
+		 * <naredba> Nezavrsni znak <naredba> generira blokove
+		 * (<slozena_naredba>) i razlicite vrste jednos- tavnih naredbi
+		 * (<izraz_naredba>, <naredba_grananja>, <naredba_petlje> i
+		 * <naredba_skoka>). Kako su sve produkcije jedinicne (s desne strane
+		 * imaju jedan nezavrsni znak) i u svim pro- dukcijama se provjeravaju
+		 * semanticka pravila na znaku s desne strane, produkcije ovdje nisu
+		 * prikazane.
 		 */
 		// <naredba> ::= <izraz_naredba>
 		case NAREDBA_2: {
@@ -1033,7 +1124,8 @@ public class SemanticsAnalyzer {
 		case NAREDBA_3:
 		case NAREDBA_4:
 		case NAREDBA_5: {
-			// FIXME ? treba forwardati svojstvo PETLJA radi continue i break, ako se
+			// FIXME ? treba forwardati svojstvo PETLJA radi continue i break,
+			// ako se
 			// naredba prosiruje u bilo sto osim <izraz_naredba>
 			NonterminalNode u = (NonterminalNode) r.get(0);
 			u.setAttribute(Attribute.PETLJA, l.getAttribute(Attribute.PETLJA));
@@ -1041,20 +1133,23 @@ public class SemanticsAnalyzer {
 			break;
 		}
 
-		/* <izraz naredba>
-		 * Nezavrsni znak <izraz_naredba> generira opcionalni izraz i znak ; (uniformni znak
-		 * TOCKAZAREZ) i predstavlja jednostavnu naredbu. Za potrebe uvjeta u for-petlji, znaku
-		 * <izraz_naredba> se pridjeljuje izvedeno svojstvo tip
+		/*
+		 * <izraz naredba> Nezavrsni znak <izraz_naredba> generira opcionalni
+		 * izraz i znak ; (uniformni znak TOCKAZAREZ) i predstavlja jednostavnu
+		 * naredbu. Za potrebe uvjeta u for-petlji, znaku <izraz_naredba> se
+		 * pridjeljuje izvedeno svojstvo tip
 		 */
 		// <izraz_naredba> ::= TOCKAZAREZ
 		case IZRAZ_NAREDBA_1: {
-			
-			/* Ova produkcija generira \praznu naredbu" koja moze biti korisna kao tijelo petlje
-			 * koja ne radi nista i slicno. Prazna naredba ce imati tip int kako bi se mogla koristiti
-			 * kao uvijek zadovoljen uvjet u for-petlji (na primjer u kakonskoj beskonacnoj petlji
+
+			/*
+			 * Ova produkcija generira \praznu naredbu" koja moze biti korisna
+			 * kao tijelo petlje koja ne radi nista i slicno. Prazna naredba ce
+			 * imati tip int kako bi se mogla koristiti kao uvijek zadovoljen
+			 * uvjet u for-petlji (na primjer u kakonskoj beskonacnoj petlji
 			 * for(;;)).
 			 */
-			
+
 			// tip <-- int
 			l.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			break;
@@ -1062,9 +1157,9 @@ public class SemanticsAnalyzer {
 		// izraz_naredba> ::= <izraz> TOCKAZAREZ
 		case IZRAZ_NAREDBA_2: {
 			NonterminalNode izraz = (NonterminalNode) r.get(0);
-			
+
 			// Za zadani izraz, svojstvo tip se preuzima od znaka <izraz>.
-			
+
 			// 1. provjeri(<izraz>)
 			checkSubtree(izraz, table);
 
@@ -1072,31 +1167,33 @@ public class SemanticsAnalyzer {
 			l.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			break;
 		}
-		
-		/* <naredba grananja>
-		 * Nezavrsni znak <naredba_grananja> generira if naredbu u jeziku.		
+
+		/*
+		 * <naredba grananja> Nezavrsni znak <naredba_grananja> generira if
+		 * naredbu u jeziku.
 		 */
 		// <naredba_grananja> ::= KR_IF L_ZAGRADA <izraz> D_ZAGRADA <naredba>
 		case NAREDBA_GRANANJA_1: {
 			NonterminalNode izraz = (NonterminalNode) r.get(2);
 			NonterminalNode naredba = (NonterminalNode) r.get(4);
-			
+
 			// Ova produkcija generira if naredbu bez else dijela.
 
 			// 1. provjeri(<izraz>)
 			checkSubtree(izraz, table);
-			
+
 			Type izrazType = (Type) izraz.getAttribute(Attribute.TIP);
 			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", l);
-			
+
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, table);
 
 			break;
 		}
-		// <naredba_grananja> ::= KR_IF L_ZAGRADA <izraz> D_ZAGRADA <naredba> KR_ELSE <naredba>
+		// <naredba_grananja> ::= KR_IF L_ZAGRADA <izraz> D_ZAGRADA <naredba>
+		// KR_ELSE <naredba>
 		case NAREDBA_GRANANJA_2: {
 			NonterminalNode izraz = (NonterminalNode) r.get(2);
 			NonterminalNode naredba1 = (NonterminalNode) r.get(4);
@@ -1108,17 +1205,18 @@ public class SemanticsAnalyzer {
 			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", l);
-			
+
 			// 3. provjeri(<naredba>1)
 			checkSubtree(naredba1, table);
-			
+
 			// 4. provjeri(<naredba>2)
 			checkSubtree(naredba2, table);
 			break;
 		}
 
-		/* <naredba petlje>
-		 * Nezavrsni znak <naredba_petlje> generira while i for petlje.
+		/*
+		 * <naredba petlje> Nezavrsni znak <naredba_petlje> generira while i for
+		 * petlje.
 		 */
 		// <naredba_petlje> ::= KR_WHILE L_ZAGRADA <izraz> D_ZAGRADA <naredba>
 		case NAREDBA_PETLJE_1: {
@@ -1138,18 +1236,21 @@ public class SemanticsAnalyzer {
 			checkSubtree(naredba, table);
 			break;
 		}
-		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1 <izraz_naredba>2 D_ZAGRADA <naredba>
+		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1
+		// <izraz_naredba>2 D_ZAGRADA <naredba>
 		case NAREDBA_PETLJE_2: {
 			NonterminalNode izrazNaredba1 = (NonterminalNode) r.get(2);
 			NonterminalNode izrazNaredba2 = (NonterminalNode) r.get(3);
 			NonterminalNode naredba = (NonterminalNode) r.get(5);
-			
-			// Ova produkcija generira for-petlju bez opcionalnog izraza koji se tipicno koristi za
-			// promjenu indeksa petlje dok sljedeca produkcija generira petlju sa tim izrazom.
+
+			// Ova produkcija generira for-petlju bez opcionalnog izraza koji se
+			// tipicno koristi za
+			// promjenu indeksa petlje dok sljedeca produkcija generira petlju
+			// sa tim izrazom.
 
 			// 1. provjeri(<izraz_naredba>1)
 			checkSubtree(izrazNaredba1, table);
-			
+
 			// 2. provjeri(<izraz_naredba>2)
 			checkSubtree(izrazNaredba2, table);
 
@@ -1174,7 +1275,7 @@ public class SemanticsAnalyzer {
 
 			// 1. provjeri(<izraz_naredba>1)
 			checkSubtree(izrazNaredba1, table);
-			
+
 			// 2. provjeri(<izraz_naredba>2)
 			checkSubtree(izrazNaredba2, table);
 
@@ -1194,16 +1295,19 @@ public class SemanticsAnalyzer {
 		}
 
 		// <naredba skoka>
-		// Nezavrsni znak <naredba_skoka> generira continue, break i return naredbe.
-		
+		// Nezavrsni znak <naredba_skoka> generira continue, break i return
+		// naredbe.
+
 		// naredba_skoka> ::= (KR_CONTINUE | KR_BREAK) TOCKAZAREZ
 		case NAREDBA_SKOKA_1:
 		case NAREDBA_SKOKA_2: {
-			
-			/* 1. naredba se nalazi unutar petlje ili unutar bloka koji je ugnijezden u petlji
-			 * naredba continue (uniformni znak KR_CONTINUE) i naredba break (uniformni
-			 * znak KR_BREAK) dozvoljene su iskljucivo unutar neke petlje, a imaju isto znacenje
-			 * kao u jeziku C.
+
+			/*
+			 * 1. naredba se nalazi unutar petlje ili unutar bloka koji je
+			 * ugnijezden u petlji naredba continue (uniformni znak KR_CONTINUE)
+			 * i naredba break (uniformni znak KR_BREAK) dozvoljene su
+			 * iskljucivo unutar neke petlje, a imaju isto znacenje kao u jeziku
+			 * C.
 			 */
 			// FIXME ?
 			boolean insideLoop = (Boolean) l.getAttribute(Attribute.PETLJA);
@@ -1215,25 +1319,28 @@ public class SemanticsAnalyzer {
 		// <naredba_skoka> ::= KR_RETURN TOCKAZAREZ
 		case NAREDBA_SKOKA_3: {
 			// 1. naredba se nalazi unutar funkcije tipa funkcija(params ! void)
-			// Naredba return bez povratne vrijednosti moze se koristiti jedino u 
-			// funkcijama koje	ne vracaju nista.
-			
+			// Naredba return bez povratne vrijednosti moze se koristiti jedino
+			// u
+			// funkcijama koje ne vracaju nista.
+
 			// FIXME check current function return type thru symboltable
 			break;
 		}
 		// <naredba_skoka> ::= KR_RETURN <izraz> TOCKAZAREZ
 		case NAREDBA_SKOKA_4: {
 			// 1. provjeri(<izraz>)
-			// 2. naredba se nalazi unutar funkcije tipa funkcija(params ! pov) i vrijedi <izraz>.tip  pov
-			
+			// 2. naredba se nalazi unutar funkcije tipa funkcija(params ! pov)
+			// i vrijedi <izraz>.tip  pov
+
 			// FIXME check current function return type thru symboltable
 			break;
 		}
-		
-		/* <prijevodna jedinica>
-		 * Nezavrsni znak <prijevodna_jedinica> je pocetni nezavrsni znak gramatike i generira
-		 * niz nezavrsnih znakova <vanjska_deklaracija> koji generiraju definicije (i deklaracije)
-		 * u globalnom djelokrugu programa.
+
+		/*
+		 * <prijevodna jedinica> Nezavrsni znak <prijevodna_jedinica> je pocetni
+		 * nezavrsni znak gramatike i generira niz nezavrsnih znakova
+		 * <vanjska_deklaracija> koji generiraju definicije (i deklaracije) u
+		 * globalnom djelokrugu programa.
 		 */
 		// <prijevodna_jedinica> ::= <vanjska_deklaracija>
 		case PRIJEVODNA_JEDINICA_1: {
@@ -1252,11 +1359,13 @@ public class SemanticsAnalyzer {
 			checkSubtree(vanjskaDeklaracija, table);
 			break;
 		}
-		
-		/* <vanjska deklaracija>
-		 * Nezavrsni znak <vanjska_deklaracija> generira ili definiciju funkcije (znak <definicija_funkcije>)
-		 * ili deklaraciju varijable ili funkcije (znak <deklaracija>). Obje produkcije su jedinicne
-		 * i u obje se provjeravaju pravila u podstablu kojem je znak s desne strane korijen.
+
+		/*
+		 * <vanjska deklaracija> Nezavrsni znak <vanjska_deklaracija> generira
+		 * ili definiciju funkcije (znak <definicija_funkcije>) ili deklaraciju
+		 * varijable ili funkcije (znak <deklaracija>). Obje produkcije su
+		 * jedinicne i u obje se provjeravaju pravila u podstablu kojem je znak
+		 * s desne strane korijen.
 		 */
 		// <vanjska_deklaracija> ::= <definicija_funkcije> | <deklaracija>
 		case VANJSKA_DEKLARACIJA_1:
@@ -1283,8 +1392,8 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("Function return type cannot be const-qualified", l);
 			}
 			Type retType = (Type) imeTipa.getAttribute(Attribute.TIP);
-//			if (table != SymbolTable.GLOBAL)
-//				throw new IllegalStateException("internal error, scope mixup");
+			// if (table != SymbolTable.GLOBAL)
+			// throw new IllegalStateException("internal error, scope mixup");
 			SymbolEntry functionEntry = SymbolTable.GLOBAL.get(functionName.getText());
 			FunctionType fType = new FunctionType(retType, new TypeList(new ArrayList<Type>()));
 
@@ -1324,11 +1433,12 @@ public class SemanticsAnalyzer {
 			TerminalNode functionName = (TerminalNode) r.get(1);
 			NonterminalNode listaParametara = (NonterminalNode) r.get(3);
 			NonterminalNode slozenaNaredba = (NonterminalNode) r.get(5);
-			
+
 			/*
-			 * Ova produkcija generira definicije funkcija s listom parametara, tj. funkcije koje
-			 * primaju jedan ili vise argumenata. Za tocku 7 je zato vazno osigurati da se prije
-			 * provjere pravila u tijelu funkcije u lokalni djelokrug ugrade parametri funkcije.
+			 * Ova produkcija generira definicije funkcija s listom parametara,
+			 * tj. funkcije koje primaju jedan ili vise argumenata. Za tocku 7
+			 * je zato vazno osigurati da se prije provjere pravila u tijelu
+			 * funkcije u lokalni djelokrug ugrade parametri funkcije.
 			 */
 
 			// 1. provjeri (<ime_tipa>)
@@ -1364,7 +1474,8 @@ public class SemanticsAnalyzer {
 			}
 			functionEntry.markDefined();
 
-			// 7. provjeri(<slozena_naredba>) uz parametre funkcije koristeci <lista_parametara>.tipovi
+			// 7. provjeri(<slozena_naredba>) uz parametre funkcije koristeci
+			// <lista_parametara>.tipovi
 			// i <lista_parametara>.imena.
 
 			SymbolTable inner = table.createNested();
@@ -1383,17 +1494,18 @@ public class SemanticsAnalyzer {
 
 			break;
 		}
-		
-		/* <lista parametara>
-		 * Nezavrsnom znaku <lista_parametara> pridruzit cemo svojstvo tipovi koje sadrzi listu
-		 * tipova parametara i svojstvo imena koje sadrzi imena parametara. Vrijednosti svojstva
-		 * grade se analogno kao kod znaka <lista_argumenata>.
+
+		/*
+		 * <lista parametara> Nezavrsnom znaku <lista_parametara> pridruzit cemo
+		 * svojstvo tipovi koje sadrzi listu tipova parametara i svojstvo imena
+		 * koje sadrzi imena parametara. Vrijednosti svojstva grade se analogno
+		 * kao kod znaka <lista_argumenata>.
 		 */
 
 		// <lista_parametara> ::= <deklaracija_parametra>
 		case LISTA_PARAMETARA_1: {
 			NonterminalNode deklaracijaParametra = (NonterminalNode) r.get(0);
-			
+
 			// 1. provjeri(<deklaracija_parametra>)
 			checkSubtree(deklaracijaParametra, table);
 
@@ -1404,14 +1516,15 @@ public class SemanticsAnalyzer {
 					new TypeList(Arrays.asList((Type) deklaracijaParametra.getAttribute(Attribute.TIP))));
 			break;
 		}
-		// <lista_parametara> ::= <lista_parametara> ZAREZ <deklaracija_parametra>
+		// <lista_parametara> ::= <lista_parametara> ZAREZ
+		// <deklaracija_parametra>
 		case LISTA_PARAMETARA_2: {
 			NonterminalNode listaParametara = (NonterminalNode) r.get(0);
 			NonterminalNode deklaracijaParametra = (NonterminalNode) r.get(3);
 
 			// 1. provjeri(<lista_parametara>)
 			checkSubtree(listaParametara, table);
-			
+
 			// 2. provjeri(<deklaracija_parametra>)
 			checkSubtree(deklaracijaParametra, table);
 
@@ -1423,22 +1536,25 @@ public class SemanticsAnalyzer {
 			Type type = (Type) deklaracijaParametra.getAttribute(Attribute.TIP);
 
 			if (names.contains(name)) {
-				// 3. <deklaracija_parametra>.ime ne postoji u <lista_parametara>.imena
+				// 3. <deklaracija_parametra>.ime ne postoji u
+				// <lista_parametara>.imena
 				throw new SemanticsException("Duplicate parameter name", l);
 			}
 			names.add(name);
 			typeList.getTypes().add(type);
 
-			// tipovi <-- <lista_parametara>.tipovi + [ <deklaracija_parametra>.tip ]
-			// imena <-- <lista_parametara>.imena + [ <deklaracija_parametra>.ime ]
+			// tipovi <-- <lista_parametara>.tipovi + [
+			// <deklaracija_parametra>.tip ]
+			// imena <-- <lista_parametara>.imena + [
+			// <deklaracija_parametra>.ime ]
 			l.setAttribute(Attribute.TIPOVI, typeList);
 			l.setAttribute(Attribute.IMENA, names);
 			break;
 		}
-		
-		/* <deklaracija parametra>
-		 * Nezavrsni znak <deklaracija_parametra> sluzi za deklaraciju jednog parametra i ima
-		 * svojstva tip i ime.
+
+		/*
+		 * <deklaracija parametra> Nezavrsni znak <deklaracija_parametra> sluzi
+		 * za deklaraciju jednog parametra i ima svojstva tip i ime.
 		 */
 
 		// <deklaracija_parametra> ::= <ime_tipa> IDN
@@ -1460,11 +1576,12 @@ public class SemanticsAnalyzer {
 			l.setAttribute(Attribute.IME, idn.getText());
 			break;
 		}
-		// <deklaracija_parametra> ::= <ime_tipa> IDN L_UGL_ZAGRADA D_UGL_ZAGRADA
+		// <deklaracija_parametra> ::= <ime_tipa> IDN L_UGL_ZAGRADA
+		// D_UGL_ZAGRADA
 		case DEKLARACIJA_PARAMETRA_2: {
 			NonterminalNode imeTipa = (NonterminalNode) r.get(0);
 			TerminalNode idn = (TerminalNode) r.get(1);
-			
+
 			// Ova produkcija generira parametre koji su nizovi.
 
 			// 1. provjeri(<ime_tipa>)
@@ -1483,7 +1600,8 @@ public class SemanticsAnalyzer {
 		}
 
 		// <lista deklaracija>
-		// Nezavrsni znak <lista_deklaracija> generira jednu ili vise deklaracija na pocetku bloka
+		// Nezavrsni znak <lista_deklaracija> generira jednu ili vise
+		// deklaracija na pocetku bloka
 		// <lista_deklaracija> ::= <deklaracija>
 		case LISTA_DEKLARACIJA_1: {
 			// 1. provjeri(<deklaracija>)
@@ -1494,7 +1612,7 @@ public class SemanticsAnalyzer {
 		case LISTA_DEKLARACIJA_2: {
 			// 1. provjeri(<lista_deklaracija>)
 			checkSubtree(r.get(0), table);
-			
+
 			// 2. provjeri(<deklaracija>)
 			checkSubtree(r.get(1), table);
 			break;
@@ -1511,25 +1629,26 @@ public class SemanticsAnalyzer {
 			checkSubtree(imeTipa, table);
 
 			// 2. provjeri(<lista_init_deklaratora>) uz nasljedno svojstvo
-			//    <lista_init_deklaratora>.ntip   <ime_tipa>.tip
+			// <lista_init_deklaratora>.ntip <ime_tipa>.tip
 			Type type = (Type) imeTipa.getAttribute(Attribute.TIP);
 			listaInitDeklaratora.setAttribute(Attribute.NTIP, type);
 			checkSubtree(listaInitDeklaratora, table);
 			break;
 		}
-		
-		/* <lista init deklaratora>
-		 * Nezavrsni znak <lista_init_deklaratora> generira deklaratore odvojene zarezima. Na
-		 * primjer, u naredbi int x, y=3, z=y+1;, znak <lista_init_deklaratora> generira x, y=3,
-		 * z=y+1 dio (dakako, generira odgovarajuce uniformne znakove). 
+
+		/*
+		 * <lista init deklaratora> Nezavrsni znak <lista_init_deklaratora>
+		 * generira deklaratore odvojene zarezima. Na primjer, u naredbi int x,
+		 * y=3, z=y+1;, znak <lista_init_deklaratora> generira x, y=3, z=y+1 dio
+		 * (dakako, generira odgovarajuce uniformne znakove).
 		 */
 
 		// <lista_init_deklaratora> ::= <init_deklarator>
 		case LISTA_INIT_DEKLARATORA_1: {
 			NonterminalNode initDeklarator = (NonterminalNode) r.get(0);
-			
+
 			// 1. provjeri(<init_deklarator>) uz nasljedno svojstvo
-			//    <init_deklarator>.ntip   <lista_init_deklaratora>.ntip
+			// <init_deklarator>.ntip <lista_init_deklaratora>.ntip
 			initDeklarator.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
 			checkSubtree(initDeklarator, table);
 			break;
@@ -1541,30 +1660,32 @@ public class SemanticsAnalyzer {
 			NonterminalNode initDeklarator = (NonterminalNode) r.get(2);
 
 			// 1. provjeri(<lista_init_deklaratora>2) uz nasljedno svojstvo
-			//    <lista_init_deklaratora>2.ntip   <lista_init_deklaratora>1.ntip
+			// <lista_init_deklaratora>2.ntip <lista_init_deklaratora>1.ntip
 			listaInitDeklaratora.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
 			checkSubtree(listaInitDeklaratora, table);
 
 			// 2. provjeri(<init_deklarator>) uz nasljedno svojstvo
-			//    <init_deklarator>.ntip   <lista_init_deklaratora>1.ntip
+			// <init_deklarator>.ntip <lista_init_deklaratora>1.ntip
 			initDeklarator.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
 			checkSubtree(initDeklarator, table);
 			break;
 		}
-		
+
 		// <init deklarator>
-		// Nezavrsni znak <init_deklarator> generira deklarator s opcionalnim inicijalizatorom.
+		// Nezavrsni znak <init_deklarator> generira deklarator s opcionalnim
+		// inicijalizatorom.
 
 		// <init deklarator> ::= <izravni_deklarator>
 		case INIT_DEKLARATOR_1: {
 			NonterminalNode izravniDeklarator = (NonterminalNode) r.get(0);
-			
+
 			// 1. provjeri(<izravni_deklarator>) uz nasljedno svojstvo
-			//    <izravni_deklarator>.ntip <-- <init_deklarator>.ntip
+			// <izravni_deklarator>.ntip <-- <init_deklarator>.ntip
 			izravniDeklarator.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
 			checkSubtree(izravniDeklarator, table);
 
-			// 2. <izravni_deklarator>.tip =6 const(T) i <izravni_deklarator>.tip =6 niz(const(T))
+			// 2. <izravni_deklarator>.tip =6 const(T) i
+			// <izravni_deklarator>.tip =6 niz(const(T))
 			Type type = (Type) izravniDeklarator.getAttribute(Attribute.TIP);
 			if (type instanceof ConstType)
 				throw new SemanticsException("Const types must have initializer", l);
@@ -1579,9 +1700,9 @@ public class SemanticsAnalyzer {
 		// <inicijalizator>
 		case INIT_DEKLARATOR_2: {
 			NonterminalNode izravniDeklarator = (NonterminalNode) r.get(0);
-			
+
 			// 1. provjeri(<izravni_deklarator>) uz nasljedno svojstvo
-			//    <izravni_deklarator>.ntip <-- <init_deklarator>.ntip
+			// <izravni_deklarator>.ntip <-- <init_deklarator>.ntip
 			izravniDeklarator.setAttribute(Attribute.NTIP, l.getAttribute(Attribute.NTIP));
 			checkSubtree(izravniDeklarator, table);
 
@@ -1589,11 +1710,12 @@ public class SemanticsAnalyzer {
 			NonterminalNode inicijalizator = (NonterminalNode) r.get(2);
 			checkSubtree(inicijalizator, table);
 
-			/* 3. ako je <izravni_deklarator>.tip T ili const(T)
-			 * <inicijalizator>.tip  T inace ako je <izravni_deklarator>.tip 
-			 * niz(T) ili niz(const(T)) <inicijalizator>.br-elem <-- 
-			 * <izravni_deklarator>.br-elem za svaki U iz <inicijalizator>.tipovi
-			 * vrijedi U ~ T inace greska 
+			/*
+			 * 3. ako je <izravni_deklarator>.tip T ili const(T)
+			 * <inicijalizator>.tip T inace ako je <izravni_deklarator>.tip
+			 * niz(T) ili niz(const(T)) <inicijalizator>.br-elem <--
+			 * <izravni_deklarator>.br-elem za svaki U iz
+			 * <inicijalizator>.tipovi vrijedi U ~ T inace greska
 			 */
 			Type type = (Type) izravniDeklarator.getAttribute(Attribute.TIP);
 
@@ -1629,23 +1751,27 @@ public class SemanticsAnalyzer {
 			}
 			break;
 		}
-		
-		/* <izravni deklarator>
-		 * Nezavrsni znak <izravni_deklarator> generira deklarator varijable ili funkcije. Znak
-		 * ima nasljedno svojstvo ntip i izvedeno svojstvo tip u koje se pohranjuje potpuni tip
-		 * varijable ili funkcije. Ako se deklarira niz, znak dodatno ima i izvedeno svojstvo br-elem
-		 * koje oznacava broj elemenata niza. 
+
+		/*
+		 * <izravni deklarator> Nezavrsni znak <izravni_deklarator> generira
+		 * deklarator varijable ili funkcije. Znak ima nasljedno svojstvo ntip i
+		 * izvedeno svojstvo tip u koje se pohranjuje potpuni tip varijable ili
+		 * funkcije. Ako se deklarira niz, znak dodatno ima i izvedeno svojstvo
+		 * br-elem koje oznacava broj elemenata niza.
 		 */
-		
+
 		// <izravni_deklarator> ::= IDN
 		case IZRAVNI_DEKLARATOR_1: {
 			TerminalNode idn = (TerminalNode) r.get(0);
 			Type ntype = (Type) l.getAttribute(Attribute.NTIP);
-			
-			/* Ova produkcija sluzi za generiranje varijabli cjelobrojnog tipa. Vazno je uociti da
-			 * je varijabla deklarirana odmah nakon navedenog identifikatora, a prije opcionalnog
-			 * inicijalizatora. To znaci da je inicijalizacija int x = x + 1; semanticki ispravna,
-			 * ali rezultat nije definiran jer x na desnoj strani ima neodredenu vrijednost. 
+
+			/*
+			 * Ova produkcija sluzi za generiranje varijabli cjelobrojnog tipa.
+			 * Vazno je uociti da je varijabla deklarirana odmah nakon navedenog
+			 * identifikatora, a prije opcionalnog inicijalizatora. To znaci da
+			 * je inicijalizacija int x = x + 1; semanticki ispravna, ali
+			 * rezultat nije definiran jer x na desnoj strani ima neodredenu
+			 * vrijednost.
 			 */
 
 			// 1. ntip != void
@@ -1654,8 +1780,8 @@ public class SemanticsAnalyzer {
 			// 2. IDN.ime nije deklarirano u lokalnom djelokrugu
 			if (table.getLocal(idn.getText()) != null)
 				throw new SemanticsException("Redeclaration in local scope", l);
-			
-			// 3. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom
+
+			// 3. zabilježi deklaraciju IDN.ime s odgovarajucim tipom
 			table.addLocal(idn.getText(), new SymbolEntry(ntype));
 
 			// tip <-- ntip
@@ -1666,12 +1792,13 @@ public class SemanticsAnalyzer {
 		case IZRAVNI_DEKLARATOR_2: {
 			TerminalNode idn = (TerminalNode) r.get(0);
 			TerminalNode broj = (TerminalNode) r.get(2);
-			
-			/* Ova produkcija sluzi za deklariranje nizova. Obavezno mora biti naveden broj ele-
-			 * menata niza (to je sintaksno osigurano ovom produkcijom) i taj broj mora biti
-			 * pozitivan i maksimalnog iznosa 1024.
-			 * Sintaksno nije moguce broj elemenata zadati nekakvim izrazom, cak ni ako se on u
-			 * cijelosti sastoji od konstanti.
+
+			/*
+			 * Ova produkcija sluzi za deklariranje nizova. Obavezno mora biti
+			 * naveden broj ele- menata niza (to je sintaksno osigurano ovom
+			 * produkcijom) i taj broj mora biti pozitivan i maksimalnog iznosa
+			 * 1024. Sintaksno nije moguce broj elemenata zadati nekakvim
+			 * izrazom, cak ni ako se on u cijelosti sastoji od konstanti.
 			 */
 
 			Type ntype = (Type) l.getAttribute(Attribute.NTIP);
@@ -1680,14 +1807,14 @@ public class SemanticsAnalyzer {
 			// 1. ntip != void
 			if (ntype instanceof VoidType)
 				throw new SemanticsException("Cannot declare identifier of type void", l);
-			
+
 			// 2. IDN.ime nije deklarirano u lokalnom djelokrugu
 			if (table.getLocal(idn.getText()) != null)
 				throw new SemanticsException("Redeclaration in local scope", l);
-			
+
 			// 3. BROJ.vrijednost je pozitivan broj (> 0) ne veci od 1024
 			int size = Integer.parseInt(broj.getText());
-			
+
 			// 4. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom
 			if (size <= 0 || size > 1024)
 				throw new SemanticsException("illegal array size", l);
@@ -1706,15 +1833,17 @@ public class SemanticsAnalyzer {
 			Type type = new FunctionType(ntype, new TypeList(new ArrayList<Type>()));
 
 			SymbolEntry entry = table.getLocal(idn.getText());
-			// 1. ako je IDN.ime deklarirano u lokalnom djelokrugu, tip prethodne deklaracije
-			//    je jednak funkcija(void --> ntip)
+			// 1. ako je IDN.ime deklarirano u lokalnom djelokrugu, tip
+			// prethodne deklaracije
+			// je jednak funkcija(void --> ntip)
 			if (entry != null) {
 				Type definedType = entry.getType();
 				if (!definedType.equals(type))
 					throw new SemanticsException("redefinition of function with differing prototype", l);
 			} else {
-				// 2. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako ista funkcija vec nije
-				//    deklarirana u lokalnom djelokrugu
+				// 2. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako
+				// ista funkcija vec nije
+				// deklarirana u lokalnom djelokrugu
 				entry = new SymbolEntry(type);
 				table.addLocal(idn.getText(), entry);
 			}
@@ -1727,10 +1856,13 @@ public class SemanticsAnalyzer {
 		case IZRAVNI_DEKLARATOR_4: {
 			TerminalNode idn = (TerminalNode) r.get(0);
 			NonterminalNode listaParametara = (NonterminalNode) r.get(2);
-			
-			/* Ova i prethodna produkcija generiraju deklaracije funkcija. Za razliku od varijabli,
-			 * funkcije se mogu deklarirati u istom djelokrugu proizvoljan broj puta (zato jer je
-			 * deklaracija varijable ujedno i njena definicija, sto kod funkcija nije slucaj). 
+
+			/*
+			 * Ova i prethodna produkcija generiraju deklaracije funkcija. Za
+			 * razliku od varijabli, funkcije se mogu deklarirati u istom
+			 * djelokrugu proizvoljan broj puta (zato jer je deklaracija
+			 * varijable ujedno i njena definicija, sto kod funkcija nije
+			 * slucaj).
 			 */
 
 			// 1. provjeri(<lista_parametara>)
@@ -1739,16 +1871,18 @@ public class SemanticsAnalyzer {
 			Type ntype = (Type) l.getAttribute(Attribute.NTIP);
 			Type type = new FunctionType(ntype, (TypeList) listaParametara.getAttribute(Attribute.TIPOVI));
 
-			// 2. ako je IDN.ime deklarirano u lokalnom djelokrugu, tip prethodne deklaracije
-			//    je jednak funkcija(<lista_parametara>.tipovi ! ntip)
+			// 2. ako je IDN.ime deklarirano u lokalnom djelokrugu, tip
+			// prethodne deklaracije
+			// je jednak funkcija(<lista_parametara>.tipovi ! ntip)
 			SymbolEntry entry = table.getLocal(idn.getText());
 			if (entry != null) {
 				Type definedType = entry.getType();
 				if (!definedType.equals(type))
 					throw new SemanticsException("redefinition of function with differing prototype", l);
 			} else {
-				// 3. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako ista funkcija vec nije
-				//    deklarirana u lokalnom djelokrugu
+				// 3. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako
+				// ista funkcija vec nije
+				// deklarirana u lokalnom djelokrugu
 				entry = new SymbolEntry(type);
 				table.addLocal(idn.getText(), entry);
 			}
@@ -1768,7 +1902,7 @@ public class SemanticsAnalyzer {
 			Node n = izrazPridruzivanja;
 			while (n.getChildren() != null && n.getChildren().size() == 1)
 				n = n.getChildren().get(0);
-			
+
 			// ako je <izraz_pridruzivanja> --> NIZ_ZNAKOVA
 			if (n instanceof TerminalNode && "NIZ_ZNAKOVA".equals(((TerminalNode) n).getSymbol().getValue())) {
 				int c = ((TerminalNode) n).getText().length() - 2 + 1; // 2
@@ -1827,7 +1961,7 @@ public class SemanticsAnalyzer {
 
 			// 1. provjeri(<lista_izraza_pridruzivanja>)
 			checkSubtree(listaIzrazaPridruzivanja, table);
-			
+
 			// 2. provjeri(<izraz_pridruzivanja>)
 			checkSubtree(izrazPridruzivanja, table);
 
@@ -1836,7 +1970,8 @@ public class SemanticsAnalyzer {
 			Type type = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
 			list.getTypes().add(type);
 
-			// tipovi <-- <lista_izraza_pridruzivanja>.tipovi + [ <izraz_pridruzivanja>.tip ]
+			// tipovi <-- <lista_izraza_pridruzivanja>.tipovi + [
+			// <izraz_pridruzivanja>.tip ]
 			// br-elem <-- <lista_izraza_pridruzivanja>.br-elem+ 1
 			l.setAttribute(Attribute.BR_ELEM, c + 1);
 			l.setAttribute(Attribute.TIPOVI, list);
@@ -1920,8 +2055,40 @@ public class SemanticsAnalyzer {
 	}
 
 	private static PPJCProduction determineProduction(Node node) {
-		// TODO implement
-		throw new UnsupportedOperationException("not implemented");
+		List<Node> children = node.getChildren();
+
+		List<orderedProduction> prods = productions.get(node.getSymbol().toString());
+
+		if (prods == null)
+			throw new SemanticsException("NEMA PRODUKCIJE", node);
+
+		for (orderedProduction o : prods) {
+			boolean matchFound = true;
+			for (int i = 0; i < children.size(); i++) {
+				if (!o.production[i].equals(children.get(i).getSymbol().toString())) {
+					matchFound = false;
+					break;
+				}
+			}
+			if (matchFound)
+				return PPJCProduction.values()[o.index];
+		}
+		throw new SemanticsException("OPET NEMA PRODUKCIJE JEBIGA", node);
 	}
+
+	//
+	// private static boolean isThat(List<Node> toCheck, Node... checkWith) {
+	//
+	// if (toCheck.size() != checkWith.length)
+	// return false;
+	//
+	// for (int i = 0; i < checkWith.length; i++) {
+	// if
+	// (!toCheck.get(i).getSymbol().toString().equals(checkWith[i].getSymbol().toString()))
+	// return false;
+	// }
+	//
+	// return true;
+	// }
 
 }
