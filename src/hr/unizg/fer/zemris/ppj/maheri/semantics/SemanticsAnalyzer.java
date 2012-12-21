@@ -24,7 +24,7 @@ public class SemanticsAnalyzer {
 	private static Map<String, List<orderedProduction>> productions;
 	private static PPJCProduction[] productionEnum;
 	private StringBuilder output;
-	
+
 	public String getOutput() {
 		return output.toString();
 	}
@@ -2081,6 +2081,8 @@ public class SemanticsAnalyzer {
 
 		for (orderedProduction o : prods) {
 			boolean matchFound = true;
+			if (o.production.length != children.size())
+				continue;
 			for (int i = 0; i < children.size(); i++) {
 				if (!o.production[i].equals(children.get(i).getSymbol().toString())) {
 					matchFound = false;

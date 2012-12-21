@@ -10,20 +10,45 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
 import static org.junit.Assert.*;
 
+@RunWith(Parameterized.class)
 public class SemanticsAnalyzerTester {
+	private String fileName;
+	
+	public SemanticsAnalyzerTester(String fileName) {
+		this.fileName=fileName;
+	}
+	
+	@Parameters
+	public static List<String[]> getFileNames() {
+		File files= new File("res/examples/seman-in");
+		File[] listFiles= files.listFiles();
+		List<String[]> fileNames = new ArrayList<String[]>();
+		for (File f: listFiles) {
+			String fName=f.getName();
+			String[] arej = new String[1];
+			arej[0]= fName.substring(0, fName.length()-3);
+			fileNames.add(arej);
+		}
+		return fileNames;
+	}
+	
+	
 	@Test
-	public void simpleTest() throws IOException {
-		String output=getAnalyzerOutputFromFile("res/examples/seman-in/01_idn.in");
-		String correctOutput=new Scanner(new File("res/examples/seman-out/01_idn.out")).useDelimiter("\\Z").next();
-		
+	public void superDuperTest() throws IOException {
+		String output=getAnalyzerOutputFromFile("res/examples/seman-in/"+fileName+".in");
+		String correctOutput=new Scanner(new File("res/examples/seman-out/"+fileName+".out")).useDelimiter("\\Z").next();
 		assertEquals(correctOutput, output);
-
 	}
 	
 	public String getAnalyzerOutputFromFile(String filename) throws IOException {
@@ -39,7 +64,7 @@ public class SemanticsAnalyzerTester {
 		while ((currentLine = reader.readLine()) != null) {
 			inputLines.add(currentLine);
 		}
-		
+		reader.close();
 		InputProcessor ip = new InputProcessor(inputLines);
 		Node tree = ip.getTree();
 		
@@ -51,4 +76,14 @@ public class SemanticsAnalyzerTester {
 		
 		return analyzer.getOutput();
 	}
+	
+//	@Test
+//	public void simpleTest() throws IOException {
+//		String output=getAnalyzerOutputFromFile("res/examples/seman-in/01_idn.in");
+//		String correctOutput=new Scanner(new File("res/examples/seman-out/01_idn.out")).useDelimiter("\\Z").next();
+//		
+//		assertEquals(correctOutput, output);
+//		
+//
+//	}
 }
