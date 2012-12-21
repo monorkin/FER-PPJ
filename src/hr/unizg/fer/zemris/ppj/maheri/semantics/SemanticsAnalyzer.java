@@ -23,7 +23,11 @@ public class SemanticsAnalyzer {
 	private Node generativeTree;
 	private static Map<String, List<orderedProduction>> productions;
 	private static PPJCProduction[] productionEnum;
-	private PrintStream output;
+	private StringBuilder output;
+	
+	public String getOutput() {
+		return output.toString();
+	}
 
 	private class orderedProduction {
 		String[] production;
@@ -40,9 +44,8 @@ public class SemanticsAnalyzer {
 
 	}
 
-	public SemanticsAnalyzer(Node tree, PrintStream output) {
+	public SemanticsAnalyzer(Node tree) {
 		this.generativeTree = tree;
-		this.output=output;
 		Scanner fr = null;
 		try {
 			fr = new Scanner(new File("produkcije.txt"));
@@ -89,7 +92,7 @@ public class SemanticsAnalyzer {
 		try {
 			checkSubtree(generativeTree, symbolTable);
 		} catch (SemanticsException e) {
-			output.println(errorString(e.getErrorNode()));
+			output.append(errorString(e.getErrorNode()));
 			System.err.println(e.getMessage());
 		}
 	}
@@ -119,14 +122,14 @@ public class SemanticsAnalyzer {
 		try {
 			checkMain();
 		} catch (SemanticsException e) {
-			output.println("main");
+			output.append("main");
 			System.err.println(e.getMessage());
 		}
 
 		try {
 			checkFunctionsAreDefined(SymbolTable.GLOBAL);
 		} catch (SemanticsException e) {
-			output.println("funkcija");
+			output.append("funkcija");
 			System.err.println(e.getMessage());
 		}
 	}

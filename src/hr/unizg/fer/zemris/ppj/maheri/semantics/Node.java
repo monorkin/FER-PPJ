@@ -38,26 +38,25 @@ public abstract class Node {
 		return symbol.toString();
 	}
 
+	// FIXME Ovdje se možda mora ili nemora nešto dodati neznam kak si je
+	// osvald to zamislio točno
 	public Object getAttribute(Attribute key) {
 		Object ret = attributes.get(key);
 
-		// FIXME Ovo možda treba ili netreba bit zakomentirano. Meni se čini da
-		// treba pošto je osvald izveo određene stvari na određen način
 		if (ret == null)
 			throw new IllegalArgumentException("no such attribute");
-		//
-		
+
 		return ret;
 	}
 
+	// FIXME Ovdje se možda mora ili nemora nešto dodati neznam kak si je
+	// osvald to zamislio točno
 	public void setAttribute(Attribute key, Object value) {
-		// FIXME Ovo možda treba ili netreba bit zakomentirano. Meni se čini da
-		// treba pošto je osvald izveo određene stvari na određen način
+
 		if (value == null) {
 			throw new IllegalArgumentException("null attribute value");
 		}
-		//
-		
+
 		attributes.put(key, value);
 	}
 
