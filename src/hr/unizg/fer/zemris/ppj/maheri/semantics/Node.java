@@ -41,15 +41,23 @@ public abstract class Node {
 	public Object getAttribute(Attribute key) {
 		Object ret = attributes.get(key);
 
+		// FIXME Ovo možda treba ili netreba bit zakomentirano. Meni se čini da
+		// treba pošto je osvald izveo određene stvari na određen način
 		if (ret == null)
 			throw new IllegalArgumentException("no such attribute");
+		//
+		
 		return ret;
 	}
 
 	public void setAttribute(Attribute key, Object value) {
+		// FIXME Ovo možda treba ili netreba bit zakomentirano. Meni se čini da
+		// treba pošto je osvald izveo određene stvari na određen način
 		if (value == null) {
 			throw new IllegalArgumentException("null attribute value");
 		}
+		//
+		
 		attributes.put(key, value);
 	}
 

@@ -23,7 +23,7 @@ public class SemantickiAnalizator {
 		InputProcessor ip = new InputProcessor(inputLines);
 		Node tree = ip.getTree();
 		
-		SemanticsAnalyzer analyzer = new SemanticsAnalyzer(tree);
+		SemanticsAnalyzer analyzer = new SemanticsAnalyzer(tree, System.out);
 		
 		analyzer.checkAttributes();
 		
