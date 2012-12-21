@@ -465,7 +465,7 @@ public class SemanticsAnalyzer {
 			checkSubtree(izrazPridruzivanja, table);
 
 			Type type = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
-			TypeList list = new TypeList(Arrays.asList(type));
+			TypeList list = new TypeList(new ArrayList<Type>(Arrays.asList(type)));
 
 			// tipovi <-- [ <izraz_pridruzivanja>.tip ]
 			node.setAttribute(Attribute.TIPOVI, list);
@@ -1147,7 +1147,9 @@ public class SemanticsAnalyzer {
 			// ako se
 			// naredba prosiruje u bilo sto osim <izraz_naredba>
 			NonterminalNode u = (NonterminalNode) children.get(0);
-			u.setAttribute(Attribute.PETLJA, node.getAttribute(Attribute.PETLJA));
+			// Object obj = node.getAttribute(Attribute.PETLJA);
+			boolean petlja = false;
+			u.setAttribute(Attribute.PETLJA, petlja);
 			checkSubtree(u, table);
 			break;
 		}
@@ -1350,7 +1352,8 @@ public class SemanticsAnalyzer {
 			// 1. provjeri(<izraz>)
 			// 2. naredba se nalazi unutar funkcije tipa funkcija(params ! pov)
 			// i vrijedi <izraz>.tip  pov
-
+			NonterminalNode izraz = (NonterminalNode) children.get(1);
+			checkSubtree(izraz, table);
 			// FIXME check current function return type thru symboltable
 			break;
 		}
@@ -1469,7 +1472,6 @@ public class SemanticsAnalyzer {
 			}
 			Type retType = (Type) imeTipa.getAttribute(Attribute.TIP);
 			SymbolEntry functionEntry = SymbolTable.GLOBAL.get(functionName.getText());
-			FunctionType fType = new FunctionType(retType, (TypeList) listaParametara.getAttribute(Attribute.TIPOVI));
 
 			if (functionEntry != null && functionEntry.isDefined()) {
 				// 3. ne postoji prije definirana funkcija imena IDN.ime
@@ -1480,6 +1482,7 @@ public class SemanticsAnalyzer {
 			// 4. provjeri (<lista_parametara>)
 			checkSubtree(listaParametara, table);
 
+			FunctionType fType = new FunctionType(retType, (TypeList) listaParametara.getAttribute(Attribute.TIPOVI));
 			// 5. ako postoji deklaracija imena IDN.ime u globalnom djelokrugu
 			// onda
 			// je pripadni tip te deklaracije ...
@@ -1530,16 +1533,19 @@ public class SemanticsAnalyzer {
 
 			// tipovi <-- [ <deklaracija_parametra>.tip ]
 			// imena <-- [ <deklaracija_parametra>.ime ]
-			node.setAttribute(Attribute.IMENA, Arrays.asList((String) deklaracijaParametra.getAttribute(Attribute.IME)));
-			node.setAttribute(Attribute.TIPOVI,
-					new TypeList(Arrays.asList((Type) deklaracijaParametra.getAttribute(Attribute.TIP))));
+			node.setAttribute(Attribute.IMENA,
+					new ArrayList<String>(Arrays.asList((String) deklaracijaParametra.getAttribute(Attribute.IME))));
+			node.setAttribute(
+					Attribute.TIPOVI,
+					new TypeList(new ArrayList<Type>(Arrays.asList((Type) deklaracijaParametra
+							.getAttribute(Attribute.TIP)))));
 			break;
 		}
 		// <lista_parametara> ::= <lista_parametara> ZAREZ
 		// <deklaracija_parametra>
 		case LISTA_PARAMETARA_2: {
 			NonterminalNode listaParametara = (NonterminalNode) children.get(0);
-			NonterminalNode deklaracijaParametra = (NonterminalNode) children.get(3);
+			NonterminalNode deklaracijaParametra = (NonterminalNode) children.get(2);
 
 			// 1. provjeri(<lista_parametara>)
 			checkSubtree(listaParametara, table);
@@ -1968,8 +1974,10 @@ public class SemanticsAnalyzer {
 			// tipovi <-- [ <izraz_pridruzivanja>.tip ]
 			// br-elem <-- 1
 			node.setAttribute(Attribute.BR_ELEM, 1);
-			node.setAttribute(Attribute.TIPOVI,
-					new TypeList(Arrays.asList((Type) izrazPridruzivanja.getAttribute(Attribute.TIP))));
+			node.setAttribute(
+					Attribute.TIPOVI,
+					new TypeList(new ArrayList<Type>(Arrays.asList((Type) izrazPridruzivanja
+							.getAttribute(Attribute.TIP)))));
 			break;
 		}
 		// <lista_izraza_pridruzivanja> ::= <lista_izraza_pridruzivanja> ZAREZ
