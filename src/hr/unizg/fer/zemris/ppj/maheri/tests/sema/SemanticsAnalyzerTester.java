@@ -46,8 +46,13 @@ public class SemanticsAnalyzerTester {
 	
 	@Test
 	public void superDuperTest() throws IOException {
+		System.out.println("\nTESTISUJEMO TEST PRIMJER: "+fileName);
 		String output=getAnalyzerOutputFromFile("res/examples/seman-in/"+fileName+".in");
 		String correctOutput=new Scanner(new File("res/examples/seman-out/"+fileName+".out")).useDelimiter("\\Z").next();
+		System.out.println("------------");
+		System.out.println(output);
+		System.out.println(correctOutput);
+		System.out.println("------------");
 		assertEquals(correctOutput, output);
 	}
 	

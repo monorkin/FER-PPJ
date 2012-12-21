@@ -45,6 +45,7 @@ public class SemanticsAnalyzer {
 	}
 
 	public SemanticsAnalyzer(Node tree) {
+		output=new StringBuilder();
 		this.generativeTree = tree;
 		Scanner fr = null;
 		try {
@@ -92,6 +93,8 @@ public class SemanticsAnalyzer {
 		try {
 			checkSubtree(generativeTree, symbolTable);
 		} catch (SemanticsException e) {
+//			System.err.println("!!!!!!!!!HURR ERROR MESIĐ  "+e.getMessage());
+//			if (output==null) System.err.println("JEBEMU MATER!!!!!1");
 			output.append(errorString(e.getErrorNode()));
 			System.err.println(e.getMessage());
 		}
@@ -2070,7 +2073,7 @@ public class SemanticsAnalyzer {
 	}
 
 	private static PPJCProduction determineProduction(Node node) {
-		System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " + node.getSymbol());
+		//System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " + node.getSymbol());
 
 		List<Node> children = node.getChildren();
 
@@ -2090,7 +2093,7 @@ public class SemanticsAnalyzer {
 				}
 			}
 			if (matchFound) {
-				System.err.println("NAŠO PRODUKCIJU:" + productionEnum[o.index]);
+				//System.err.println("NAŠO PRODUKCIJU:" + productionEnum[o.index]);
 				return productionEnum[o.index];
 			}
 		}
