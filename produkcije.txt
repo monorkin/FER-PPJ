@@ -135,6 +135,6 @@
 <inicijalizator>
 	<izraz_pridruzivanja>
 	L_VIT_ZAGRADA <lista_izraza_pridruzivanja> D_VIT_ZAGRADA
-<lista izraza pridruzivanja>
+<lista_izraza_pridruzivanja>
 	<izraz_pridruzivanja>
 	<lista_izraza_pridruzivanja> ZAREZ <izraz_pridruzivanja>
