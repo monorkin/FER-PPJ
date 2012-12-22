@@ -132,7 +132,9 @@ public class SemanticsAnalyzer {
 		try {
 			checkMain();
 		} catch (SemanticsException e) {
-			output.append("main");
+			if(output.length() == 0) {
+				output.append("main");
+			}
 			System.err.println(e.getMessage());
 		}
 
