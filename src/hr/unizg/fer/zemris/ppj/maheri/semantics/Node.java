@@ -38,8 +38,8 @@ public abstract class Node {
 		return symbol.toString();
 	}
 
-	// FIXME Ovdje se možda mora ili nemora nešto dodati neznam kak si je
-	// osvald to zamislio točno
+	// DONTFIXME null se namjerno provjerava jer ako pukne tu, onda je greska u
+	// atributima (i bila je jedna)
 	public Object getAttribute(Attribute key) {
 		Object ret = attributes.get(key);
 
@@ -49,8 +49,8 @@ public abstract class Node {
 		return ret;
 	}
 
-	// FIXME Ovdje se možda mora ili nemora nešto dodati neznam kak si je
-	// osvald to zamislio točno
+	// DONTFIXME null se namjerno provjerava jer ako pukne tu, onda je greska u
+	// atributima (i bila je jedna)
 	public void setAttribute(Attribute key, Object value) {
 
 		if (value == null) {

@@ -153,7 +153,8 @@ public class SemanticsAnalyzer {
 		for (Entry<String, SymbolEntry> entry : table.getEntries()) {
 			SymbolEntry s = entry.getValue();
 			String funcName = entry.getKey();
-			if (s.getType() instanceof FunctionType && !SymbolTable.GLOBAL.get(funcName).isDefined()) {
+			SymbolEntry globalFunction = SymbolTable.GLOBAL.get(funcName);
+			if (s.getType() instanceof FunctionType && (globalFunction == null || !globalFunction.isDefined())) {
 				throw new SemanticsException("Declaration of function which is not defined in global scope", null);
 			}
 		}
@@ -490,7 +491,7 @@ public class SemanticsAnalyzer {
 			checkSubtree(izrazPridruzivanja, table);
 
 			Type type = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
-			TypeList list = (TypeList) node.getAttribute(Attribute.TIPOVI);
+			TypeList list = (TypeList) listaArgumenata.getAttribute(Attribute.TIPOVI);
 			list.getTypes().add(type);
 
 			// tipovi <-- <lista_argumenata>.tipovi + [
