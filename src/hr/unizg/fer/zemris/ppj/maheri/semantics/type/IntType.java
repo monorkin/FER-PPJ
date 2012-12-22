@@ -8,6 +8,6 @@ public class IntType extends NumericType {
 
 	@Override
 	public boolean equals(Type t) {
-		return this.getClass().equals(t.getClass());
+		return this == t;
 	}
 }
