@@ -1346,7 +1346,7 @@ public class SemanticsAnalyzer {
 			// u
 			// funkcijama koje ne vracaju nista.
 
-			// FIXME check current function return type thru symboltable
+			// FIXME check current function return type through symboltable
 			break;
 		}
 		// <naredba_skoka> ::= KR_RETURN <izraz> TOCKAZAREZ
@@ -1356,7 +1356,7 @@ public class SemanticsAnalyzer {
 			// i vrijedi <izraz>.tip  pov
 			NonterminalNode izraz = (NonterminalNode) children.get(1);
 			checkSubtree(izraz, table);
-			// FIXME check current function return type thru symboltable
+			// FIXME check current function return type through symboltable
 			break;
 		}
 
