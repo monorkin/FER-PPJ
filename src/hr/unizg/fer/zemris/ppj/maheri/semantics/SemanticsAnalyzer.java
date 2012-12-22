@@ -1365,10 +1365,9 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) children.get(1);
 			checkSubtree(izraz, table);
 			
-			if (!(table.getReturnType().equals(izraz.getAttribute(Attribute.TIP)))) {
-				System.err.println(">"+table.getReturnType()+"=="+izraz.getAttribute(Attribute.TIP));
-				System.err.println(table.getReturnType().equals(izraz.getAttribute(Attribute.TIP)));
-				throw new SemanticsException("function must return "+table.getReturnType()+", got "+izraz.getAttribute(Attribute.TIP), node);
+			if (!((Type) izraz.getAttribute(Attribute.TIP)).canConvertImplicit(table.getReturnType())) {
+				throw new SemanticsException("function must return " + table.getReturnType() + ", got "
+						+ izraz.getAttribute(Attribute.TIP), node);
 			}
 			break;
 		}
