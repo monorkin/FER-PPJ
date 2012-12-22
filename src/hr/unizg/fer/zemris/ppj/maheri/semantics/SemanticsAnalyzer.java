@@ -1349,7 +1349,7 @@ public class SemanticsAnalyzer {
 			// funkcijama koje ne vracaju nista.
 
 			if (!(table.getReturnType().equals(VoidType.INSTANCE))) 
-				throw new SemanticsException("function must return "+table.getReturnType(), node);
+				throw new SemanticsException("function must return ", node);
 
 			break;
 		}
@@ -1362,7 +1362,7 @@ public class SemanticsAnalyzer {
 			checkSubtree(izraz, table);
 			
 			if (!(table.getReturnType().equals(izraz.getAttribute(Attribute.TIP)))) 
-				throw new SemanticsException("function must return "+table.getReturnType(), node);
+				throw new SemanticsException("function must return "+table.getReturnType()+", got "+izraz.getAttribute(Attribute.TIP), node);
 			break;
 		}
 
