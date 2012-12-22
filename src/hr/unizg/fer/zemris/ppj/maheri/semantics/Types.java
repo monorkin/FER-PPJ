@@ -217,7 +217,7 @@ class TypeList extends Type {
 			if (types.size() != tl.types.size())
 				return false;
 			for (int i = 0; i < types.size(); ++i) {
-				if (types.get(i).canConvertImplicit(tl.types.get(i)))
+				if (!types.get(i).canConvertImplicit(tl.types.get(i)))
 					return false;
 			}
 			return true;
