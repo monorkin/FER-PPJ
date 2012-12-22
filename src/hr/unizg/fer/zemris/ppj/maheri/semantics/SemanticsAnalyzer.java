@@ -1186,7 +1186,8 @@ public class SemanticsAnalyzer {
 			checkSubtree(izraz, table);
 
 			// tip <-- <izraz>.tip
-			node.setAttribute(Attribute.TIP, IntType.INSTANCE);
+			node.setAttribute(Attribute.TIP, izraz.getAttribute(Attribute.TIP));
+			
 			break;
 		}
 
