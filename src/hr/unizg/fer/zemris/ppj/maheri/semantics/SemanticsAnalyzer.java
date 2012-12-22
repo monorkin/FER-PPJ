@@ -272,7 +272,7 @@ public class SemanticsAnalyzer {
 					esc = true;
 				}
 			}
-			if (esc = true)
+			if (esc == true)
 				throw new SemanticsException("Invalid char-array constant value", node);
 
 			// tip <-- niz (const(char))
