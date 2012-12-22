@@ -1346,7 +1346,9 @@ public class SemanticsAnalyzer {
 			// u
 			// funkcijama koje ne vracaju nista.
 
-			// FIXME check current function return type through symboltable
+			if (!(table.getReturnType().equals(VoidType.INSTANCE))) 
+				throw new SemanticsException("function must return "+table.getReturnType(), node);
+
 			break;
 		}
 		// <naredba_skoka> ::= KR_RETURN <izraz> TOCKAZAREZ
@@ -1356,7 +1358,9 @@ public class SemanticsAnalyzer {
 			// i vrijedi <izraz>.tip  pov
 			NonterminalNode izraz = (NonterminalNode) children.get(1);
 			checkSubtree(izraz, table);
-			// FIXME check current function return type through symboltable
+			
+			if (!(table.getReturnType().equals(izraz.getAttribute(Attribute.TIP)))) 
+				throw new SemanticsException("function must return "+table.getReturnType(), node);
 			break;
 		}
 
@@ -1442,8 +1446,10 @@ public class SemanticsAnalyzer {
 			functionEntry.markDefined();
 
 			// FIXME add something for return check
+			
 
 			SymbolTable inner = table.createNested();
+			inner.setReturnType(retType);
 
 			// 6. provjeri (<slozena_naredba>)
 			checkSubtree(slozenaNaredba, inner);
@@ -1503,6 +1509,7 @@ public class SemanticsAnalyzer {
 			// i <lista_parametara>.imena.
 
 			SymbolTable inner = table.createNested();
+			inner.setReturnType(retType);
 
 			@SuppressWarnings("unchecked")
 			List<String> paramNames = (List<String>) listaParametara.getAttribute(Attribute.IMENA);

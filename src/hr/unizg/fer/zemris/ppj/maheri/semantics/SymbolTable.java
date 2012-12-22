@@ -16,18 +16,35 @@ import java.util.Set;
  */
 public class SymbolTable {
 	public static SymbolTable GLOBAL = new SymbolTable(null);
-	
+
 	private final HashMap<String, SymbolEntry> map = new HashMap<String, SymbolEntry>();
 	private final SymbolTable parentScope;
-	
+
+	private Type returnType = null;
+
 	private final List<SymbolTable> nested = new ArrayList<SymbolTable>();
-	
-	protected Set<Entry<String,SymbolEntry>> getEntries() {
+
+	protected Set<Entry<String, SymbolEntry>> getEntries() {
 		return Collections.unmodifiableSet(map.entrySet());
 	}
-	
+
 	protected List<SymbolTable> getNested() {
 		return Collections.unmodifiableList(nested);
+	}
+
+	/**
+	 * @return the returnType
+	 */
+	public Type getReturnType() {
+		return returnType;
+	}
+
+	/**
+	 * @param returnType
+	 *            the returnType to set
+	 */
+	public void setReturnType(Type returnType) {
+		this.returnType = returnType;
 	}
 
 	/**
@@ -40,10 +57,13 @@ public class SymbolTable {
 	 */
 	public SymbolTable(SymbolTable parentScope) {
 		this.parentScope = parentScope;
+		if (parentScope != null)
+			this.returnType = parentScope.returnType;
 	}
-	
+
 	/**
 	 * Create a nested symbol table (for nesting scopes)
+	 * 
 	 * @return the created scope
 	 */
 	public SymbolTable createNested() {
