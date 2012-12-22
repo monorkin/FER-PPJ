@@ -1444,8 +1444,6 @@ public class SemanticsAnalyzer {
 				SymbolTable.GLOBAL.addLocal(functionName.getText(), functionEntry);
 			}
 			functionEntry.markDefined();
-
-			// FIXME add something for return check
 			
 
 			SymbolTable inner = table.createNested();
@@ -1518,8 +1516,6 @@ public class SemanticsAnalyzer {
 			int size = paramNames.size();
 			for (int i = 0; i < size; ++i)
 				inner.addLocal(paramNames.get(i), new SymbolEntry(paramTypes.get(i)));
-
-			// FIXME add something so return check works
 
 			checkSubtree(slozenaNaredba, inner);
 
