@@ -33,9 +33,7 @@ public class SemanticsAnalyzerTester {
 	public static List<String[]> getFileNames() {
 		File files = new File("res/examples/seman-in/");
 		File[] listFiles = files.listFiles();
-		// FIXME Ovisno o tome da li je ova linija zakomentirana ili ne se
-		// testovi drukčije izvrte, ako je zakomentirana bude 5 failura ako
-		// odkomentirana onda 6, nema nikakvog smisla
+		
 		Arrays.sort(listFiles);
 		List<String[]> fileNames = new ArrayList<String[]>();
 		for (File f : listFiles) {
