@@ -141,6 +141,11 @@ public class SemanticsAnalyzer {
 		try {
 			checkFunctionsAreDefined(SymbolTable.GLOBAL);
 		} catch (SemanticsException e) {
+			/*
+			 * Ako se naiđe na grešku definicija funkcije, potrebno je samo
+			 * ispisati <i>funkcija</i>
+			 */
+			output.setLength(0);
 			output.append("funkcija");
 			System.err.println(e.getMessage());
 		}
