@@ -1283,8 +1283,6 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("For-loop condition of invalit type", node);
 
 			// 4. provjeri(<naredba>)
-			naredba.setAttribute(Attribute.PETLJA, true, true);
-
 			checkSubtree(naredba, table);
 			break;
 		}
@@ -2118,19 +2116,6 @@ public class SemanticsAnalyzer {
 			}
 		}
 		throw new SemanticsException("OPET NEMA PRODUKCIJE JEBIGA", node);
-	}
-
-	private void printNode(Node node, int tab) {
-		List<Node> children = node.getChildren();
-		for(int i = 0; i < tab; ++i){
-			System.err.print("  ");
-		}
-		System.err.println(node);
-		if(children != null) {
-			for(Node n : children) {
-				printNode(n, tab + 1);
-			}
-		}
 	}
 	
 	private void checkAndApplyLoop(Node node) {
