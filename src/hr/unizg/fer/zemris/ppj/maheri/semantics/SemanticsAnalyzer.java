@@ -21,8 +21,8 @@ import java.util.Set;
 
 public class SemanticsAnalyzer {
 	private Node generativeTree;
-	private static Map<String, List<orderedProduction>> productions;
-	private static PPJCProduction[] productionEnum;
+	private Map<String, List<orderedProduction>> productions;
+	private PPJCProduction[] productionEnum;
 	private StringBuilder output;
 
 	public String getOutput() {
@@ -74,7 +74,7 @@ public class SemanticsAnalyzer {
 		fr.close();
 	}
 
-	private static String errorString(Node errorNode) {
+	private String errorString(Node errorNode) {
 		if (errorNode.getChildren() == null) {
 			return errorNode.toString();
 		}
@@ -138,7 +138,7 @@ public class SemanticsAnalyzer {
 		}
 	}
 
-	private static void checkMain() {
+	private void checkMain() {
 		SymbolEntry mainEntry = SymbolTable.GLOBAL.get("main");
 		if (mainEntry == null)
 			throw new SemanticsException("main function undeclared", null);
@@ -149,7 +149,7 @@ public class SemanticsAnalyzer {
 			throw new SemanticsException("main function takes no arguments", null);
 	}
 
-	private static void checkFunctionsAreDefined(SymbolTable table) {
+	private void checkFunctionsAreDefined(SymbolTable table) {
 		for (Entry<String, SymbolEntry> entry : table.getEntries()) {
 			SymbolEntry s = entry.getValue();
 			String funcName = entry.getKey();
@@ -162,7 +162,7 @@ public class SemanticsAnalyzer {
 			checkFunctionsAreDefined(nested);
 	}
 
-	private static void checkSubtree(Node node, SymbolTable table) throws SemanticsException {
+	private void checkSubtree(Node node, SymbolTable table) throws SemanticsException {
 		PPJCProduction production = determineProduction(node);
 		List<Node> children = node.getChildren();
 
@@ -2036,7 +2036,7 @@ public class SemanticsAnalyzer {
 	 * @throws SemanticsException
 	 *             if any checks fail
 	 */
-	private static void checkIntBinaryOperator(Node parent, SymbolTable syms) throws SemanticsException {
+	private void checkIntBinaryOperator(Node parent, SymbolTable syms) throws SemanticsException {
 		NonterminalNode a = (NonterminalNode) parent.getChildren().get(0);
 		NonterminalNode b = (NonterminalNode) parent.getChildren().get(2);
 		TerminalNode op = (TerminalNode) parent.getChildren().get(1);
@@ -2077,7 +2077,7 @@ public class SemanticsAnalyzer {
 	 * @throws SemanticsException
 	 *             if any checks fail
 	 */
-	private static void checkExpressionUnitProduction(Node op, SymbolTable syms) {
+	private void checkExpressionUnitProduction(Node op, SymbolTable syms) {
 		NonterminalNode innerOp = (NonterminalNode) op.getChildren().get(0);
 
 		checkSubtree(innerOp, syms);
@@ -2086,7 +2086,7 @@ public class SemanticsAnalyzer {
 		op.setAttribute(Attribute.L_IZRAZ, innerOp.getAttribute(Attribute.L_IZRAZ));
 	}
 
-	private static PPJCProduction determineProduction(Node node) {
+	private PPJCProduction determineProduction(Node node) {
 		//System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " + node.getSymbol());
 
 		List<Node> children = node.getChildren();
