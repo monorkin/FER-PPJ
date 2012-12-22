@@ -45,6 +45,11 @@ abstract class Type {
 	}
 
 	public abstract boolean equals(Type t);
+	
+	public String toString() {
+		return this.getClass().getSimpleName();
+	}
+	
 }
 
 class VoidType extends Type {
