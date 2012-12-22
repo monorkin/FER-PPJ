@@ -1,15 +1,20 @@
 package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
-import static hr.unizg.fer.zemris.ppj.maheri.semantics.Node.Attribute;
-
-import hr.unizg.fer.zemris.ppj.maheri.parser.Production;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.Node.Attribute;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.SymbolTable.SymbolEntry;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.ArrayType;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.CharType;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.ConstType;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.FunctionType;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.IntType;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.NumericType;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.PrimitiveType;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.Type;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.TypeList;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.VoidType;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
-import java.util.Set;
 
 public class SemanticsAnalyzer {
 	private Node generativeTree;
@@ -1361,8 +1365,11 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) children.get(1);
 			checkSubtree(izraz, table);
 			
-			if (!(table.getReturnType().equals(izraz.getAttribute(Attribute.TIP)))) 
+			if (!(table.getReturnType().equals(izraz.getAttribute(Attribute.TIP)))) {
+				System.err.println(">"+table.getReturnType()+"=="+izraz.getAttribute(Attribute.TIP));
+				System.err.println(table.getReturnType().equals(izraz.getAttribute(Attribute.TIP)));
 				throw new SemanticsException("function must return "+table.getReturnType()+", got "+izraz.getAttribute(Attribute.TIP), node);
+			}
 			break;
 		}
 

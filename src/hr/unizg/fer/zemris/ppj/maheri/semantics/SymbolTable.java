@@ -1,5 +1,8 @@
 package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.NumericType;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.type.Type;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
