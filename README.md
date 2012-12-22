@@ -1,4 +1,3 @@
 3. Labos
 ========
-In progress.  
-read mail for info.
+TREBA RIJEŠIT CONTINUE I BREAK AJMO EKIPA 23/30 JOŠ SAMO 7 MOŽEMO MI TO
