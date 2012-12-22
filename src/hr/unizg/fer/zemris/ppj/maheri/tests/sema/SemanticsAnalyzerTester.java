@@ -36,7 +36,7 @@ public class SemanticsAnalyzerTester {
 		// FIXME Ovisno o tome da li je ova linija zakomentirana ili ne se
 		// testovi drukčije izvrte, ako je zakomentirana bude 5 failura ako
 		// odkomentirana onda 6, nema nikakvog smisla
-		 Arrays.sort(listFiles);
+		Arrays.sort(listFiles);
 		List<String[]> fileNames = new ArrayList<String[]>();
 		for (File f : listFiles) {
 			String fName = f.getName();
@@ -63,8 +63,10 @@ public class SemanticsAnalyzerTester {
 		}
 		String correctOutput = null;
 		try {
-			correctOutput = new Scanner(new File("res/examples/seman-out/" + fileName + ".out")).useDelimiter("\\Z")
-					.next();
+			Scanner scn = new Scanner(new File("res/examples/seman-out/" + fileName + ".out"));
+			scn.useDelimiter("\\Z");
+			correctOutput =scn.next();
+			scn.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

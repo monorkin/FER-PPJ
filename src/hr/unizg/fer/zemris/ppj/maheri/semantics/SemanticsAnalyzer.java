@@ -45,6 +45,7 @@ public class SemanticsAnalyzer {
 	}
 
 	public SemanticsAnalyzer(Node tree) {
+		SymbolTable.GLOBAL= new SymbolTable(null);
 		output=new StringBuilder();
 		this.generativeTree = tree;
 		Scanner fr = null;
@@ -2073,7 +2074,7 @@ public class SemanticsAnalyzer {
 	}
 
 	private static PPJCProduction determineProduction(Node node) {
-		//System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " + node.getSymbol());
+		System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " + node.getSymbol());
 
 		List<Node> children = node.getChildren();
 
@@ -2093,7 +2094,7 @@ public class SemanticsAnalyzer {
 				}
 			}
 			if (matchFound) {
-				//System.err.println("NAŠO PRODUKCIJU:" + productionEnum[o.index]);
+				System.err.println("NAŠO PRODUKCIJU:" + productionEnum[o.index]);
 				return productionEnum[o.index];
 			}
 		}

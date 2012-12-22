@@ -15,7 +15,7 @@ import java.util.Set;
  * 
  */
 public class SymbolTable {
-	public static final SymbolTable GLOBAL = new SymbolTable(null);
+	public static SymbolTable GLOBAL = new SymbolTable(null);
 	
 	private final HashMap<String, SymbolEntry> map = new HashMap<String, SymbolEntry>();
 	private final SymbolTable parentScope;
@@ -38,7 +38,7 @@ public class SymbolTable {
 	 *            symbol table of parent scope, or <code>null</code> if global
 	 *            scope
 	 */
-	private SymbolTable(SymbolTable parentScope) {
+	public SymbolTable(SymbolTable parentScope) {
 		this.parentScope = parentScope;
 	}
 	
