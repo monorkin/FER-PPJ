@@ -16,8 +16,8 @@
 	<lista_argumenata> ZAREZ <izraz_pridruzivanja>
 <unarni_izraz>
 	<postfiks_izraz>
-	OP_DEC <unarni_izraz>
 	OP_INC <unarni_izraz>
+	OP_DEC <unarni_izraz>
 	<unarni_operator> <cast_izraz>
 <unarni_operator>
 	PLUS
