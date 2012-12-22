@@ -83,8 +83,10 @@ public class SemanticsAnalyzer {
 		if (errorNode.getChildren().isEmpty()) {
 			return sb.append("$").toString();
 		}
-		for (Node c : errorNode.getChildren())
+		for (Node c : errorNode.getChildren()){
 			sb.append(c.toString()).append(" ");
+			System.err.println(c);
+		}
 		sb.setLength(sb.length() - 1);
 		return sb.toString();
 	}
@@ -1054,7 +1056,7 @@ public class SemanticsAnalyzer {
 		// <slozena_naredba> ::= L_VIT_ZAGRADA <lista_naredbi> D_VIT_ZAGRADA
 		case SLOZENA_NAREDBA_1: {
 			NonterminalNode listaNaredbi = (NonterminalNode) children.get(1);
-
+			
 			/*
 			 * Ova produkcija generira blok koji nema vlastite deklaracije (ali
 			 * neka od naredbi u bloku moze biti novi blok koji ima lokalne
@@ -1105,7 +1107,6 @@ public class SemanticsAnalyzer {
 		// lista_naredbi> ::= <naredba>
 		case LISTA_NAREDBI_1: {
 			NonterminalNode naredba = (NonterminalNode) children.get(0);
-
 			// 1. provjeri(<naredba>)
 			checkSubtree(naredba, table);
 			break;
@@ -1148,9 +1149,7 @@ public class SemanticsAnalyzer {
 			// ako se
 			// naredba prosiruje u bilo sto osim <izraz_naredba>
 			NonterminalNode u = (NonterminalNode) children.get(0);
-			// Object obj = node.getAttribute(Attribute.PETLJA);
-			boolean petlja = false;
-			u.setAttribute(Attribute.PETLJA, petlja);
+//			u.setAttribute(Attribute.PETLJA, false, true);
 			checkSubtree(u, table);
 			break;
 		}
@@ -1245,6 +1244,7 @@ public class SemanticsAnalyzer {
 		case NAREDBA_PETLJE_1: {
 			NonterminalNode izraz = (NonterminalNode) children.get(2);
 			NonterminalNode naredba = (NonterminalNode) children.get(4);
+			node.setAttribute(Attribute.PETLJA, !((Boolean) node.getAttribute(Attribute.PETLJA)), true);
 
 			// 1. provjeri(<izraz>)
 			checkSubtree(izraz, table);
@@ -1254,7 +1254,7 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("While-loop condition is of invalid type", node);
 
 			// 3. provjeri(<naredba>)
-			naredba.setAttribute(Attribute.PETLJA, true); // FIXME ?
+//			naredba.setAttribute(Attribute.PETLJA, false, true); // FIXME ?
 
 			checkSubtree(naredba, table);
 			break;
@@ -1265,6 +1265,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode izrazNaredba1 = (NonterminalNode) children.get(2);
 			NonterminalNode izrazNaredba2 = (NonterminalNode) children.get(3);
 			NonterminalNode naredba = (NonterminalNode) children.get(5);
+			node.setAttribute(Attribute.PETLJA, !((Boolean) node.getAttribute(Attribute.PETLJA)), true);
 
 			// Ova produkcija generira for-petlju bez opcionalnog izraza koji se
 			// tipicno koristi za
@@ -1283,7 +1284,7 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("For-loop condition of invalit type", node);
 
 			// 4. provjeri(<naredba>)
-			naredba.setAttribute(Attribute.PETLJA, true); // FIXME ?
+			naredba.setAttribute(Attribute.PETLJA, true, true); // FIXME ?
 
 			checkSubtree(naredba, table);
 			break;
@@ -1296,6 +1297,11 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) children.get(4);
 			NonterminalNode naredba = (NonterminalNode) children.get(6);
 
+			try {
+				node.setAttribute(Attribute.PETLJA, !((Boolean) node.getAttribute(Attribute.PETLJA)), true);
+			} catch(IllegalArgumentException e) {
+				node.setAttribute(Attribute.PETLJA, true, true);
+			}
 			// 1. provjeri(<izraz_naredba>1)
 			checkSubtree(izrazNaredba1, table);
 
@@ -1309,8 +1315,6 @@ public class SemanticsAnalyzer {
 
 			// 4. provjeri(<izraz>)
 			checkSubtree(izraz, table);
-
-			naredba.setAttribute(Attribute.PETLJA, true); // FIXME ?
 
 			// 5. provjeri(<naredba>)
 			checkSubtree(naredba, table);
