@@ -24,8 +24,6 @@ public abstract class Node {
 		super();
 		attributes = new HashMap<Node.Attribute, Object>();
 		this.symbol = symbol;
-		setAttribute(Attribute.PETLJA, false);
-
 	}
 
 	public Symbol getSymbol() {

@@ -45,8 +45,8 @@ public class SemanticsAnalyzer {
 	}
 
 	public SemanticsAnalyzer(Node tree) {
-		SymbolTable.GLOBAL= new SymbolTable(null);
-		output=new StringBuilder();
+		SymbolTable.GLOBAL = new SymbolTable(null);
+		output = new StringBuilder();
 		this.generativeTree = tree;
 		Scanner fr = null;
 		try {
@@ -83,7 +83,7 @@ public class SemanticsAnalyzer {
 		if (errorNode.getChildren().isEmpty()) {
 			return sb.append("$").toString();
 		}
-		for (Node c : errorNode.getChildren()){
+		for (Node c : errorNode.getChildren()) {
 			sb.append(c.toString()).append(" ");
 			System.err.println(c);
 		}
@@ -96,8 +96,8 @@ public class SemanticsAnalyzer {
 		try {
 			checkSubtree(generativeTree, symbolTable);
 		} catch (SemanticsException e) {
-//			System.err.println("!!!!!!!!!HURR ERROR MESIĐ  "+e.getMessage());
-//			if (output==null) System.err.println("JEBEMU MATER!!!!!1");
+			// System.err.println("!!!!!!!!!HURR ERROR MESIĐ  "+e.getMessage());
+			// if (output==null) System.err.println("JEBEMU MATER!!!!!1");
 			output.append(errorString(e.getErrorNode()));
 			System.err.println(e.getMessage());
 		}
@@ -1145,11 +1145,7 @@ public class SemanticsAnalyzer {
 		case NAREDBA_3:
 		case NAREDBA_4:
 		case NAREDBA_5: {
-			// FIXME ? treba forwardati svojstvo PETLJA radi continue i break,
-			// ako se
-			// naredba prosiruje u bilo sto osim <izraz_naredba>
 			NonterminalNode u = (NonterminalNode) children.get(0);
-//			u.setAttribute(Attribute.PETLJA, false, true);
 			checkSubtree(u, table);
 			break;
 		}
@@ -1244,7 +1240,12 @@ public class SemanticsAnalyzer {
 		case NAREDBA_PETLJE_1: {
 			NonterminalNode izraz = (NonterminalNode) children.get(2);
 			NonterminalNode naredba = (NonterminalNode) children.get(4);
-			node.setAttribute(Attribute.PETLJA, !((Boolean) node.getAttribute(Attribute.PETLJA)), true);
+			/*
+			 * Mark this subtree as part of a loop. If the node is already a
+			 * part of a different loop, set this to false in order to prevent
+			 * continue / break, as it is illegal in a nested-loop context
+			 */
+			checkAndApplyLoop(node);
 
 			// 1. provjeri(<izraz>)
 			checkSubtree(izraz, table);
@@ -1254,8 +1255,6 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("While-loop condition is of invalid type", node);
 
 			// 3. provjeri(<naredba>)
-//			naredba.setAttribute(Attribute.PETLJA, false, true); // FIXME ?
-
 			checkSubtree(naredba, table);
 			break;
 		}
@@ -1265,8 +1264,8 @@ public class SemanticsAnalyzer {
 			NonterminalNode izrazNaredba1 = (NonterminalNode) children.get(2);
 			NonterminalNode izrazNaredba2 = (NonterminalNode) children.get(3);
 			NonterminalNode naredba = (NonterminalNode) children.get(5);
-			node.setAttribute(Attribute.PETLJA, !((Boolean) node.getAttribute(Attribute.PETLJA)), true);
 
+			checkAndApplyLoop(node);
 			// Ova produkcija generira for-petlju bez opcionalnog izraza koji se
 			// tipicno koristi za
 			// promjenu indeksa petlje dok sljedeca produkcija generira petlju
@@ -1284,7 +1283,7 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("For-loop condition of invalit type", node);
 
 			// 4. provjeri(<naredba>)
-			naredba.setAttribute(Attribute.PETLJA, true, true); // FIXME ?
+			naredba.setAttribute(Attribute.PETLJA, true, true);
 
 			checkSubtree(naredba, table);
 			break;
@@ -1297,11 +1296,8 @@ public class SemanticsAnalyzer {
 			NonterminalNode izraz = (NonterminalNode) children.get(4);
 			NonterminalNode naredba = (NonterminalNode) children.get(6);
 
-			try {
-				node.setAttribute(Attribute.PETLJA, !((Boolean) node.getAttribute(Attribute.PETLJA)), true);
-			} catch(IllegalArgumentException e) {
-				node.setAttribute(Attribute.PETLJA, true, true);
-			}
+			checkAndApplyLoop(node);
+			
 			// 1. provjeri(<izraz_naredba>1)
 			checkSubtree(izrazNaredba1, table);
 
@@ -1336,8 +1332,12 @@ public class SemanticsAnalyzer {
 			 * iskljucivo unutar neke petlje, a imaju isto znacenje kao u jeziku
 			 * C.
 			 */
-			// FIXME ?
-			boolean insideLoop = (Boolean) node.getAttribute(Attribute.PETLJA);
+			boolean insideLoop;
+			try {
+				insideLoop = (Boolean) node.getAttribute(Attribute.PETLJA);
+			} catch (IllegalArgumentException e) {
+				insideLoop = false;
+			}
 			if (!insideLoop) {
 				throw new SemanticsException("break/continue in non-loop scope", node);
 			}
@@ -2091,7 +2091,8 @@ public class SemanticsAnalyzer {
 	}
 
 	private PPJCProduction determineProduction(Node node) {
-		//System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " + node.getSymbol());
+		// System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " +
+		// node.getSymbol());
 
 		List<Node> children = node.getChildren();
 
@@ -2111,11 +2112,29 @@ public class SemanticsAnalyzer {
 				}
 			}
 			if (matchFound) {
-				//System.err.println("NAŠO PRODUKCIJU:" + productionEnum[o.index]);
+				// System.err.println("NAŠO PRODUKCIJU:" +
+				// productionEnum[o.index]);
 				return productionEnum[o.index];
 			}
 		}
 		throw new SemanticsException("OPET NEMA PRODUKCIJE JEBIGA", node);
 	}
 
+	private void printNode(Node node, int tab) {
+		List<Node> children = node.getChildren();
+		for(int i = 0; i < tab; ++i){
+			System.err.print("  ");
+		}
+		System.err.println(node);
+		if(children != null) {
+			for(Node n : children) {
+				printNode(n, tab + 1);
+			}
+		}
+	}
+	
+	private void checkAndApplyLoop(Node node) {
+		node.setAttribute(Attribute.PETLJA, true, true);
+	}
+	
 }
