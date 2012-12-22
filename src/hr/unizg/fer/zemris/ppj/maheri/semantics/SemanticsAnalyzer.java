@@ -635,7 +635,7 @@ public class SemanticsAnalyzer {
 			Type to = (Type) imeTipa.getAttribute(Attribute.TIP);
 
 			if (!from.canConvertExplicit(to)) {
-				throw new SemanticsException("Invalid cast", node);
+				throw new SemanticsException("Invalid cast " + from + " -> " + to, node);
 			}
 
 			// tip <-- ime_tipa.tip

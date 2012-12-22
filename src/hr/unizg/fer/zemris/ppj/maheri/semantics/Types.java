@@ -88,6 +88,11 @@ abstract class NumericType extends PrimitiveType {
 		 */
 		if (target instanceof NumericType)
 			return true;
+		if (target instanceof ConstType) {
+			ConstType constType = (ConstType) target;
+			if (constType.getType() instanceof NumericType)
+				return true;
+		}
 
 		return false;
 	}
@@ -146,6 +151,13 @@ class ConstType extends PrimitiveType {
 		 * vrijednost tipa T
 		 */
 		return target == type || equals(target) || type.canConvertImplicit(target);
+	}
+	
+	@Override
+	public boolean canConvertExplicit(Type target) {
+		if (canConvertImplicit(target))
+			return true;
+		return type.canConvertExplicit(target);
 	}
 
 	@Override
