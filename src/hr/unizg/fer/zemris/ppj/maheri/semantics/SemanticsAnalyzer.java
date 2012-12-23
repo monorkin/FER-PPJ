@@ -112,7 +112,6 @@ public class SemanticsAnalyzer {
 			} else {
 				output.append(errorString(e.getErrorNode()));
 			}
-			e.printStackTrace();
 			System.err.println(e.getMessage());
 		}
 		return this;
