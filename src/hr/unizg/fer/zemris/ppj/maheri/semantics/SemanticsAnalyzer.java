@@ -152,7 +152,12 @@ public class SemanticsAnalyzer {
 		SymbolEntry mainEntry = SymbolTable.GLOBAL.get("main");
 		if (mainEntry == null)
 			throw new SemanticsMainException("main function undeclared", null);
-		FunctionType mainType = (FunctionType) mainEntry.getType();
+		FunctionType mainType;
+		if (mainEntry.getType() instanceof FunctionType) {
+			mainType = (FunctionType) mainEntry.getType();
+		} else {
+			throw new SemanticsMainException("main function is of wrong type", null);
+		}
 		if (!mainType.getReturnType().equals(IntType.INSTANCE))
 			throw new SemanticsMainException("main function must return int", null);
 		if (!mainType.getParameterTypes().getTypes().isEmpty())
