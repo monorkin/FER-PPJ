@@ -274,22 +274,23 @@ public class SemanticsAnalyzer {
 			 */
 			String stringValue = niz.getText();
 			boolean esc = true;
-			for(char c : stringValue.toCharArray()) {
-				if(c == '\\' && !esc) {
+			for (char c : stringValue.substring(0, stringValue.length() - 1).toCharArray()) {
+				if (c == '\\' && !esc) {
 					esc = true;
 					continue;
 				}
-				if(esc) {
+				if (esc) {
 					esc = false;
-					if(!"nt0'\"\\".contains(c+"")) {
+					if (!"nt0'\"\\".contains(c + "")) {
 						esc = true;
 						break;
 					}
 				}
 			}
-			
-			if (esc)
+
+			if (esc) {
 				throw new SemanticsException("Invalid char-array constant value", node);
+			}
 
 			// tip <-- niz (const(char))
 			// l-izraz <-- 0
@@ -1085,7 +1086,7 @@ public class SemanticsAnalyzer {
 			// retrofit into SymbolTable?
 
 			// 1. provjeri(<lista_naredbi>)
-			SymbolTable newTable= table.createNested();
+			SymbolTable newTable = table.createNested();
 			// 3. provjeri(<naredba>)
 			checkSubtree(listaNaredbi, newTable);
 			break;
@@ -1221,8 +1222,7 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", node);
 
-			
-			SymbolTable newTable= table.createNested();
+			SymbolTable newTable = table.createNested();
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
 
@@ -1242,11 +1242,11 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", node);
 
-			SymbolTable newTable= table.createNested();
+			SymbolTable newTable = table.createNested();
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba1, newTable);
 
-			SymbolTable newTable2= table.createNested();
+			SymbolTable newTable2 = table.createNested();
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba2, newTable2);
 			break;
@@ -1274,7 +1274,7 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("While-loop condition is of invalid type", node);
 
-			SymbolTable newTable= table.createNested();
+			SymbolTable newTable = table.createNested();
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
 			break;
@@ -1303,7 +1303,7 @@ public class SemanticsAnalyzer {
 				// 3. <izraz_naredba>2.tip ~ int
 				throw new SemanticsException("For-loop condition of invalit type", node);
 
-			SymbolTable newTable= table.createNested();
+			SymbolTable newTable = table.createNested();
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
 			break;
@@ -1332,7 +1332,7 @@ public class SemanticsAnalyzer {
 			// 4. provjeri(<izraz>)
 			checkSubtree(izraz, table);
 
-			SymbolTable newTable= table.createNested();
+			SymbolTable newTable = table.createNested();
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
 			break;
