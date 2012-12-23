@@ -43,7 +43,7 @@ public abstract class Node {
 		Object ret = attributes.get(key);
 
 		if (ret == null)
-			throw new IllegalArgumentException("no such attribute");
+			throw new IllegalArgumentException("no such attribute\n"+attributes);
 
 		return ret;
 	}

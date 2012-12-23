@@ -165,7 +165,8 @@ public class SemanticsAnalyzer {
 			String funcName = entry.getKey();
 			SymbolEntry globalFunction = SymbolTable.GLOBAL.get(funcName);
 			if (s.getType() instanceof FunctionType && (globalFunction == null || !globalFunction.isDefined())) {
-				throw new SemanticsFunctionException("Declaration of function which is not defined in global scope", null);
+				throw new SemanticsFunctionException("Declaration of function which is not defined in global scope",
+						null);
 			}
 		}
 		for (SymbolTable nested : table.getNested())
@@ -1767,7 +1768,12 @@ public class SemanticsAnalyzer {
 				} else {
 					to = type;
 				}
-				Type from = (Type) inicijalizator.getAttribute(Attribute.TIP);
+				Type from;
+				try {
+					from = (Type) inicijalizator.getAttribute(Attribute.TIP);
+				} catch (IllegalArgumentException e) {
+					from = (TypeList) inicijalizator.getAttribute(Attribute.TIPOVI);
+				}
 				if (!from.canConvertImplicit(to))
 					throw new SemanticsException("Incompatible types", node);
 			} else if (type instanceof ArrayType) {
