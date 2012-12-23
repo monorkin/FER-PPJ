@@ -207,7 +207,7 @@ public class SemanticsAnalyzer {
 
 			// 1. vrijednost je u rasponu tipa int
 			try {
-				int intValue = Integer.parseInt(broj.getText());
+				int intValue = Integer.decode(broj.getText());
 				// ovaj int se nigdje ne koristi
 				// vjerojatno se ne treba ovdje koristiti, tek u generiranju
 				// koda
