@@ -1861,7 +1861,7 @@ public class SemanticsAnalyzer {
 
 			/*
 			 * Ova produkcija sluzi za deklariranje nizova. Obavezno mora biti
-			 * naveden broj ele- menata niza (to je sintaksno osigurano ovom
+			 * naveden broj elemenata niza (to je sintaksno osigurano ovom
 			 * produkcijom) i taj broj mora biti pozitivan i maksimalnog iznosa
 			 * 1024. Sintaksno nije moguce broj elemenata zadati nekakvim
 			 * izrazom, cak ni ako se on u cijelosti sastoji od konstanti.
@@ -1976,10 +1976,7 @@ public class SemanticsAnalyzer {
 
 			// ako je <izraz_pridruzivanja> --> NIZ_ZNAKOVA
 			if (n instanceof TerminalNode && "NIZ_ZNAKOVA".equals(((TerminalNode) n).getSymbol().getValue())) {
-				long c = ((TerminalNode) n).getText().length() - 2 + 1; // 2
-																		// quotes,
-																		// add
-																		// NUL
+				long c = ((TerminalNode) n).getText().toCharArray().length - 2;
 				// br-elem <-- duljina niza znakova + 1
 				node.setAttribute(Attribute.BR_ELEM, c);
 
