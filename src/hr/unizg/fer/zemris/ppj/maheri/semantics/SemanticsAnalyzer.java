@@ -1085,7 +1085,9 @@ public class SemanticsAnalyzer {
 			// retrofit into SymbolTable?
 
 			// 1. provjeri(<lista_naredbi>)
-			checkSubtree(listaNaredbi, table);
+			SymbolTable newTable= table.createNested();
+			// 3. provjeri(<naredba>)
+			checkSubtree(listaNaredbi, newTable);
 			break;
 		}
 		// <slozena_naredba> ::= L_VIT_ZAGRADA <lista_deklaracija>
@@ -1219,8 +1221,10 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", node);
 
+			
+			SymbolTable newTable= table.createNested();
 			// 3. provjeri(<naredba>)
-			checkSubtree(naredba, table);
+			checkSubtree(naredba, newTable);
 
 			break;
 		}
@@ -1238,11 +1242,13 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", node);
 
-			// 3. provjeri(<naredba>1)
-			checkSubtree(naredba1, table);
+			SymbolTable newTable= table.createNested();
+			// 3. provjeri(<naredba>)
+			checkSubtree(naredba1, newTable);
 
-			// 4. provjeri(<naredba>2)
-			checkSubtree(naredba2, table);
+			SymbolTable newTable2= table.createNested();
+			// 3. provjeri(<naredba>)
+			checkSubtree(naredba2, newTable2);
 			break;
 		}
 
@@ -1268,8 +1274,9 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("While-loop condition is of invalid type", node);
 
+			SymbolTable newTable= table.createNested();
 			// 3. provjeri(<naredba>)
-			checkSubtree(naredba, table);
+			checkSubtree(naredba, newTable);
 			break;
 		}
 		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1
@@ -1296,8 +1303,9 @@ public class SemanticsAnalyzer {
 				// 3. <izraz_naredba>2.tip ~ int
 				throw new SemanticsException("For-loop condition of invalit type", node);
 
-			// 4. provjeri(<naredba>)
-			checkSubtree(naredba, table);
+			SymbolTable newTable= table.createNested();
+			// 3. provjeri(<naredba>)
+			checkSubtree(naredba, newTable);
 			break;
 		}
 		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1
@@ -1324,8 +1332,9 @@ public class SemanticsAnalyzer {
 			// 4. provjeri(<izraz>)
 			checkSubtree(izraz, table);
 
-			// 5. provjeri(<naredba>)
-			checkSubtree(naredba, table);
+			SymbolTable newTable= table.createNested();
+			// 3. provjeri(<naredba>)
+			checkSubtree(naredba, newTable);
 			break;
 		}
 
