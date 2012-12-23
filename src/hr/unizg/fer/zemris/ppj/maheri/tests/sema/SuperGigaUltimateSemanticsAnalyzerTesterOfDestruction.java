@@ -6,9 +6,11 @@ import hr.unizg.fer.zemris.ppj.maheri.semantics.SemanticsAnalyzer;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +26,8 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class SuperGigaUltimateSemanticsAnalyzerTesterOfDestruction {
 	private String fileName;
+	
+	public static boolean PRINT_SUCCESSFUL = false;
 
 	public SuperGigaUltimateSemanticsAnalyzerTesterOfDestruction(String fileName) {
 		this.fileName = fileName;
@@ -59,19 +63,25 @@ public class SuperGigaUltimateSemanticsAnalyzerTesterOfDestruction {
 			throw e;
 
 		}
-		String correctOutput = null;
+		StringBuilder correctOutputBuilder = new StringBuilder();
 		try {
-			Scanner scn = new Scanner(new File("res/examples/seman-out-extra/" + fileName + ".out"));
-			scn.useDelimiter("\\Z");
-			correctOutput =scn.next();
-			scn.close();
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/examples/seman-out-extra/" + fileName + ".out")));
+			String line;
+			while((line = br.readLine()) != null) {
+				correctOutputBuilder.append(line);
+				correctOutputBuilder.append("\n");
+			}
+			br.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		System.out.println("------------");
-		System.out.println("DOBIVENO: " + output);
-		System.out.println("OČEKIVANO: " + correctOutput);
-		System.out.println("------------");
+		String correctOutput = correctOutputBuilder.toString().trim();
+		if (!correctOutput.equals(output) || PRINT_SUCCESSFUL) {
+			System.out.println("------------");
+			System.out.println("DOBIVENO: " + output);
+			System.out.println("OČEKIVANO: " + correctOutput);
+			System.out.println("------------");
+		}
 		assertEquals(correctOutput, output);
 	}
 
