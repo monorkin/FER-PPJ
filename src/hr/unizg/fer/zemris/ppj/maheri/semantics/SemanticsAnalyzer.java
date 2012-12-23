@@ -1771,8 +1771,8 @@ public class SemanticsAnalyzer {
 				if (!from.canConvertImplicit(to))
 					throw new SemanticsException("Incompatible types", node);
 			} else if (type instanceof ArrayType) {
-				int arraySize = (Integer) izravniDeklarator.getAttribute(Attribute.BR_ELEM);
-				int initializerSize = (Integer) inicijalizator.getAttribute(Attribute.BR_ELEM);
+				Long arraySize = (Long) izravniDeklarator.getAttribute(Attribute.BR_ELEM);
+				Long initializerSize = (Long) inicijalizator.getAttribute(Attribute.BR_ELEM);
 				if (initializerSize > arraySize)
 					throw new SemanticsException("Initializer too long", node);
 
@@ -1854,7 +1854,7 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("Redeclaration in local scope", node);
 
 			// 3. BROJ.vrijednost je pozitivan broj (> 0) ne veci od 1024
-			int size = Integer.parseInt(broj.getText());
+			Long size = Long.parseLong(broj.getText());
 
 			// 4. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom
 			if (size <= 0 || size > 1024)
@@ -1946,7 +1946,7 @@ public class SemanticsAnalyzer {
 
 			// ako je <izraz_pridruzivanja> --> NIZ_ZNAKOVA
 			if (n instanceof TerminalNode && "NIZ_ZNAKOVA".equals(((TerminalNode) n).getSymbol().getValue())) {
-				int c = ((TerminalNode) n).getText().length() - 2 + 1; // 2
+				long c = ((TerminalNode) n).getText().length() - 2 + 1; // 2
 																		// quotes,
 																		// add
 																		// NUL
@@ -1989,7 +1989,7 @@ public class SemanticsAnalyzer {
 
 			// tipovi <-- [ <izraz_pridruzivanja>.tip ]
 			// br-elem <-- 1
-			node.setAttribute(Attribute.BR_ELEM, 1);
+			node.setAttribute(Attribute.BR_ELEM, 1L);
 			node.setAttribute(
 					Attribute.TIPOVI,
 					new TypeList(new ArrayList<Type>(Arrays.asList((Type) izrazPridruzivanja
@@ -2008,7 +2008,7 @@ public class SemanticsAnalyzer {
 			// 2. provjeri(<izraz_pridruzivanja>)
 			checkSubtree(izrazPridruzivanja, table);
 
-			int c = (Integer) listaIzrazaPridruzivanja.getAttribute(Attribute.BR_ELEM);
+			Long c = (Long) listaIzrazaPridruzivanja.getAttribute(Attribute.BR_ELEM);
 			TypeList list = (TypeList) listaIzrazaPridruzivanja.getAttribute(Attribute.TIPOVI);
 			Type type = (Type) izrazPridruzivanja.getAttribute(Attribute.TIP);
 			list.getTypes().add(type);
