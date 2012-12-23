@@ -1918,7 +1918,7 @@ public class SemanticsAnalyzer {
 			if (entry != null) {
 				Type definedType = entry.getType();
 				if (!definedType.equals(type))
-					throw new SemanticsFunctionException("redefinition of function with differing prototype", node);
+					throw new SemanticsException("redefinition of function with differing prototype", node);
 			} else {
 				// 2. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako
 				// ista funkcija vec nije
