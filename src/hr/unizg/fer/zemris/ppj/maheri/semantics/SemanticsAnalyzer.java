@@ -1129,7 +1129,9 @@ public class SemanticsAnalyzer {
 		case LISTA_NAREDBI_1: {
 			NonterminalNode naredba = (NonterminalNode) children.get(0);
 			// 1. provjeri(<naredba>)
-			checkSubtree(naredba, table);
+			SymbolTable newTable = table.createNested();
+			// 3. provjeri(<naredba>)
+			checkSubtree(naredba, newTable);
 			break;
 		}
 		// lista_naredbi> ::= <lista_naredbi> <naredba>
@@ -1140,8 +1142,9 @@ public class SemanticsAnalyzer {
 			// 1. provjeri(<lista_naredbi>)
 			checkSubtree(listaNaredbi, table);
 
-			// 2. provjeri(<naredba>)
-			checkSubtree(naredba, table);
+			SymbolTable newTable = table.createNested();
+			// 3. provjeri(<naredba>)
+			checkSubtree(naredba, newTable);
 			break;
 		}
 
