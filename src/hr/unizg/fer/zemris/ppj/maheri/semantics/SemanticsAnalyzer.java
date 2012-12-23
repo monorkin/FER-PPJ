@@ -1778,7 +1778,12 @@ public class SemanticsAnalyzer {
 					throw new SemanticsException("Incompatible types", node);
 			} else if (type instanceof ArrayType) {
 				Long arraySize = (Long) izravniDeklarator.getAttribute(Attribute.BR_ELEM);
-				Long initializerSize = (Long) inicijalizator.getAttribute(Attribute.BR_ELEM);
+				Long initializerSize;
+				try {
+					initializerSize = (Long) inicijalizator.getAttribute(Attribute.BR_ELEM);
+				} catch (IllegalArgumentException e) {
+					throw new SemanticsException(e.getMessage(), node);
+				}
 				if (initializerSize > arraySize)
 					throw new SemanticsException("Initializer too long", node);
 
