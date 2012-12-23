@@ -1,0 +1,1 @@
+<definicija_funkcije> ::= <ime_tipa> IDN(134,f) L_ZAGRADA(134,() KR_VOID(134,void) D_ZAGRADA(134,)) <slozena_naredba>

@@ -1,0 +1,14 @@
+<prijevodna_jedinica>
+ <vanjska_deklaracija>
+  <deklaracija>
+   <ime_tipa>
+    <specifikator_tipa>
+     KR_CHAR 15 char
+   <lista_init_deklaratora>
+    <init_deklarator>
+     <izravni_deklarator>
+      IDN 15 a
+      L_UGL_ZAGRADA 15 [
+      BROJ 15 10
+      D_UGL_ZAGRADA 15 ]
+   TOCKAZAREZ 16 ;

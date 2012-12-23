@@ -1,0 +1,36 @@
+<prijevodna_jedinica>
+ <vanjska_deklaracija>
+  <deklaracija>
+   <ime_tipa>
+    <specifikator_tipa>
+     KR_VOID 1 void
+   <lista_init_deklaratora>
+    <init_deklarator>
+     <izravni_deklarator>
+      IDN 1 f
+      L_ZAGRADA 1 (
+      <lista_parametara>
+       <lista_parametara>
+        <lista_parametara>
+         <deklaracija_parametra>
+          <ime_tipa>
+           <specifikator_tipa>
+            KR_INT 1 int
+          IDN 1 a
+        ZAREZ 1 ,
+        <deklaracija_parametra>
+         <ime_tipa>
+          KR_CONST 1 const
+          <specifikator_tipa>
+           KR_INT 1 int
+         IDN 1 b
+       ZAREZ 1 ,
+       <deklaracija_parametra>
+        <ime_tipa>
+         <specifikator_tipa>
+          KR_CHAR 1 char
+        IDN 1 c
+        L_UGL_ZAGRADA 1 [
+        D_UGL_ZAGRADA 1 ]
+      D_ZAGRADA 1 )
+   TOCKAZAREZ 1 ;

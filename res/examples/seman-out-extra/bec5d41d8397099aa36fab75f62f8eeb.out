@@ -1,0 +1,1 @@
+<ime_tipa> ::= KR_CONST(8,const) <specifikator_tipa>

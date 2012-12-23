@@ -1,0 +1,14 @@
+<prijevodna_jedinica>
+ <vanjska_deklaracija>
+  <deklaracija>
+   <ime_tipa>
+    <specifikator_tipa>
+     KR_INT 14 int
+   <lista_init_deklaratora>
+    <init_deklarator>
+     <izravni_deklarator>
+      IDN 14 main
+      L_ZAGRADA 14 (
+      KR_VOID 14 void
+      D_ZAGRADA 14 )
+   TOCKAZAREZ 14 ;

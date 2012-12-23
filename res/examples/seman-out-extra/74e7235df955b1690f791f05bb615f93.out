@@ -1,0 +1,1 @@
+<definicija_funkcije> ::= <ime_tipa> IDN(34,foo) L_ZAGRADA(34,() <lista_parametara> D_ZAGRADA(34,)) <slozena_naredba>

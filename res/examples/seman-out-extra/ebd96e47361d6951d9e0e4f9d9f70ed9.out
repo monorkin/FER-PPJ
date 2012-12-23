@@ -1,0 +1,1 @@
+<definicija_funkcije> ::= <ime_tipa> IDN(15,printf) L_ZAGRADA(15,() <lista_parametara> D_ZAGRADA(15,)) <slozena_naredba>

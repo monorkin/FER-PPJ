@@ -92,13 +92,8 @@ public class SuperGigaUltimateSemanticsAnalyzerTesterOfDestruction {
 		InputProcessor ip = new InputProcessor(inputLines);
 		Node tree = ip.getTree();
 
-		SemanticsAnalyzer analyzer = new SemanticsAnalyzer(tree);
+		return new SemanticsAnalyzer(tree).check().getOutput();
 
-		analyzer.checkAttributes();
-
-		analyzer.checkFunctions();
-
-		return analyzer.getOutput();
 	}
 
 	// @Test

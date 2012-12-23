@@ -1,0 +1,1 @@
+<izravni_deklarator> ::= IDN(13,m) L_UGL_ZAGRADA(13,[) BROJ(13,1025) D_UGL_ZAGRADA(13,])

@@ -1,0 +1,1 @@
+<cast_izraz> ::= L_ZAGRADA(20,() <ime_tipa> D_ZAGRADA(20,)) <cast_izraz>

@@ -1,0 +1,168 @@
+<prijevodna_jedinica>
+ <prijevodna_jedinica>
+  <prijevodna_jedinica>
+   <vanjska_deklaracija>
+    <definicija_funkcije>
+     <ime_tipa>
+      <specifikator_tipa>
+       KR_INT 1 int
+     IDN 1 nesto
+     L_ZAGRADA 1 (
+     KR_VOID 1 void
+     D_ZAGRADA 1 )
+     <slozena_naredba>
+      L_VIT_ZAGRADA 1 {
+      <lista_naredbi>
+       <naredba>
+        <izraz_naredba>
+         <izraz>
+          <izraz_pridruzivanja>
+           <log_ili_izraz>
+            <log_i_izraz>
+             <bin_ili_izraz>
+              <bin_xili_izraz>
+               <bin_i_izraz>
+                <jednakosni_izraz>
+                 <odnosni_izraz>
+                  <aditivni_izraz>
+                   <multiplikativni_izraz>
+                    <cast_izraz>
+                     <unarni_izraz>
+                      <postfiks_izraz>
+                       <postfiks_izraz>
+                        <primarni_izraz>
+                         IDN 2 printf
+                       L_ZAGRADA 2 (
+                       <lista_argumenata>
+                        <izraz_pridruzivanja>
+                         <log_ili_izraz>
+                          <log_i_izraz>
+                           <bin_ili_izraz>
+                            <bin_xili_izraz>
+                             <bin_i_izraz>
+                              <jednakosni_izraz>
+                               <odnosni_izraz>
+                                <aditivni_izraz>
+                                 <multiplikativni_izraz>
+                                  <cast_izraz>
+                                   <unarni_izraz>
+                                    <postfiks_izraz>
+                                     <primarni_izraz>
+                                      NIZ_ZNAKOVA 2 "bok"
+                       D_ZAGRADA 2 )
+         TOCKAZAREZ 2 ;
+      D_VIT_ZAGRADA 3 }
+  <vanjska_deklaracija>
+   <definicija_funkcije>
+    <ime_tipa>
+     <specifikator_tipa>
+      KR_INT 5 int
+    IDN 5 main
+    L_ZAGRADA 5 (
+    KR_VOID 5 void
+    D_ZAGRADA 5 )
+    <slozena_naredba>
+     L_VIT_ZAGRADA 5 {
+     <lista_deklaracija>
+      <deklaracija>
+       <ime_tipa>
+        <specifikator_tipa>
+         KR_INT 6 int
+       <lista_init_deklaratora>
+        <init_deklarator>
+         <izravni_deklarator>
+          IDN 6 printf
+          L_ZAGRADA 6 (
+          <lista_parametara>
+           <deklaracija_parametra>
+            <ime_tipa>
+             KR_CONST 6 const
+             <specifikator_tipa>
+              KR_CHAR 6 char
+            IDN 6 nesto
+            L_UGL_ZAGRADA 6 [
+            D_UGL_ZAGRADA 6 ]
+          D_ZAGRADA 6 )
+       TOCKAZAREZ 6 ;
+     <lista_naredbi>
+      <naredba>
+       <naredba_skoka>
+        KR_RETURN 7 return
+        <izraz>
+         <izraz_pridruzivanja>
+          <log_ili_izraz>
+           <log_i_izraz>
+            <bin_ili_izraz>
+             <bin_xili_izraz>
+              <bin_i_izraz>
+               <jednakosni_izraz>
+                <odnosni_izraz>
+                 <aditivni_izraz>
+                  <multiplikativni_izraz>
+                   <cast_izraz>
+                    <unarni_izraz>
+                     <postfiks_izraz>
+                      <postfiks_izraz>
+                       <primarni_izraz>
+                        IDN 7 printf
+                      L_ZAGRADA 7 (
+                      <lista_argumenata>
+                       <izraz_pridruzivanja>
+                        <log_ili_izraz>
+                         <log_i_izraz>
+                          <bin_ili_izraz>
+                           <bin_xili_izraz>
+                            <bin_i_izraz>
+                             <jednakosni_izraz>
+                              <odnosni_izraz>
+                               <aditivni_izraz>
+                                <multiplikativni_izraz>
+                                 <cast_izraz>
+                                  <unarni_izraz>
+                                   <postfiks_izraz>
+                                    <primarni_izraz>
+                                     NIZ_ZNAKOVA 7 "hello world!\n"
+                      D_ZAGRADA 7 )
+        TOCKAZAREZ 7 ;
+     D_VIT_ZAGRADA 8 }
+ <vanjska_deklaracija>
+  <definicija_funkcije>
+   <ime_tipa>
+    <specifikator_tipa>
+     KR_INT 10 int
+   IDN 10 printf
+   L_ZAGRADA 10 (
+   <lista_parametara>
+    <deklaracija_parametra>
+     <ime_tipa>
+      KR_CONST 10 const
+      <specifikator_tipa>
+       KR_CHAR 10 char
+     IDN 10 format
+     L_UGL_ZAGRADA 10 [
+     D_UGL_ZAGRADA 10 ]
+   D_ZAGRADA 10 )
+   <slozena_naredba>
+    L_VIT_ZAGRADA 10 {
+    <lista_naredbi>
+     <naredba>
+      <naredba_skoka>
+       KR_RETURN 12 return
+       <izraz>
+        <izraz_pridruzivanja>
+         <log_ili_izraz>
+          <log_i_izraz>
+           <bin_ili_izraz>
+            <bin_xili_izraz>
+             <bin_i_izraz>
+              <jednakosni_izraz>
+               <odnosni_izraz>
+                <aditivni_izraz>
+                 <multiplikativni_izraz>
+                  <cast_izraz>
+                   <unarni_izraz>
+                    <postfiks_izraz>
+                     <primarni_izraz>
+                      BROJ 12 0
+       TOCKAZAREZ 12 ;
+    D_VIT_ZAGRADA 13 }
