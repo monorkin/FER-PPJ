@@ -8,27 +8,20 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class SemantickiAnalizator {
-	
+
 	public static void main(String[] args) throws IOException {
 		List<String> inputLines = new ArrayList<String>();
-		
+
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		String currentLine;
 		while ((currentLine = reader.readLine()) != null) {
 			inputLines.add(currentLine);
 		}
-		
+
 		InputProcessor ip = new InputProcessor(inputLines);
 		Node tree = ip.getTree();
-		
-		SemanticsAnalyzer analyzer = new SemanticsAnalyzer(tree);
-		
-		analyzer.checkAttributes();
-		
-		analyzer.checkFunctions();
-		
-		System.out.println(analyzer.getOutput());
+
+		System.out.println(new SemanticsAnalyzer(tree).check().getOutput());
 	}
 }

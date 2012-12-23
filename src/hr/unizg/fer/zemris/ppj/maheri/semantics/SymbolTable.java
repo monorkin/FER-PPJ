@@ -171,6 +171,12 @@ public class SymbolTable {
 		public boolean isDefined() {
 			return defined;
 		}
+		
+		@Override
+		public String toString() {
+			return this.type.toString();
+		}
+		
 	}
 
 }
