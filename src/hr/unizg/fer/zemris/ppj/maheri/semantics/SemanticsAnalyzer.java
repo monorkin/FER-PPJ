@@ -169,7 +169,9 @@ public class SemanticsAnalyzer {
 			SymbolEntry s = entry.getValue();
 			String funcName = entry.getKey();
 			SymbolEntry globalFunction = SymbolTable.GLOBAL.get(funcName);
-			if (s.getType() instanceof FunctionType && (globalFunction == null || !globalFunction.isDefined() || !s.getType().equals(globalFunction.getType()))) {
+			if (s.getType() instanceof FunctionType
+					&& (globalFunction == null || !globalFunction.isDefined() || !s.getType().equals(
+							globalFunction.getType()))) {
 				throw new SemanticsFunctionException("Declaration of function which is not defined in global scope",
 						null);
 			}
@@ -275,7 +277,7 @@ public class SemanticsAnalyzer {
 			String stringValue = niz.getText();
 			boolean esc = true;
 			for (char c : stringValue.substring(0, stringValue.length() - 1).toCharArray()) {
-				if(c == '"' && !esc) {
+				if (c == '"' && !esc) {
 					esc = true;
 					break;
 				}
@@ -1086,8 +1088,7 @@ public class SemanticsAnalyzer {
 			 * Svaki blok je odvojeni djelokrug, a nelokalnim imenima se
 			 * pristupa u ugnijezdujucem bloku
 			 */
-			// FIXME maybe some attributes need to be forwarded (PETLJA)? Or
-			// retrofit into SymbolTable?
+		
 
 			// 1. provjeri(<lista_naredbi>)
 			SymbolTable newTable = table.createNested();
@@ -1111,8 +1112,7 @@ public class SemanticsAnalyzer {
 			 * Svaki blok je odvojeni djelokrug, a nelokalnim imenima se
 			 * pristupa u ugnijezdujucem bloku
 			 */
-			// FIXME maybe some attributes need to be forwarded (PETLJA)? Or
-			// retrofit into SymbolTable?
+			
 
 			// 1. provjeri(<lista_deklaracija>)
 			checkSubtree(listaDeklaracija, table);
@@ -1986,6 +1986,8 @@ public class SemanticsAnalyzer {
 			if (n instanceof TerminalNode && "NIZ_ZNAKOVA".equals(((TerminalNode) n).getSymbol().getValue())) {
 				long c = ((TerminalNode) n).getText().toCharArray().length - 2;
 				// br-elem <-- duljina niza znakova + 1
+				// FIXME ovo nevalja jer ne uračunava postojanje escape
+				// character, drugim riječima osvald je retardiran
 				node.setAttribute(Attribute.BR_ELEM, c);
 
 				ArrayList<Type> list = new ArrayList<Type>();
