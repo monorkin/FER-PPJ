@@ -169,7 +169,7 @@ public class SemanticsAnalyzer {
 			SymbolEntry s = entry.getValue();
 			String funcName = entry.getKey();
 			SymbolEntry globalFunction = SymbolTable.GLOBAL.get(funcName);
-			if (s.getType() instanceof FunctionType && (globalFunction == null || !globalFunction.isDefined())) {
+			if (s.getType() instanceof FunctionType && (globalFunction == null || !globalFunction.isDefined() || !s.getType().equals(globalFunction.getType()))) {
 				throw new SemanticsFunctionException("Declaration of function which is not defined in global scope",
 						null);
 			}
