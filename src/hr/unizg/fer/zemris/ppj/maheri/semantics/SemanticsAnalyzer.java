@@ -129,26 +129,18 @@ public class SemanticsAnalyzer {
 		// #2 add entry to symbol table which will be updated on function
 		// definition.
 		// then check this value
+		boolean main = true;
 		try {
 			checkMain();
+			main = false;
+			checkFunctionsAreDefined(SymbolTable.GLOBAL);
 		} catch (SemanticsException e) {
 			if(output.length() == 0) {
-				output.append("main");
+				output.append(main ? "main" : "funkcija");
 			}
 			System.err.println(e.getMessage());
 		}
 
-		try {
-			checkFunctionsAreDefined(SymbolTable.GLOBAL);
-		} catch (SemanticsException e) {
-			/*
-			 * Ako se naiđe na grešku definicija funkcije, potrebno je samo
-			 * ispisati <i>funkcija</i>
-			 */
-			output.setLength(0);
-			output.append("funkcija");
-			System.err.println(e.getMessage());
-		}
 	}
 
 	private void checkMain() {
@@ -166,8 +158,10 @@ public class SemanticsAnalyzer {
 		for (Entry<String, SymbolEntry> entry : table.getEntries()) {
 			SymbolEntry s = entry.getValue();
 			String funcName = entry.getKey();
+			System.err.println("Assesing : "+s+"="+funcName);
 			SymbolEntry globalFunction = SymbolTable.GLOBAL.get(funcName);
 			if (s.getType() instanceof FunctionType && (globalFunction == null || !globalFunction.isDefined())) {
+				System.err.println(globalFunction);
 				throw new SemanticsException("Declaration of function which is not defined in global scope", null);
 			}
 		}
