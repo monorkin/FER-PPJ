@@ -1865,7 +1865,12 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("Redeclaration in local scope", node);
 
 			// 3. BROJ.vrijednost je pozitivan broj (> 0) ne veci od 1024
-			Long size = Long.parseLong(broj.getText());
+			Long size;
+			try {
+				size = Long.decode(broj.getText());
+			} catch (NumberFormatException e) {
+				throw new SemanticsException(e.getMessage(), node);
+			}
 
 			// 4. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom
 			if (size <= 0 || size > 1024)
