@@ -37,9 +37,11 @@ public class TypeList extends Type {
 			TypeList list = (TypeList) t;
 			if (types.size() != list.types.size())
 				return false;
-			for (int i = 0; i < types.size(); ++i)
-				if (!types.get(i).equals(list.types.get(i)))
+			for (int i = 0; i < types.size(); ++i) {
+				if (!types.get(i).equals(list.types.get(i))) {
 					return false;
+				}
+			}
 			return true;
 		}
 		return false;

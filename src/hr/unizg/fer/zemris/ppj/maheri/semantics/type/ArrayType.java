@@ -27,10 +27,10 @@ public class ArrayType extends Type {
 				ConstType arrayConst = (ConstType) array.elementType;
 				if (!(this.elementType instanceof ConstType)) {
 					// array of X -> array of Const y if y == x
-					return arrayConst.getType() == elementType;
+					return elementType.canConvertImplicit(arrayConst.getType());
 				} else {
 					// array of const x -> array of const y;
-					return array.elementType == elementType;
+					return elementType.canConvertImplicit(array.elementType);
 				}
 			} else {
 				// convert to array of nonconst
