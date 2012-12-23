@@ -273,22 +273,22 @@ public class SemanticsAnalyzer {
 			 * "\" i "\x"
 			 */
 			String stringValue = niz.getText();
-			boolean esc = false;
-			int len = stringValue.length();
-			for (int i = 1; i < len - 1; ++i) {
-				if (esc) {
+			boolean esc = true;
+			for(char c : stringValue.toCharArray()) {
+				if(c == '\\' && !esc) {
+					esc = true;
+					continue;
+				}
+				if(esc) {
 					esc = false;
-					if (-1 == "nt0'\"\\".indexOf(stringValue.charAt(i))) {
+					if(!"nt0'\"\\".contains(c+"")) {
 						esc = true;
-						break; // nece li ovo prekinuti samo vanjski if ???
-						// lol break samo petlje i switcheve dira
+						break;
 					}
 				}
-				if (stringValue.charAt(i) == '\\') {
-					esc = true;
-				}
 			}
-			if (esc == true)
+			
+			if (esc)
 				throw new SemanticsException("Invalid char-array constant value", node);
 
 			// tip <-- niz (const(char))
