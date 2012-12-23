@@ -92,13 +92,7 @@ public class SemanticsAnalyzerTester {
 		InputProcessor ip = new InputProcessor(inputLines);
 		Node tree = ip.getTree();
 
-		SemanticsAnalyzer analyzer = new SemanticsAnalyzer(tree);
-
-		analyzer.checkAttributes();
-
-		analyzer.checkFunctions();
-
-		return analyzer.getOutput();
+		return new SemanticsAnalyzer(tree).check().getOutput();
 	}
 
 	// @Test

@@ -95,19 +95,35 @@ public class SemanticsAnalyzer {
 		return sb.toString();
 	}
 
-	public void checkAttributes() {
-		SymbolTable symbolTable = SymbolTable.GLOBAL;
+	/**
+	 * Performs an attribute and function check
+	 * 
+	 * @return call source for easy chaining
+	 */
+	public SemanticsAnalyzer check() {
 		try {
-			checkSubtree(generativeTree, symbolTable);
+			checkAttributes();
+			checkFunctions();
 		} catch (SemanticsException e) {
-			// System.err.println("!!!!!!!!!HURR ERROR MESIĐ  "+e.getMessage());
-			// if (output==null) System.err.println("JEBEMU MATER!!!!!1");
-			output.append(errorString(e.getErrorNode()));
+			if (e instanceof SemanticsFunctionException) {
+				output.append("funkcija");
+			} else if (e instanceof SemanticsMainException) {
+				output.append("main");
+			} else {
+				output.append(errorString(e.getErrorNode()));
+			}
+			e.printStackTrace();
 			System.err.println(e.getMessage());
 		}
+		return this;
 	}
 
-	public void checkFunctions() {
+	private void checkAttributes() throws SemanticsException {
+		SymbolTable symbolTable = SymbolTable.GLOBAL;
+		checkSubtree(generativeTree, symbolTable);
+	}
+
+	private void checkFunctions() throws SemanticsException {
 		/*
 		 * 4.4.7 Provjere nakon obilaska stabla
 		 * 
@@ -129,40 +145,28 @@ public class SemanticsAnalyzer {
 		// #2 add entry to symbol table which will be updated on function
 		// definition.
 		// then check this value
-		boolean main = true;
-		try {
-			checkMain();
-			main = false;
-			checkFunctionsAreDefined(SymbolTable.GLOBAL);
-		} catch (SemanticsException e) {
-			if(output.length() == 0) {
-				output.append(main ? "main" : "funkcija");
-			}
-			System.err.println(e.getMessage());
-		}
-
+		checkMain();
+		checkFunctionsAreDefined(SymbolTable.GLOBAL);
 	}
 
 	private void checkMain() {
 		SymbolEntry mainEntry = SymbolTable.GLOBAL.get("main");
 		if (mainEntry == null)
-			throw new SemanticsException("main function undeclared", null);
+			throw new SemanticsMainException("main function undeclared", null);
 		FunctionType mainType = (FunctionType) mainEntry.getType();
 		if (!mainType.getReturnType().equals(IntType.INSTANCE))
-			throw new SemanticsException("main function must return int", null);
+			throw new SemanticsMainException("main function must return int", null);
 		if (!mainType.getParameterTypes().getTypes().isEmpty())
-			throw new SemanticsException("main function takes no arguments", null);
+			throw new SemanticsMainException("main function takes no arguments", null);
 	}
 
 	private void checkFunctionsAreDefined(SymbolTable table) {
 		for (Entry<String, SymbolEntry> entry : table.getEntries()) {
 			SymbolEntry s = entry.getValue();
 			String funcName = entry.getKey();
-			System.err.println("Assesing : "+s+"="+funcName);
 			SymbolEntry globalFunction = SymbolTable.GLOBAL.get(funcName);
 			if (s.getType() instanceof FunctionType && (globalFunction == null || !globalFunction.isDefined())) {
-				System.err.println(globalFunction);
-				throw new SemanticsException("Declaration of function which is not defined in global scope", null);
+				throw new SemanticsFunctionException("Declaration of function which is not defined in global scope", null);
 			}
 		}
 		for (SymbolTable nested : table.getNested())
@@ -1061,7 +1065,7 @@ public class SemanticsAnalyzer {
 		// <slozena_naredba> ::= L_VIT_ZAGRADA <lista_naredbi> D_VIT_ZAGRADA
 		case SLOZENA_NAREDBA_1: {
 			NonterminalNode listaNaredbi = (NonterminalNode) children.get(1);
-			
+
 			/*
 			 * Ova produkcija generira blok koji nema vlastite deklaracije (ali
 			 * neka od naredbi u bloku moze biti novi blok koji ima lokalne
@@ -1187,7 +1191,7 @@ public class SemanticsAnalyzer {
 
 			// tip <-- <izraz>.tip
 			node.setAttribute(Attribute.TIP, izraz.getAttribute(Attribute.TIP));
-			
+
 			break;
 		}
 
@@ -1300,7 +1304,7 @@ public class SemanticsAnalyzer {
 			NonterminalNode naredba = (NonterminalNode) children.get(6);
 
 			checkAndApplyLoop(node);
-			
+
 			// 1. provjeri(<izraz_naredba>1)
 			checkSubtree(izrazNaredba1, table);
 
@@ -1353,7 +1357,7 @@ public class SemanticsAnalyzer {
 			// u
 			// funkcijama koje ne vracaju nista.
 
-			if (!(table.getReturnType().equals(VoidType.INSTANCE))) 
+			if (!(table.getReturnType().equals(VoidType.INSTANCE)))
 				throw new SemanticsException("function must return ", node);
 
 			break;
@@ -1365,7 +1369,7 @@ public class SemanticsAnalyzer {
 			// i vrijedi <izraz>.tip  pov
 			NonterminalNode izraz = (NonterminalNode) children.get(1);
 			checkSubtree(izraz, table);
-			
+
 			if (!((Type) izraz.getAttribute(Attribute.TIP)).canConvertImplicit(table.getReturnType())) {
 				throw new SemanticsException("function must return " + table.getReturnType() + ", got "
 						+ izraz.getAttribute(Attribute.TIP), node);
@@ -1453,7 +1457,6 @@ public class SemanticsAnalyzer {
 				SymbolTable.GLOBAL.addLocal(functionName.getText(), functionEntry);
 			}
 			functionEntry.markDefined();
-			
 
 			SymbolTable inner = table.createNested();
 			inner.setReturnType(retType);
@@ -1878,7 +1881,7 @@ public class SemanticsAnalyzer {
 			if (entry != null) {
 				Type definedType = entry.getType();
 				if (!definedType.equals(type))
-					throw new SemanticsException("redefinition of function with differing prototype", node);
+					throw new SemanticsFunctionException("redefinition of function with differing prototype", node);
 			} else {
 				// 2. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako
 				// ista funkcija vec nije
@@ -1917,7 +1920,7 @@ public class SemanticsAnalyzer {
 			if (entry != null) {
 				Type definedType = entry.getType();
 				if (!definedType.equals(type))
-					throw new SemanticsException("redefinition of function with differing prototype", node);
+					throw new SemanticsFunctionException("redefinition of function with differing prototype", node);
 			} else {
 				// 3. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako
 				// ista funkcija vec nije
@@ -2124,9 +2127,9 @@ public class SemanticsAnalyzer {
 		}
 		throw new SemanticsException("OPET NEMA PRODUKCIJE JEBIGA", node);
 	}
-	
+
 	private void checkAndApplyLoop(Node node) {
 		node.setAttribute(Attribute.PETLJA, true, true);
 	}
-	
+
 }
