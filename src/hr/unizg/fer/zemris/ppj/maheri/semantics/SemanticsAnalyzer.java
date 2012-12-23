@@ -275,6 +275,10 @@ public class SemanticsAnalyzer {
 			String stringValue = niz.getText();
 			boolean esc = true;
 			for (char c : stringValue.substring(0, stringValue.length() - 1).toCharArray()) {
+				if(c == '"' && !esc) {
+					esc = true;
+					break;
+				}
 				if (c == '\\' && !esc) {
 					esc = true;
 					continue;
@@ -1788,8 +1792,9 @@ public class SemanticsAnalyzer {
 				} catch (IllegalArgumentException e) {
 					from = (TypeList) inicijalizator.getAttribute(Attribute.TIPOVI);
 				}
-				if (!from.canConvertImplicit(to))
-					throw new SemanticsException("Incompatible types", node);
+				if (!from.canConvertImplicit(to)) {
+					throw new SemanticsException("Incompatible types " + from + "->" + to, node);
+				}
 			} else if (type instanceof ArrayType) {
 				Long arraySize = (Long) izravniDeklarator.getAttribute(Attribute.BR_ELEM);
 				Long initializerSize;
