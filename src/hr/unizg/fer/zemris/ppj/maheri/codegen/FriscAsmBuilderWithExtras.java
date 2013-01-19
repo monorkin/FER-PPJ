@@ -11,13 +11,12 @@ import java.util.List;
 public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 
 	private final FriscAsmBuilder dataSection = new FriscAsmBuilder();
-	
+
 	private final LinkedList<String> blockStartLabels = new LinkedList<String>();
 	private final LinkedList<String> blockEndLabels = new LinkedList<String>();
-	private String subName;;
+	private  List<?> blockLocalVariables;
 
 	private int labelCounter = 0;
-
 
 	@Override
 	public String toString() {
@@ -49,6 +48,17 @@ public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 	}
 
 	/**
+	 * creates instructions to use character literal as expression operand
+	 * 
+	 * @param op
+	 */
+	public void genCharacterLiteralRef(char c) {
+		Logger.log("reference to 20bit extensible numeric literal:");
+		addInstruction("MOVE " + c + ", R1");
+		addInstruction("PUSH R1");
+	}
+
+	/**
 	 * creates instructions to use string literal as expression operand
 	 * 
 	 * @param unescapedString
@@ -59,29 +69,59 @@ public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 		String label = tmpLabelName("STRING");
 		dataSection.addLabel(label);
 		for (int i = 0; i < unescapedString.length(); ++i)
-			dataSection.addInstruction("`DW " + unescapedString.codePointAt(i));
+			dataSection.addInstruction("`DW " + Integer.toHexString(unescapedString.charAt(i)));
 
 		addInstruction("MOVE R1, " + label);
 		addInstruction("PUSH R1");
 	}
 	
-	
+	/**
+	 * creates instructions to use global variable as expression operand
+	 * 
+	 * @param varname
+	 *            name of variable
+	 */
+	public void genGlobalRef(String var, boolean character) {
+		String op = character ? "MOVEB " : "MOVE ";
+		addInstruction(op + getLabelForVariable(var) + ", R1");
+		addInstruction("PUSH R1");
+	}
+
+	/**
+	 * creates instructions to use local variable as expression operand
+	 * 
+	 * @param offset
+	 *            byte offset of the local variable (positive = locals, negative
+	 *            = params)
+	 */
+	public void genLocalRef(long offset, boolean character) {
+		String op = character ? "LOADB" : "LOAD";
+		addInstruction(op + " R1, (R5+" + Long.toHexString(offset) + ")");
+	}
+
+	// maybe useful for loops ?
 	public void genBlockStart() {
 		String blockLabel = tmpLabelName("BLOCK_START");
-		blockStartLabels.add(blockLabel);
-		
 		addLabel(blockLabel);
-	}
-	
-	public void genBlockEnd() {
-		blockStartLabels.removeLast();
+
+		blockStartLabels.add(blockLabel);
+//		blockLocalVariables.add(new ArrayList<?????>());
 		blockEndLabels.add(tmpLabelName("BLOCK_END"));
 	}
-	
-	public void genJumpToEndOfBlock() {
+
+	public void genBlockEnd() {
+		addLabel(blockEndLabels.getLast());
+		blockStartLabels.removeLast();
+		blockEndLabels.removeLast();
+	}
+
+	public void genJumpToStartOfBlock() {
 		addInstruction("JR " + blockStartLabels.getLast());
 	}
 
+	public void genJumpToEndOfBlock() {
+		addInstruction("JR " + blockEndLabels.getLast());
+	}
 
 	/**
 	 * creates instructions for start of new subroutine
@@ -90,9 +130,8 @@ public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 	 */
 	public void genSubroutinePrologue(String subName) {
 		Logger.log("Start of " + subName);
-		
-		this.subName = subName;
-		
+
+		subroutineName = subName;
 		addLabel(getLabelForSub(subName));
 		addInstruction("");
 		// R5 is used as frame pointer, save it
@@ -102,48 +141,34 @@ public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 
 	/**
 	 * creates instructions at end of a subroutine
-	 * @param subName name of routine
-	 * @param localsSize number of bytes to deallocate
+	 * 
+	 * @param subName
+	 *            name of routine
+	 * @param localsSize
+	 *            number of bytes to deallocate
 	 */
 	public void genSubroutineEpilogue(String subName, long localsSize) {
 		Logger.log("End of " + subName);
+		addLabel(getReturnLabelForSub(subroutineName));
 		// R5 is used as frame pointer, restore it
 		addInstruction("POP R5");
 		addInstruction("ADD R7, " + Long.toHexString(localsSize) + ", R7");
 		addInstruction("RET ");
 	}
 
-	public void genReturnVal(String subFromWhichReturning) {
+	public void genReturnVal() {
 		addInstruction("POP R6");
-		addInstruction("JR " + getReturnLabelForSub(subFromWhichReturning));
+		addInstruction("JR " + getReturnLabelForSub(subroutineName));
 	}
 
-	public void genReturnVoid(String subFromWhichReturning) {
-		addInstruction("JR " + getReturnLabelForSub(subFromWhichReturning));
+	public void genReturnVoid() {
+		addInstruction("JR " + getReturnLabelForSub(subroutineName));
 	}
-
-	/**
-	 * creates instructions to load global variable value from memory and push
-	 * it to stack for expression calculation
-	 * 
-	 * @param varname
-	 *            name of variable
-	 */
-	public void genGlobalRef(String var) {
-		addInstruction("MOVE " + getLabelForVariable(var) + ", R1");
-		addInstruction("PUSH R1");
-	}
-
-	/**
-	 * creates instructions to load local variable value from memory and push it
-	 * to stack for expression calculation
-	 * 
-	 * @param offset
-	 *            byte offset of the local variable (positive = locals, negative
-	 *            = params)
-	 */
-	public void genLocalRef(long offset) {
-		addInstruction("LOAD R1, (R5+" + Long.toHexString(offset) + ")");
+	
+	// TODO gen: allocate + init za int, char, string, array...
+	
+	public void genLocalsDeallocation() {
+		
 	}
 
 	public void genStartProgram() {
