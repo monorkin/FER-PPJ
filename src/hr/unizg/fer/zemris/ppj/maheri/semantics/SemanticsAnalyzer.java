@@ -1,6 +1,9 @@
 package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
+import hr.unizg.fer.zemris.ppj.maheri.codegen.FriscAsmBuilder;
+import hr.unizg.fer.zemris.ppj.maheri.codegen.FriscAsmBuilderWithExtras;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.Node.Attribute;
+import hr.unizg.fer.zemris.ppj.maheri.semantics.SymbolTable.StorageInfo;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.SymbolTable.SymbolEntry;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.type.ArrayType;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.type.CharType;
@@ -25,9 +28,11 @@ import java.util.Scanner;
 
 public class SemanticsAnalyzer {
 	private Node generativeTree;
-	private Map<String, List<orderedProduction>> productions;
-	private PPJCProduction[] productionEnum;
+	private static Map<String, List<orderedProduction>> productions;
+	private static PPJCProduction[] productionEnum;
 	private StringBuilder output;
+	
+	private FriscAsmBuilderWithExtras codegen;
 
 	public String getOutput() {
 		return output.toString();
@@ -76,6 +81,8 @@ public class SemanticsAnalyzer {
 			}
 		}
 		fr.close();
+		codegen = new FriscAsmBuilderWithExtras();
+		codegen.genStartProgram();
 	}
 
 	private String errorString(Node errorNode) {
@@ -201,18 +208,26 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- IDN.l-izraz
 			node.setAttribute(Attribute.TIP, idn.getAttribute(Attribute.TIP));
 			node.setAttribute(Attribute.L_IZRAZ, idn.getAttribute(Attribute.L_IZRAZ));
+			
+			StorageInfo storageInfo = idnEntry.getStorageInfo();
+			int varType = storageInfo.getType();
+			
+			if (varType == storageInfo.GLOBAL) {
+				codegen.genGlobalRef(idn.getText());
+			} else {
+				codegen.genLocalRef(storageInfo.getOffset());
+			}
+			
 			break;
 		}
 		// <primarni_izraz> ::= BROJ
 		case PRIMARNI_IZRAZ_2: {
 			TerminalNode broj = (TerminalNode) children.get(0);
-
+			
+			int intValue;
 			// 1. vrijednost je u rasponu tipa int
 			try {
-				int intValue = Integer.decode(broj.getText());
-				// ovaj int se nigdje ne koristi
-				// vjerojatno se ne treba ovdje koristiti, tek u generiranju
-				// koda
+				intValue = Integer.decode(broj.getText());
 			} catch (NumberFormatException nf) {
 				throw new SemanticsException("Invalid integer constant value " + broj.getText(), node);
 			}
@@ -221,6 +236,9 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			node.setAttribute(Attribute.L_IZRAZ, false);
+			
+			codegen.genNumericLiteralRef(intValue);
+			
 			break;
 		}
 		// <primarni_izraz> ::= ZNAK
@@ -255,6 +273,11 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, CharType.INSTANCE);
 			node.setAttribute(Attribute.L_IZRAZ, false);
+			
+			char c = charValue.charAt(1);
+			
+			codegen.genNumericLiteralRef(c);
+			
 			break;
 		}
 
@@ -302,6 +325,9 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, new ArrayType(new ConstType(CharType.INSTANCE)));
 			node.setAttribute(Attribute.L_IZRAZ, false);
+			
+			// TODO
+			
 			break;
 		}
 		// <primarni_izraz> ::= L_ZAGRADA <izraz> D_ZAGRADA
@@ -1395,6 +1421,9 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("function must return " + table.getReturnType() + ", got "
 						+ izraz.getAttribute(Attribute.TIP), node);
 			}
+			
+			codegen.genReturnVal(subFromWhichReturning);
+			
 			break;
 		}
 
@@ -1475,15 +1504,19 @@ public class SemanticsAnalyzer {
 			} else {
 				// 5. zabiljezi definiciju i deklaraciju funkcije
 				functionEntry = new SymbolEntry(fType);
+				functionEntry.setStorageInfo(new StorageInfo(StorageInfo.GLOBAL));
 				SymbolTable.GLOBAL.addLocal(functionName.getText(), functionEntry);
 			}
 			functionEntry.markDefined();
 
 			SymbolTable inner = table.createNested();
 			inner.setReturnType(retType);
+			
+			codegen.genSubroutinePrologue(functionName.getText());
 
 			// 6. provjeri (<slozena_naredba>)
 			checkSubtree(slozenaNaredba, inner);
+			
 
 			break;
 		}
@@ -1550,7 +1583,9 @@ public class SemanticsAnalyzer {
 			for (int i = 0; i < size; ++i)
 				inner.addLocal(paramNames.get(i), new SymbolEntry(paramTypes.get(i)));
 
+			codegen.genSubroutinePrologue(functionName.getText());
 			checkSubtree(slozenaNaredba, inner);
+			
 
 			break;
 		}
@@ -2134,7 +2169,7 @@ public class SemanticsAnalyzer {
 		op.setAttribute(Attribute.L_IZRAZ, innerOp.getAttribute(Attribute.L_IZRAZ));
 	}
 
-	private PPJCProduction determineProduction(Node node) {
+	protected static PPJCProduction determineProduction(Node node) {
 		// System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " +
 		// node.getSymbol());
 
@@ -2166,6 +2201,10 @@ public class SemanticsAnalyzer {
 
 	private void checkAndApplyLoop(Node node) {
 		node.setAttribute(Attribute.PETLJA, true, true);
+	}
+
+	public String createAsmCode() {
+		return codegen.toString();
 	}
 
 }

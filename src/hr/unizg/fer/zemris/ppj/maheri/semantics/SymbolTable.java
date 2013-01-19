@@ -131,7 +131,7 @@ public class SymbolTable {
 	 * 
 	 * @author dosvald
 	 */
-	public static class SymbolEntry {
+	public static abstract class SymbolEntry {
 		// add extra data for each symbol ?
 		private final Type type;
 
@@ -177,6 +177,50 @@ public class SymbolTable {
 			return this.type.toString();
 		}
 		
+		private StorageInfo storageInfo;
+		public abstract StorageInfo getStorageInfo();
+		
+		public void setStorageInfo(StorageInfo storageInfo) {
+			this.storageInfo = storageInfo;
+		}	
+		
+	}
+	
+	public static class StorageInfo {
+		public static final int LOCAL = 0;
+		public static final int GLOBAL = 1;
+		public static final int PARAMETER = 2;
+		
+		private final int type;
+		
+		public int getType() {
+			return type;
+		}
+
+		public StorageInfo(int type) {
+			this.type = type;
+		}
+		
+		private long offset;
+		/**
+		 * byte offset for storage. for local vars, offset is positive, for parameters it is negative.
+		 * @return the offset as explained above
+		 */
+		public long getOffset() {
+			return offset;
+		}
+		public void setOffset(long offset) {
+			this.offset = offset;
+		}
+		
+		private long size;
+	
+		public long getSize() {
+			return size;
+		}
+		public void setSize(long byteSize) {
+			this.size = size;
+		}
 	}
 
 }

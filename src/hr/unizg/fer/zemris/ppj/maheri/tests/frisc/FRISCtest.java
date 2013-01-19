@@ -2,7 +2,7 @@ package hr.unizg.fer.zemris.ppj.maheri.tests.frisc;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-public class FRICStest {
+public class FRISCtest {
 	
 	//Ovdje radi testa
     public static void main(String[] argv) throws Exception {
