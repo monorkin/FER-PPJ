@@ -18,14 +18,20 @@ import java.util.Set;
  * 
  */
 public class SymbolTable {
-	public static SymbolTable GLOBAL = new SymbolTable(null);
+	public static SymbolTable GLOBAL = new SymbolTable(null, false);
+	
+	public static void resetAll () {
+		SymbolTable.GLOBAL = new SymbolTable(null, false);
+	}
 
 	private final HashMap<String, SymbolEntry> map = new HashMap<String, SymbolEntry>();
 	private final SymbolTable parentScope;
+	private final boolean parameterScope;
 
 	private Type returnType = null;
 
 	private final List<SymbolTable> nested = new ArrayList<SymbolTable>();
+
 
 	protected Set<Entry<String, SymbolEntry>> getEntries() {
 		return Collections.unmodifiableSet(map.entrySet());
@@ -58,10 +64,11 @@ public class SymbolTable {
 	 *            symbol table of parent scope, or <code>null</code> if global
 	 *            scope
 	 */
-	public SymbolTable(SymbolTable parentScope) {
+	private SymbolTable(SymbolTable parentScope, boolean parameterScope) {
 		this.parentScope = parentScope;
 		if (parentScope != null)
 			this.returnType = parentScope.returnType;
+		this.parameterScope = parameterScope;
 	}
 
 	/**
@@ -69,8 +76,8 @@ public class SymbolTable {
 	 * 
 	 * @return the created scope
 	 */
-	public SymbolTable createNested() {
-		SymbolTable sub = new SymbolTable(this);
+	public SymbolTable createNested(boolean parameterScope) {
+		SymbolTable sub = new SymbolTable(this, parameterScope);
 		nested.add(sub);
 		return sub;
 	}
@@ -131,7 +138,7 @@ public class SymbolTable {
 	 * 
 	 * @author dosvald
 	 */
-	public static abstract class SymbolEntry {
+	public static class SymbolEntry {
 		// add extra data for each symbol ?
 		private final Type type;
 
@@ -178,7 +185,9 @@ public class SymbolTable {
 		}
 		
 		private StorageInfo storageInfo;
-		public abstract StorageInfo getStorageInfo();
+		public  StorageInfo getStorageInfo() {
+			return new StorageInfo(SymbolTable.GLOBAL);
+		}
 		
 		public void setStorageInfo(StorageInfo storageInfo) {
 			this.storageInfo = storageInfo;
@@ -191,35 +200,44 @@ public class SymbolTable {
 		public static final int GLOBAL = 1;
 		public static final int PARAMETER = 2;
 		
+		private final SymbolTable table;
+		
 		private final int type;
 		
 		public int getType() {
 			return type;
 		}
 
-		public StorageInfo(int type) {
-			this.type = type;
+		public StorageInfo(SymbolTable table) {
+			if (table == SymbolTable.GLOBAL) {
+				this.type = GLOBAL;
+			} else if (table.parameterScope) {
+				this.type = PARAMETER;
+			} else {
+				this.type = LOCAL;
+			}
+			this.table = table;
 		}
 		
-		private long offset;
+		private int offset;
 		/**
 		 * byte offset for storage. for local vars, offset is positive, for parameters it is negative.
 		 * @return the offset as explained above
 		 */
-		public long getOffset() {
+		public int getOffset() {
 			return offset;
 		}
-		public void setOffset(long offset) {
+		public void setOffset(int offset) {
 			this.offset = offset;
 		}
 		
-		private long size;
+		private int size;
 	
-		public long getSize() {
+		public int getSize() {
 			return size;
 		}
-		public void setSize(long byteSize) {
-			this.size = size;
+		public void setSize(int byteSize) {
+			this.size = byteSize;
 		}
 	}
 

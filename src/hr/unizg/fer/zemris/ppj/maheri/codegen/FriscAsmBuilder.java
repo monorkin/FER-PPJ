@@ -12,7 +12,7 @@ public class FriscAsmBuilder {
 	 * write label
 	 * @param label
 	 */
-	public void addLabel(String label) {
+	protected void addLabel(String label) {
 		next.getLabels().add(label);
 	}
 	
@@ -21,7 +21,7 @@ public class FriscAsmBuilder {
 	 * @param label
 	 * @param where
 	 */
-	public void addLabel(String label, int where) {
+	protected void addLabel(String label, int where) {
 		if (where == instr.size()) {
 			addLabel(label);
 		} else {
@@ -33,7 +33,7 @@ public class FriscAsmBuilder {
 	 * add next instruction
 	 * @param instr
 	 */
-	public void addInstruction(String body) {
+	protected void addInstruction(String body) {
 		next.setInstructionBody(body);
 		instr.add(next);
 		next = new InstructionData("");

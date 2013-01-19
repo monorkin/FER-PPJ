@@ -31,7 +31,7 @@ public class SemanticsAnalyzer {
 	private static Map<String, List<orderedProduction>> productions;
 	private static PPJCProduction[] productionEnum;
 	private StringBuilder output;
-	
+
 	private FriscAsmBuilderWithExtras codegen;
 
 	public String getOutput() {
@@ -54,7 +54,7 @@ public class SemanticsAnalyzer {
 	}
 
 	public SemanticsAnalyzer(Node tree) {
-		SymbolTable.GLOBAL = new SymbolTable(null);
+		SymbolTable.resetAll();
 		output = new StringBuilder();
 		this.generativeTree = tree;
 		Scanner fr = null;
@@ -208,22 +208,24 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- IDN.l-izraz
 			node.setAttribute(Attribute.TIP, idn.getAttribute(Attribute.TIP));
 			node.setAttribute(Attribute.L_IZRAZ, idn.getAttribute(Attribute.L_IZRAZ));
-			
+
 			StorageInfo storageInfo = idnEntry.getStorageInfo();
-			int varType = storageInfo.getType();
-			
+			int varType = 0; //storageInfo.getType();
+
+			boolean passByAddress = idnEntry.isLvalue() || idnEntry.getType() instanceof FunctionType
+					|| idnEntry.getType() instanceof ArrayType;
 			if (varType == storageInfo.GLOBAL) {
-				codegen.genGlobalRef(idn.getText());
+				codegen.genGlobalRef(idn.getText(), idnEntry.getType() instanceof CharType, passByAddress);
 			} else {
-				codegen.genLocalRef(storageInfo.getOffset());
+				codegen.genLocalRef(storageInfo.getOffset(), idnEntry.getType() instanceof CharType, passByAddress);
 			}
-			
+
 			break;
 		}
 		// <primarni_izraz> ::= BROJ
 		case PRIMARNI_IZRAZ_2: {
 			TerminalNode broj = (TerminalNode) children.get(0);
-			
+
 			int intValue;
 			// 1. vrijednost je u rasponu tipa int
 			try {
@@ -236,9 +238,9 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			node.setAttribute(Attribute.L_IZRAZ, false);
-			
+
 			codegen.genNumericLiteralRef(intValue);
-			
+
 			break;
 		}
 		// <primarni_izraz> ::= ZNAK
@@ -273,11 +275,11 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, CharType.INSTANCE);
 			node.setAttribute(Attribute.L_IZRAZ, false);
-			
+
 			char c = charValue.charAt(1);
-			
-			codegen.genNumericLiteralRef(c);
-			
+
+			codegen.genCharacterLiteralRef(c);
+
 			break;
 		}
 
@@ -325,9 +327,9 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, new ArrayType(new ConstType(CharType.INSTANCE)));
 			node.setAttribute(Attribute.L_IZRAZ, false);
-			
-			// TODO
-			
+
+			// TODO codegen.genStringLiteralRef(unescapedString);
+
 			break;
 		}
 		// <primarni_izraz> ::= L_ZAGRADA <izraz> D_ZAGRADA
@@ -342,6 +344,9 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- izraz.l-izraz
 			node.setAttribute(Attribute.TIP, izraz.getAttribute(Attribute.TIP));
 			node.setAttribute(Attribute.L_IZRAZ, izraz.getAttribute(Attribute.L_IZRAZ));
+
+			// TODO push/pop result ?
+
 			break;
 		}
 		// <postfiks_izraz> ::= <primarni_izraz>
@@ -355,6 +360,9 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- primarniIzraz-l-izraz
 			node.setAttribute(Attribute.TIP, primarniIzraz.getAttribute(Attribute.TIP));
 			node.setAttribute(Attribute.L_IZRAZ, primarniIzraz.getAttribute(Attribute.L_IZRAZ));
+
+			// TODO push/pop result ?
+
 			break;
 		}
 		// <postfiks_izraz> ::= <postfiks_izraz> L_UGL_ZAGRADA <izraz>
@@ -379,6 +387,7 @@ public class SemanticsAnalyzer {
 			}
 
 			ArrayType nizX = (ArrayType) t;
+			PrimitiveType elementType = nizX.getElementType();
 
 			// 3. provjeri (<izraz>)
 			checkSubtree(izraz, table);
@@ -389,10 +398,15 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("Non-integer type in array index", node);
 			}
 
+			boolean lvalue = !(elementType instanceof ConstType);
+			boolean chr = (elementType instanceof CharType)
+					|| (elementType instanceof ConstType && ((ConstType) elementType).getType() instanceof CharType);
+			codegen.genArrayAccessRef(chr, (Boolean) izraz.getAttribute(Attribute.L_IZRAZ), lvalue);
+
 			// tip <-- X
 			// l-izraz <-- X != const(T )
-			node.setAttribute(Attribute.TIP, nizX.getElementType());
-			node.setAttribute(Attribute.L_IZRAZ, !(nizX.getElementType() instanceof ConstType));
+			node.setAttribute(Attribute.TIP, elementType);
+			node.setAttribute(Attribute.L_IZRAZ, lvalue);
 			break;
 		}
 		// <postfiks_izraz> ::= <postfiks_izraz> L_ZAGRADA D_ZAGRADA
@@ -418,6 +432,10 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, func.getReturnType());
 			node.setAttribute(Attribute.L_IZRAZ, false);
+
+			// TODO passByValue stuff ?
+			codegen.genCall(!(func.getReturnType() instanceof VoidType));
+
 			break;
 		}
 		// <postfiks_izraz> ::= <postfiks_izraz> L_ZAGRADA <lista_argumenata>
@@ -453,6 +471,10 @@ public class SemanticsAnalyzer {
 
 			node.setAttribute(Attribute.TIP, func.getReturnType());
 			node.setAttribute(Attribute.L_IZRAZ, false);
+
+			// TODO passByValue, params ?
+			codegen.genCall(!(func.getReturnType() instanceof VoidType));
+
 			break;
 		}
 		// <postfiks_izraz> ::= <postfiks_izraz> OP_INC
@@ -491,6 +513,14 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			node.setAttribute(Attribute.L_IZRAZ, false);
+
+			if (production == PPJCProduction.POSTFIX_IZRAZ_5) {
+				// TODO char/byte
+				codegen.genPostIncrement(false);
+			} else {
+				codegen.genPostDecrement(false);
+			}
+
 			break;
 		}
 
@@ -519,6 +549,9 @@ public class SemanticsAnalyzer {
 
 			// tipovi <-- [ <izraz_pridruzivanja>.tip ]
 			node.setAttribute(Attribute.TIPOVI, list);
+
+			// TODO params/args
+
 			break;
 		}
 		// <lista_argumenata> ::= <lista_argumenata> ZAREZ <izraz_pridruzivanja>
@@ -546,6 +579,9 @@ public class SemanticsAnalyzer {
 			// tipovi <-- <lista_argumenata>.tipovi + [
 			// <izraz_pridruzivanja>.tip ]
 			node.setAttribute(Attribute.TIPOVI, list);
+
+			// TODO params/args
+
 			break;
 		}
 
@@ -594,10 +630,20 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			node.setAttribute(Attribute.L_IZRAZ, false);
+
+			if (production == PPJCProduction.UNARNI_IZRAZ_2) {
+				// TODO fix conversion for char type
+				codegen.genPreIncrement(false);
+			} else {
+				// TODO fix conversion for char type
+				codegen.genPreDecrement(false);
+			}
+
 			break;
 		}
 		// <unarni_izraz> ::= <unarni_operator> <cast_izraz>
 		case UNARNI_IZRAZ_4: {
+			NonterminalNode unarniOperator = (NonterminalNode) children.get(0);
 			NonterminalNode castIzraz = (NonterminalNode) children.get(1);
 
 			/*
@@ -626,6 +672,16 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, IntType.INSTANCE);
 			node.setAttribute(Attribute.L_IZRAZ, false);
+
+			boolean lval = (Boolean) castIzraz.getAttribute(Attribute.L_IZRAZ);
+			if (lval) {
+				// TODO need a way to tell if address is of char(1B) or
+				// int(4B)...
+				// TODO also test implicit casts...
+				codegen.genAddressToValue(false);
+			}
+			checkSubtree(unarniOperator, table);
+
 			break;
 		}
 
@@ -637,18 +693,22 @@ public class SemanticsAnalyzer {
 		 */
 		case UNARNI_OPERATOR_1: {
 			// u semantickoj analizi ne treba nista provjeriti,
+			// a bogme niti u generatoru koda za unarni plus
 			break;
 		}
 		case UNARNI_OPERATOR_2: {
 			// u semantickoj analizi ne treba nista provjeriti,
+			codegen.genNegate();
 			break;
 		}
 		case UNARNI_OPERATOR_3: {
 			// u semantickoj analizi ne treba nista provjeriti,
+			codegen.genBitwiseNot();
 			break;
 		}
 		case UNARNI_OPERATOR_4: {
 			// u semantickoj analizi ne treba nista provjeriti,
+			codegen.genLogicalNot();
 			break;
 		}
 
@@ -689,11 +749,15 @@ public class SemanticsAnalyzer {
 
 			// tip <-- ime_tipa.tip
 			// l-izraz <-- 0
-			// nigdje se ne sprema? cini mi se da fali "l.setAttribute(Att...."
-			// pa sam ih dodao dolje
-			// OK
 			node.setAttribute(Attribute.TIP, imeTipa.getAttribute(Attribute.TIP));
 			node.setAttribute(Attribute.L_IZRAZ, false);
+
+			if ((Boolean) castIzraz.getAttribute(Attribute.L_IZRAZ)) {
+				// TODO need a way to tell if address is of char(1B) or int(4B);
+				// TODO test and handle actual conversion int -> char and
+				// overflow, range...
+				codegen.genAddressToValue(false);
+			}
 
 			break;
 		}
@@ -1058,6 +1122,15 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, postfiksIzraz.getAttribute(Attribute.TIP));
 			node.setAttribute(Attribute.L_IZRAZ, false);
+			
+			boolean rhsLvalue = (Boolean) izrazPridruzivanja.getAttribute(Attribute.L_IZRAZ);
+			if (rhsLvalue) {
+				// TODO byte/charsized addresses
+				codegen.genAddressToValue(false);
+			}
+			// TODO byte/charsized addresses
+			codegen.genAssignment(false);
+			
 			break;
 		}
 
@@ -1082,6 +1155,8 @@ public class SemanticsAnalyzer {
 
 			// 1. provjeri(<izraz>)
 			checkSubtree(izraz, table);
+			
+			codegen.genDiscard();
 
 			// 2. provjeri(<izraz_pridruzivanja>)
 			checkSubtree(izrazPridruzivanja, table);
@@ -1090,6 +1165,13 @@ public class SemanticsAnalyzer {
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, izrazPridruzivanja.getAttribute(Attribute.TIP));
 			node.setAttribute(Attribute.L_IZRAZ, false);
+			
+			boolean wasLvalue = (Boolean) izrazPridruzivanja.getAttribute(Attribute.L_IZRAZ);
+			if (wasLvalue) {
+				// TODO char/bytesized address
+				codegen.genAddressToValue(false);
+			}
+			
 			break;
 		}
 
@@ -1114,10 +1196,9 @@ public class SemanticsAnalyzer {
 			 * Svaki blok je odvojeni djelokrug, a nelokalnim imenima se
 			 * pristupa u ugnijezdujucem bloku
 			 */
-		
 
 			// 1. provjeri(<lista_naredbi>)
-			SymbolTable newTable = table.createNested();
+			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
 			checkSubtree(listaNaredbi, newTable);
 			break;
@@ -1139,12 +1220,19 @@ public class SemanticsAnalyzer {
 			 * pristupa u ugnijezdujucem bloku
 			 */
 			
-
+			// TODO locals
+			
+			codegen.genBlockStart();
+			
 			// 1. provjeri(<lista_deklaracija>)
 			checkSubtree(listaDeklaracija, table);
 
 			// 2. provjeri(<lista_naredbi>)
 			checkSubtree(listaNaredbi, table);
+			
+			// TODO deallocate locals
+			codegen.genBlockEnd();
+			
 			break;
 		}
 
@@ -1155,7 +1243,7 @@ public class SemanticsAnalyzer {
 		case LISTA_NAREDBI_1: {
 			NonterminalNode naredba = (NonterminalNode) children.get(0);
 			// 1. provjeri(<naredba>)
-			SymbolTable newTable = table.createNested();
+			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
 			break;
@@ -1168,7 +1256,7 @@ public class SemanticsAnalyzer {
 			// 1. provjeri(<lista_naredbi>)
 			checkSubtree(listaNaredbi, table);
 
-			SymbolTable newTable = table.createNested();
+			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
 			break;
@@ -1187,6 +1275,9 @@ public class SemanticsAnalyzer {
 		case NAREDBA_2: {
 			NonterminalNode u = (NonterminalNode) children.get(0);
 			checkSubtree(u, table);
+			
+			codegen.genDiscard();
+			
 			break;
 		}
 		// <naredba> ::= <slozena_naredba> | <naredba_grananja>
@@ -1219,6 +1310,10 @@ public class SemanticsAnalyzer {
 
 			// tip <-- int
 			node.setAttribute(Attribute.TIP, IntType.INSTANCE);
+			
+			codegen.genAddDefault();
+			node.setAttribute(Attribute.L_IZRAZ, false);
+			
 			break;
 		}
 		// izraz_naredba> ::= <izraz> TOCKAZAREZ
@@ -1232,6 +1327,14 @@ public class SemanticsAnalyzer {
 
 			// tip <-- <izraz>.tip
 			node.setAttribute(Attribute.TIP, izraz.getAttribute(Attribute.TIP));
+			
+			boolean wasLvalue = (Boolean) izraz.getAttribute(Attribute.L_IZRAZ);
+			if (wasLvalue) {
+				// TODO char/bytesized address
+				codegen.genAddressToValue(false);
+			}
+			
+//			node.setAttribute(Attribute.L_IZRAZ, false);
 
 			break;
 		}
@@ -1255,9 +1358,11 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", node);
 
-			SymbolTable newTable = table.createNested();
+			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
+			
+			// TODO if
 
 			break;
 		}
@@ -1275,13 +1380,16 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", node);
 
-			SymbolTable newTable = table.createNested();
+			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba1, newTable);
 
-			SymbolTable newTable2 = table.createNested();
+			SymbolTable newTable2 = table.createNested(false);
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba2, newTable2);
+			
+			// TODO if-else
+			
 			break;
 		}
 
@@ -1307,9 +1415,12 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("While-loop condition is of invalid type", node);
 
-			SymbolTable newTable = table.createNested();
+			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
+			
+			// TODO while
+			
 			break;
 		}
 		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1
@@ -1336,9 +1447,12 @@ public class SemanticsAnalyzer {
 				// 3. <izraz_naredba>2.tip ~ int
 				throw new SemanticsException("For-loop condition of invalit type", node);
 
-			SymbolTable newTable = table.createNested();
+			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
+			
+			// TODO for
+			
 			break;
 		}
 		// <naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1
@@ -1365,9 +1479,12 @@ public class SemanticsAnalyzer {
 			// 4. provjeri(<izraz>)
 			checkSubtree(izraz, table);
 
-			SymbolTable newTable = table.createNested();
+			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
 			checkSubtree(naredba, newTable);
+			
+			// todo for
+			
 			break;
 		}
 
@@ -1406,6 +1523,8 @@ public class SemanticsAnalyzer {
 
 			if (!(table.getReturnType().equals(VoidType.INSTANCE)))
 				throw new SemanticsException("function must return ", node);
+			
+			codegen.genReturnVoid();
 
 			break;
 		}
@@ -1422,8 +1541,14 @@ public class SemanticsAnalyzer {
 						+ izraz.getAttribute(Attribute.TIP), node);
 			}
 			
-			codegen.genReturnVal(subFromWhichReturning);
-			
+			boolean wasLvalue = (Boolean) izraz.getAttribute(Attribute.L_IZRAZ);
+			if (wasLvalue) {
+				// TODO char/bytesized address
+				codegen.genAddressToValue(false);
+			}
+
+			codegen.genReturnVal();
+
 			break;
 		}
 
@@ -1504,12 +1629,12 @@ public class SemanticsAnalyzer {
 			} else {
 				// 5. zabiljezi definiciju i deklaraciju funkcije
 				functionEntry = new SymbolEntry(fType);
-				functionEntry.setStorageInfo(new StorageInfo(StorageInfo.GLOBAL));
+				functionEntry.setStorageInfo(new StorageInfo(SymbolTable.GLOBAL));
 				SymbolTable.GLOBAL.addLocal(functionName.getText(), functionEntry);
 			}
 			functionEntry.markDefined();
 
-			SymbolTable inner = table.createNested();
+			SymbolTable inner = table.createNested(false);
 			inner.setReturnType(retType);
 			
 			codegen.genSubroutinePrologue(functionName.getText());
@@ -1517,6 +1642,8 @@ public class SemanticsAnalyzer {
 			// 6. provjeri (<slozena_naredba>)
 			checkSubtree(slozenaNaredba, inner);
 			
+			// TODO get locals size from slozenaNaredba or move deallocation elsewhere
+			codegen.genSubroutineEpilogue(functionName.getText(), 0);
 
 			break;
 		}
@@ -1572,7 +1699,7 @@ public class SemanticsAnalyzer {
 			// <lista_parametara>.tipovi
 			// i <lista_parametara>.imena.
 
-			SymbolTable inner = table.createNested();
+			SymbolTable inner = table.createNested(true);
 			inner.setReturnType(retType);
 
 			@SuppressWarnings("unchecked")
@@ -1585,7 +1712,6 @@ public class SemanticsAnalyzer {
 
 			codegen.genSubroutinePrologue(functionName.getText());
 			checkSubtree(slozenaNaredba, inner);
-			
 
 			break;
 		}
@@ -2132,6 +2258,11 @@ public class SemanticsAnalyzer {
 		Type bType = (Type) b.getAttribute(Attribute.TIP);
 		if (!bType.canConvertImplicit(IntType.INSTANCE))
 			throw new SemanticsException("Right operand to '" + op.getText() + "' is of invalid type", parent);
+		
+		boolean isLeftLvalue = (Boolean) a.getAttribute(Attribute.L_IZRAZ);
+		boolean isRightLvalue = (Boolean) b.getAttribute(Attribute.L_IZRAZ);
+		
+		codegen.genArithmeticBinaryOperation(op.getText(), isLeftLvalue, isRightLvalue);
 
 		parent.setAttribute(Attribute.TIP, IntType.INSTANCE);
 		parent.setAttribute(Attribute.L_IZRAZ, false);
