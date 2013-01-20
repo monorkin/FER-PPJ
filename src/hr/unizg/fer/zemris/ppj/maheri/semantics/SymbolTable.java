@@ -1,5 +1,6 @@
 package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.type.NumericType;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.type.Type;
 
@@ -18,15 +19,20 @@ import java.util.Set;
  * 
  */
 public class SymbolTable {
-	public static SymbolTable GLOBAL = new SymbolTable(null, false);
+	public static SymbolTable GLOBAL = new SymbolTable(null);
 	
 	public static void resetAll () {
-		SymbolTable.GLOBAL = new SymbolTable(null, false);
+		SymbolTable.GLOBAL = new SymbolTable(null);
 	}
 
 	private final HashMap<String, SymbolEntry> map = new HashMap<String, SymbolEntry>();
 	private final SymbolTable parentScope;
-	private final boolean parameterScope;
+	
+	private final StorageInfo storageInfo;
+	
+	public StorageInfo getStorageInfo() {
+		return storageInfo;
+	}
 
 	private Type returnType = null;
 
@@ -64,11 +70,13 @@ public class SymbolTable {
 	 *            symbol table of parent scope, or <code>null</code> if global
 	 *            scope
 	 */
-	private SymbolTable(SymbolTable parentScope, boolean parameterScope) {
+	private SymbolTable(SymbolTable parentScope) {
 		this.parentScope = parentScope;
 		if (parentScope != null)
 			this.returnType = parentScope.returnType;
-		this.parameterScope = parameterScope;
+		
+		// size starts at 0
+		this.storageInfo = new StorageInfo(parentScope, 0);
 	}
 
 	/**
@@ -76,8 +84,8 @@ public class SymbolTable {
 	 * 
 	 * @return the created scope
 	 */
-	public SymbolTable createNested(boolean parameterScope) {
-		SymbolTable sub = new SymbolTable(this, parameterScope);
+	public SymbolTable createNested() {
+		SymbolTable sub = new SymbolTable(this);
 		nested.add(sub);
 		return sub;
 	}
@@ -131,6 +139,12 @@ public class SymbolTable {
 		if (map.get(symbolName) != null)
 			throw new IllegalStateException("symbol exists in current scope");
 		map.put(symbolName, data);
+		
+		if (!data.isParameter()) {
+			this.storageInfo.size += data.storageInfo.size;
+		} else {
+			Logger.log("parameters not handled yet in table...");
+		}
 	}
 
 	/**
@@ -142,9 +156,10 @@ public class SymbolTable {
 		// add extra data for each symbol ?
 		private final Type type;
 
-		public SymbolEntry(Type symbolType, StorageInfo info) {
+		public SymbolEntry(Type symbolType, StorageInfo info, boolean parameter) {
 			this.type = symbolType;
 			this.storageInfo = info;
+			this.parameter = parameter;
 		}
 
 		/**
@@ -185,23 +200,21 @@ public class SymbolTable {
 			return this.type.toString();
 		}
 		
-		private StorageInfo storageInfo;
+		private final StorageInfo storageInfo;
 		public  StorageInfo getStorageInfo() {
 			return storageInfo;
 		}
 		
-		public void setStorageInfo(StorageInfo storageInfo) {
-			this.storageInfo = storageInfo;
-		}	
+		private final boolean parameter;
+		public boolean isParameter() {
+			return parameter;
+		}
 		
 	}
 	
 	public static class StorageInfo {
 		public static final int LOCAL = 0;
 		public static final int GLOBAL = 1;
-		public static final int PARAMETER = 2;
-		
-		private final SymbolTable table;
 		
 		private final int type;
 		
@@ -209,36 +222,35 @@ public class SymbolTable {
 			return type;
 		}
 
-		public StorageInfo(SymbolTable table) {
-			if (table == SymbolTable.GLOBAL) {
+		public StorageInfo(SymbolTable parent, int size) {
+			if (parent == null || parent == SymbolTable.GLOBAL) {
 				this.type = GLOBAL;
-			} else if (table.parameterScope) {
-				this.type = PARAMETER;
 			} else {
 				this.type = LOCAL;
 			}
-			this.table = table;
+			if (type == LOCAL) {
+				this.offset = parent.storageInfo.offset + parent.storageInfo.size + 4;
+			} else {
+				this.offset = 0;
+			}
+			this.size = size;
 		}
 		
-		private int offset;
+		private final int offset;
 		/**
 		 * byte offset for storage. for local vars, offset is positive, for parameters it is negative.
 		 * @return the offset as explained above
 		 */
 		public int getOffset() {
+			if (type == GLOBAL)
+				throw new IllegalStateException("offset no applicable for globals");
 			return offset;
-		}
-		public void setOffset(int offset) {
-			this.offset = offset;
 		}
 		
 		private int size;
 	
 		public int getSize() {
 			return size;
-		}
-		public void setSize(int byteSize) {
-			this.size = byteSize;
 		}
 	}
 

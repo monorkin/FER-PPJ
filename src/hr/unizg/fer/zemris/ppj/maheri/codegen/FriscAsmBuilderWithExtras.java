@@ -34,7 +34,7 @@ public class FriscAsmBuilderWithExtras {
 	public FriscAsmBuilderWithExtras() {
 		builder.addInstruction("`BASE D");
 		builder.addLabel("start");
-		builder.addInstruction("MOVE 40000, R7");
+		builder.addInstruction("MOVE %H 40000, R7");
 		builder.addInstruction("CALL " + getLabelForGlobal("INITIALIZERS"));
 		builder.addInstruction("CALL " + getLabelForGlobal("main"));
 		builder.addInstruction("HALT");
@@ -144,9 +144,9 @@ public class FriscAsmBuilderWithExtras {
 	public void genLocalRef(int offset, boolean isByteSized, boolean passByAddress) {
 		Logger.log("reference to local variable @" + offset);
 		if (passByAddress) {
-			builder.addInstruction("ADD R5, " + Integer.toString(offset) + ", R1");
+			builder.addInstruction("SUB R5, " + Integer.toString(offset) + ", R1");
 		} else {
-			addLoadInstruction("R1, (R5+" + Integer.toString(offset) + ")", isByteSized);
+			addLoadInstruction("R1, (R5-" + Integer.toString(offset) + ")", isByteSized);
 		}
 		builder.addInstruction("PUSH R1");
 	}
@@ -224,9 +224,10 @@ public class FriscAsmBuilderWithExtras {
 	public void genSubroutineEpilogue(String subName, int localsSize) {
 		Logger.log("End of " + subName);
 		builder.addLabel(getReturnLabelForSub(subroutineName));
+		if (localsSize != 0)
+			genLocalsDeallocation(localsSize);
 		// R5 is used as frame pointer, restore it
 		builder.addInstruction("POP R5");
-		builder.addInstruction("ADD R7, " + Integer.toString(localsSize) + ", R7");
 		builder.addInstruction("RET ");
 	}
 
@@ -395,8 +396,13 @@ public class FriscAsmBuilderWithExtras {
 		builder.addInstruction("POP R1");
 	}
 
-	public void genAddDefault() {
+	public void genEmpryStatementValue() {
 		builder.addInstruction("MOVE 1, R1");
+		builder.addInstruction("PUSH R1");
+	}
+	
+	public void genDefaultValue() {
+		builder.addInstruction("XOR R1, R1, R1");
 		builder.addInstruction("PUSH R1");
 	}
 	
@@ -406,15 +412,13 @@ public class FriscAsmBuilderWithExtras {
 		dataSection.addInstruction("`DS " + bytes + "; allocating global " + name);
 	}
 	
-	public void prepGlobalInitialiser(String text) {
-		Logger.log("prepare init of " + text);
-		builder.addInstruction("MOVE " + getLabelForGlobal(text) + ", R1" + "; prepare init of " + text);
-		builder.addInstruction("PUSH R1");
+	public void genLocalAllocation(int bytes) {
+		builder.addInstruction("SUB R7, " + bytes + ", R7; local allocation");
 	}
+	
 
-	// TODO gen: allocate + init za int, char, string, array...
-	public void genLocalsDeallocation() {
-
+	public void genLocalsDeallocation(int localsSize) {
+		builder.addInstruction("ADD R7, " + Integer.toString(localsSize) + ", R7 ; deallocate local variables");
 	}
 
 	private void lessThan() {
