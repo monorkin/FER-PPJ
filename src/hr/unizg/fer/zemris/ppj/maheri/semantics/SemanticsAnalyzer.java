@@ -1581,7 +1581,11 @@ public class SemanticsAnalyzer {
 		// <vanjska_deklaracija> ::= <definicija_funkcije> | <deklaracija>
 		case VANJSKA_DEKLARACIJA_1:
 		case VANJSKA_DEKLARACIJA_2: {
-			checkSubtree((NonterminalNode) children.get(0), table);
+			NonterminalNode child = (NonterminalNode) children.get(0);
+			if (child.getSymbol().getValue().equals("<deklaracija>"))
+				codegen.switchToInit();
+			checkSubtree(child, table);
+			codegen.switchToCode();
 			break;
 		}
 
@@ -1985,11 +1989,10 @@ public class SemanticsAnalyzer {
 				throw new SemanticsException("Invalid type initializer", node);
 			}
 			
-			codegen.switchToInit();
+
 			// TODO byte size
 			codegen.genAssignment(false);
 			codegen.genDiscard();
-			codegen.switchToCode();
 			
 			break;
 		}
@@ -2030,7 +2033,6 @@ public class SemanticsAnalyzer {
 			} else {
 				t = ntype;
 			}
-			codegen.switchToInit();
 			if (table == SymbolTable.GLOBAL) {
 				codegen.genGlobalAllocation(idn.getText(), t instanceof CharType ? 1 : 4);
 				codegen.prepGlobalInitialiser(idn.getText());
@@ -2038,7 +2040,6 @@ public class SemanticsAnalyzer {
 				// TODO locals
 //				codegen.genLocalAllocation(t instanceof CharType ? 1 : 4);
 			}
-			codegen.switchToCode();
 
 			// 3. zabilježi deklaraciju IDN.ime s odgovarajucim tipom
 			table.addLocal(idn.getText(), new SymbolEntry(ntype, new StorageInfo(table)));
@@ -2180,7 +2181,6 @@ public class SemanticsAnalyzer {
 		case INICIJALIZATOR_1: {
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) children.get(0);
 
-			codegen.switchToInit();
 			// 1. provjeri(<izraz_pridruzivanja>)
 			checkSubtree(izrazPridruzivanja, table);
 			
@@ -2213,7 +2213,6 @@ public class SemanticsAnalyzer {
 				node.setAttribute(Attribute.TIP, izrazPridruzivanja.getAttribute(Attribute.TIP));
 			}
 
-			codegen.switchToCode();
 			break;
 		}
 		// <inicijalizator> ::= L_VIT_ZAGRADA <lista_izraza_pridruzivanja>
