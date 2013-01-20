@@ -3,14 +3,16 @@ import hr.unizg.fer.zemris.ppj.maheri.semantics.Node;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.SemanticsAnalyzer;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class GeneratorKoda {
-	
+
 	public static void main(String[] args) throws IOException {
 		List<String> inputLines = new ArrayList<String>();
 
@@ -22,9 +24,14 @@ public class GeneratorKoda {
 
 		InputProcessor ip = new InputProcessor(inputLines);
 		Node tree = ip.getTree();
-		
+
 		SemanticsAnalyzer semAn = new SemanticsAnalyzer(tree);
 		String code = semAn.check().createAsmCode();
+
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("a.frisc")));
+		writer.write(code);
+		writer.close();
+
 		System.out.println(code);
 	}
 
