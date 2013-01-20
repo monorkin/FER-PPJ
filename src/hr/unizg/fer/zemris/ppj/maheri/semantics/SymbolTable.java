@@ -142,8 +142,9 @@ public class SymbolTable {
 		// add extra data for each symbol ?
 		private final Type type;
 
-		public SymbolEntry(Type symbolType) {
+		public SymbolEntry(Type symbolType, StorageInfo info) {
 			this.type = symbolType;
+			this.storageInfo = info;
 		}
 
 		/**
@@ -186,7 +187,7 @@ public class SymbolTable {
 		
 		private StorageInfo storageInfo;
 		public  StorageInfo getStorageInfo() {
-			return new StorageInfo(SymbolTable.GLOBAL);
+			return storageInfo;
 		}
 		
 		public void setStorageInfo(StorageInfo storageInfo) {

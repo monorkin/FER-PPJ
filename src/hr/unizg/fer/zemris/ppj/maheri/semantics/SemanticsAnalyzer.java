@@ -212,7 +212,7 @@ public class SemanticsAnalyzer {
 			node.setAttribute(Attribute.L_IZRAZ, idn.getAttribute(Attribute.L_IZRAZ));
 
 			StorageInfo storageInfo = idnEntry.getStorageInfo();
-			int varType = 0; //storageInfo.getType();
+			int varType = storageInfo.getType();
 
 			boolean passByAddress = idnEntry.isLvalue() || idnEntry.getType() instanceof FunctionType
 					|| idnEntry.getType() instanceof ArrayType;
@@ -1623,8 +1623,7 @@ public class SemanticsAnalyzer {
 					throw new SemanticsException("Function definition and declaration differ in prototypes", node);
 			} else {
 				// 5. zabiljezi definiciju i deklaraciju funkcije
-				functionEntry = new SymbolEntry(fType);
-				functionEntry.setStorageInfo(new StorageInfo(SymbolTable.GLOBAL));
+				functionEntry = new SymbolEntry(fType, new StorageInfo(SymbolTable.GLOBAL));
 				SymbolTable.GLOBAL.addLocal(functionName.getText(), functionEntry);
 			}
 			functionEntry.markDefined();
@@ -1685,7 +1684,7 @@ public class SemanticsAnalyzer {
 					throw new SemanticsException("Function definition and declaration differ in prototypes", node);
 			} else {
 				// 6. zabiljezi definiciju i deklaraciju funkcije
-				functionEntry = new SymbolEntry(fType);
+				functionEntry = new SymbolEntry(fType, new StorageInfo(SymbolTable.GLOBAL));
 				SymbolTable.GLOBAL.addLocal(functionName.getText(), functionEntry);
 			}
 			functionEntry.markDefined();
@@ -1703,7 +1702,7 @@ public class SemanticsAnalyzer {
 
 			int size = paramNames.size();
 			for (int i = 0; i < size; ++i)
-				inner.addLocal(paramNames.get(i), new SymbolEntry(paramTypes.get(i)));
+				inner.addLocal(paramNames.get(i), new SymbolEntry(paramTypes.get(i), new StorageInfo(inner)));
 
 			codegen.genSubroutinePrologue(functionName.getText());
 			checkSubtree(slozenaNaredba, inner);
@@ -1915,6 +1914,9 @@ public class SemanticsAnalyzer {
 				if (arrayType.getElementType() instanceof ConstType)
 					throw new SemanticsException("Const types must have initializer", node);
 			}
+			
+			// TODO make uninitialised variable
+			
 			break;
 		}
 		// <init_deklarator> ::= <izravni_deklarator> OP_PRIDRUZI
@@ -1981,6 +1983,13 @@ public class SemanticsAnalyzer {
 			} else {
 				throw new SemanticsException("Invalid type initializer", node);
 			}
+			
+			codegen.switchToInit();
+			// TODO byte size
+			codegen.genAssignment(false);
+			codegen.genDiscard();
+			codegen.switchToCode();
+			
 			break;
 		}
 
@@ -2012,12 +2021,30 @@ public class SemanticsAnalyzer {
 			// 2. IDN.ime nije deklarirano u lokalnom djelokrugu
 			if (table.getLocal(idn.getText()) != null)
 				throw new SemanticsException("Redeclaration in local scope", node);
+			
+			Type t;
+			if (ntype instanceof ConstType) {
+				ConstType constType = (ConstType) ntype;
+				t= constType.getType();
+			} else {
+				t = ntype;
+			}
+			codegen.switchToInit();
+			if (table == SymbolTable.GLOBAL) {
+				codegen.genGlobalAllocation(idn.getText(), t instanceof CharType ? 1 : 4);
+				codegen.prepGlobalInitialiser(idn.getText());
+			} else {
+				// TODO locals
+//				codegen.genLocalAllocation(t instanceof CharType ? 1 : 4);
+			}
+			codegen.switchToCode();
 
 			// 3. zabilježi deklaraciju IDN.ime s odgovarajucim tipom
-			table.addLocal(idn.getText(), new SymbolEntry(ntype));
+			table.addLocal(idn.getText(), new SymbolEntry(ntype, new StorageInfo(table)));
 
 			// tip <-- ntip
 			node.setAttribute(Attribute.TIP, ntype);
+			
 			break;
 		}
 		// <izravni_deklarator> ::= IDN L_UGL_ZAGRADA BROJ D_UGL_ZAGRADA
@@ -2055,12 +2082,29 @@ public class SemanticsAnalyzer {
 			// 4. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom
 			if (size <= 0 || size > 1024)
 				throw new SemanticsException("illegal array size", node);
-			table.addLocal(idn.getText(), new SymbolEntry(type));
+			table.addLocal(idn.getText(), new SymbolEntry(type, new StorageInfo(table)));
 
 			// tip <-- niz(ntip)
 			// br-elem <-- BROJ.vrijednost
 			node.setAttribute(Attribute.TIP, type);
 			node.setAttribute(Attribute.BR_ELEM, size);
+			
+			Type t;
+			if (ntype instanceof ConstType) {
+				ConstType constType = (ConstType) ntype;
+				t= constType.getType();
+			} else {
+				t = ntype;
+			}
+			int bytes = (int) ((t instanceof CharType ? 1 : 4) * size);
+			if (table == SymbolTable.GLOBAL) {
+				codegen.genGlobalAllocation(idn.getText(), bytes);
+				codegen.prepGlobalInitialiser(idn.getText());
+			} else {
+				// TODO locals
+//				codegen.genLocalAllocation(bytes);
+			}
+			
 			break;
 		}
 		// <izravni_deklarator> ::= IDN L_ZAGRADA KR_VOID D_ZAGRADA
@@ -2081,12 +2125,13 @@ public class SemanticsAnalyzer {
 				// 2. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako
 				// ista funkcija vec nije
 				// deklarirana u lokalnom djelokrugu
-				entry = new SymbolEntry(type);
+				entry = new SymbolEntry(type, new StorageInfo(table));
 				table.addLocal(idn.getText(), entry);
 			}
 
 			// tip <-- funkcija(void --> ntip)
 			node.setAttribute(Attribute.TIP, type);
+			// no code here
 			break;
 		}
 		// <izravni_deklarator> ::= IDN L_ZAGRADA <lista_parametara> D_ZAGRADA
@@ -2120,12 +2165,13 @@ public class SemanticsAnalyzer {
 				// 3. zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako
 				// ista funkcija vec nije
 				// deklarirana u lokalnom djelokrugu
-				entry = new SymbolEntry(type);
+				entry = new SymbolEntry(type, new StorageInfo(table));
 				table.addLocal(idn.getText(), entry);
 			}
 
 			// tip <-- funkcija(<lista_parametara>.tipovi --> ntip)
 			node.setAttribute(Attribute.TIP, type);
+			// no code here
 			break;
 		}
 
@@ -2133,8 +2179,16 @@ public class SemanticsAnalyzer {
 		case INICIJALIZATOR_1: {
 			NonterminalNode izrazPridruzivanja = (NonterminalNode) children.get(0);
 
+			codegen.switchToInit();
 			// 1. provjeri(<izraz_pridruzivanja>)
 			checkSubtree(izrazPridruzivanja, table);
+			
+			boolean wasLvalue = (Boolean) izrazPridruzivanja.getAttribute(Attribute.L_IZRAZ);
+			if (wasLvalue) {
+				// TODO char/bytesized address
+				codegen.genAddressToValue(false);
+			}
+			
 
 			Node n = izrazPridruzivanja;
 			while (n.getChildren() != null && n.getChildren().size() == 1)
@@ -2157,6 +2211,8 @@ public class SemanticsAnalyzer {
 				// tip <-- <izraz_pridruzivanja>.tip
 				node.setAttribute(Attribute.TIP, izrazPridruzivanja.getAttribute(Attribute.TIP));
 			}
+
+			codegen.switchToCode();
 			break;
 		}
 		// <inicijalizator> ::= L_VIT_ZAGRADA <lista_izraza_pridruzivanja>
@@ -2171,6 +2227,9 @@ public class SemanticsAnalyzer {
 			// tipovi <-- <lista_izraza_pridruzivanja>.tipovi
 			node.setAttribute(Attribute.BR_ELEM, listaIzrazaPridruzivanja.getAttribute(Attribute.BR_ELEM));
 			node.setAttribute(Attribute.TIPOVI, listaIzrazaPridruzivanja.getAttribute(Attribute.TIPOVI));
+			
+			// TODO array initialiser
+			
 			break;
 		}
 
