@@ -1,5 +1,6 @@
 package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
 import hr.unizg.fer.zemris.ppj.maheri.codegen.FriscAsmBuilder;
 import hr.unizg.fer.zemris.ppj.maheri.codegen.FriscAsmBuilderWithExtras;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.Node.Attribute;
@@ -81,8 +82,6 @@ public class SemanticsAnalyzer {
 			}
 		}
 		fr.close();
-		codegen = new FriscAsmBuilderWithExtras();
-		codegen.genStartProgram();
 	}
 
 	private String errorString(Node errorNode) {
@@ -108,6 +107,7 @@ public class SemanticsAnalyzer {
 	 * @return call source for easy chaining
 	 */
 	public SemanticsAnalyzer check() {
+		codegen = new FriscAsmBuilderWithExtras();
 		try {
 			checkAttributes();
 			checkFunctions();
@@ -169,6 +169,8 @@ public class SemanticsAnalyzer {
 			throw new SemanticsMainException("main function must return int", null);
 		if (!mainType.getParameterTypes().getTypes().isEmpty())
 			throw new SemanticsMainException("main function takes no arguments", null);
+		if (!mainEntry.isDefined())
+			throw new SemanticsMainException("main function declared but not defined", null);
 	}
 
 	private void checkFunctionsAreDefined(SymbolTable table) {
@@ -270,13 +272,15 @@ public class SemanticsAnalyzer {
 				if (!found)
 					throw new SemanticsException("Invalid character constant value " + znak.getText(), node);
 			}
+			char c = charValue.charAt(1);
+			if (c == '\\' && charValue.length() == 3)
+				throw new SemanticsException("Invalid character", node);
 
 			// tip <-- char
 			// l-izraz <-- 0
 			node.setAttribute(Attribute.TIP, CharType.INSTANCE);
 			node.setAttribute(Attribute.L_IZRAZ, false);
 
-			char c = charValue.charAt(1);
 
 			codegen.genCharacterLiteralRef(c);
 
@@ -1198,9 +1202,7 @@ public class SemanticsAnalyzer {
 			 */
 
 			// 1. provjeri(<lista_naredbi>)
-			SymbolTable newTable = table.createNested(false);
-			// 3. provjeri(<naredba>)
-			checkSubtree(listaNaredbi, newTable);
+			checkSubtree(listaNaredbi, table);
 			break;
 		}
 		// <slozena_naredba> ::= L_VIT_ZAGRADA <lista_deklaracija>
@@ -1243,9 +1245,7 @@ public class SemanticsAnalyzer {
 		case LISTA_NAREDBI_1: {
 			NonterminalNode naredba = (NonterminalNode) children.get(0);
 			// 1. provjeri(<naredba>)
-			SymbolTable newTable = table.createNested(false);
-			// 3. provjeri(<naredba>)
-			checkSubtree(naredba, newTable);
+			checkSubtree(naredba, table);
 			break;
 		}
 		// lista_naredbi> ::= <lista_naredbi> <naredba>
@@ -1256,9 +1256,8 @@ public class SemanticsAnalyzer {
 			// 1. provjeri(<lista_naredbi>)
 			checkSubtree(listaNaredbi, table);
 
-			SymbolTable newTable = table.createNested(false);
-			// 3. provjeri(<naredba>)
-			checkSubtree(naredba, newTable);
+			// 2. provjeri(<naredba>)
+			checkSubtree(naredba, table);
 			break;
 		}
 
@@ -1287,7 +1286,9 @@ public class SemanticsAnalyzer {
 		case NAREDBA_4:
 		case NAREDBA_5: {
 			NonterminalNode u = (NonterminalNode) children.get(0);
-			checkSubtree(u, table);
+			SymbolTable newTable = table.createNested(false);
+			checkSubtree(u, newTable);
+			// TODO deallocate locals
 			break;
 		}
 
@@ -1358,9 +1359,8 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", node);
 
-			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
-			checkSubtree(naredba, newTable);
+			checkSubtree(naredba, table);
 			
 			// TODO if
 
@@ -1379,14 +1379,12 @@ public class SemanticsAnalyzer {
 			if (!izrazType.canConvertImplicit(IntType.INSTANCE))
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("If-condition expression has invalid type", node);
-
-			SymbolTable newTable = table.createNested(false);
+			
 			// 3. provjeri(<naredba>)
-			checkSubtree(naredba1, newTable);
+			checkSubtree(naredba1, table);
 
-			SymbolTable newTable2 = table.createNested(false);
 			// 3. provjeri(<naredba>)
-			checkSubtree(naredba2, newTable2);
+			checkSubtree(naredba2, table);
 			
 			// TODO if-else
 			
@@ -1415,9 +1413,8 @@ public class SemanticsAnalyzer {
 				// 2. <izraz>.tip ~ int
 				throw new SemanticsException("While-loop condition is of invalid type", node);
 
-			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
-			checkSubtree(naredba, newTable);
+			checkSubtree(naredba, table);
 			
 			// TODO while
 			
@@ -1447,9 +1444,8 @@ public class SemanticsAnalyzer {
 				// 3. <izraz_naredba>2.tip ~ int
 				throw new SemanticsException("For-loop condition of invalit type", node);
 
-			SymbolTable newTable = table.createNested(false);
 			// 3. provjeri(<naredba>)
-			checkSubtree(naredba, newTable);
+			checkSubtree(naredba, table);
 			
 			// TODO for
 			
@@ -1479,9 +1475,8 @@ public class SemanticsAnalyzer {
 			// 4. provjeri(<izraz>)
 			checkSubtree(izraz, table);
 
-			SymbolTable newTable = table.createNested(false);
-			// 3. provjeri(<naredba>)
-			checkSubtree(naredba, newTable);
+			// 5. provjeri(<naredba>)
+			checkSubtree(naredba, table);
 			
 			// todo for
 			
@@ -1686,7 +1681,7 @@ public class SemanticsAnalyzer {
 			// onda
 			// je pripadni tip te deklaracije ...
 			if (functionEntry != null) {
-				if (!functionEntry.getType().canConvertImplicit(fType))
+				if (!functionEntry.getType().equals(fType))
 					throw new SemanticsException("Function definition and declaration differ in prototypes", node);
 			} else {
 				// 6. zabiljezi definiciju i deklaraciju funkcije
@@ -1712,6 +1707,8 @@ public class SemanticsAnalyzer {
 
 			codegen.genSubroutinePrologue(functionName.getText());
 			checkSubtree(slozenaNaredba, inner);
+			
+			// TODO deallocate locals...
 
 			break;
 		}
@@ -2145,10 +2142,9 @@ public class SemanticsAnalyzer {
 
 			// ako je <izraz_pridruzivanja> --> NIZ_ZNAKOVA
 			if (n instanceof TerminalNode && "NIZ_ZNAKOVA".equals(((TerminalNode) n).getSymbol().getValue())) {
-				long c = ((TerminalNode) n).getText().toCharArray().length - 2;
+				String text = unescape(((TerminalNode) n).getText());
+				long c = text.toCharArray().length - 1;
 				// br-elem <-- duljina niza znakova + 1
-				// FIXME ovo nevalja jer ne uračunava postojanje escape
-				// character, drugim riječima osvald je retardiran
 				node.setAttribute(Attribute.BR_ELEM, c);
 
 				ArrayList<Type> list = new ArrayList<Type>();
@@ -2333,8 +2329,29 @@ public class SemanticsAnalyzer {
 	private void checkAndApplyLoop(Node node) {
 		node.setAttribute(Attribute.PETLJA, true, true);
 	}
+	
+	private static String unescape(String s) {
+		StringBuilder sb = new StringBuilder();
+		
+		boolean esc = false;
+		for (int i = 0; i < s.length(); ++i) {
+			char ch = s.charAt(i);
+			if (esc) {
+				// TODO replace
+				sb.append(ch);
+				esc = false;
+			} else if (ch == '\\') {
+				esc = true;
+			} else {
+				sb.append(ch);
+			}
+		}
+		
+		return sb.toString();
+	}
 
 	public String createAsmCode() {
+		codegen.finish();
 		return codegen.toString();
 	}
 

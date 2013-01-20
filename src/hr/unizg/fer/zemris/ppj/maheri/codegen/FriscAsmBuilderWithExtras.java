@@ -11,6 +11,7 @@ import java.util.List;
 public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 
 	private final FriscAsmBuilder dataSection = new FriscAsmBuilder();
+	private final FriscAsmBuilder init = new FriscAsmBuilder();
 
 	private final LinkedList<String> blockStartLabels = new LinkedList<String>();
 	private final LinkedList<String> blockEndLabels = new LinkedList<String>();
@@ -18,10 +19,33 @@ public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 	private String subroutineName;
 
 	private int labelCounter = 0;
+	private int initStatus = 0;
+
+	public FriscAsmBuilderWithExtras() {
+		addLabel("start");
+		addInstruction("MOVE 40000, R7");
+		addInstruction("CALL " + getLabelForGlobal("INITIALIZERS"));
+		addInstruction("CALL " + getLabelForGlobal("main"));
+		addInstruction("HALT");
+
+		genMultProcedure();
+		genDivProcedure();
+
+		init.addLabel(getLabelForGlobal("INITIALIZERS"));
+		init.addInstruction("");
+		++initStatus;
+	}
+
+	public void finish() {
+		if (initStatus < 2) {
+			init.addInstruction("RET");
+			++initStatus;
+		}
+	}
 
 	@Override
 	public String toString() {
-		return super.toString() + dataSection.toString();
+		return super.toString() + init.toString() + dataSection.toString();
 	}
 
 	/**
@@ -343,7 +367,7 @@ public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 		} else {
 			handled = false;
 		}
-		
+
 		if (!handled) {
 			Logger.log("Unhandled operation " + opSymbol + ", setting result to 0");
 			addInstruction("XOR R1, R1, R1");
@@ -351,11 +375,11 @@ public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 
 		addInstruction("PUSH R1");
 	}
-	
+
 	public void genDiscard() {
 		addInstruction("POP R1");
 	}
-	
+
 	public void genAddDefault() {
 		addInstruction("MOVE 1, R1");
 		addInstruction("PUSH R1");
@@ -364,16 +388,6 @@ public class FriscAsmBuilderWithExtras extends FriscAsmBuilder {
 	// TODO gen: allocate + init za int, char, string, array...
 	public void genLocalsDeallocation() {
 
-	}
-
-	public void genStartProgram() {
-		addLabel("start");
-		addInstruction("MOVE 40000, R7");
-		addInstruction("CALL " + getLabelForGlobal("main"));
-		addInstruction("HALT");
-
-		genMultProcedure();
-		genDivProcedure();
 	}
 
 	private void lessThan() {
