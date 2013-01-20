@@ -32,6 +32,7 @@ public class FriscAsmBuilderWithExtras {
 	private int initStatus = 0;
 
 	public FriscAsmBuilderWithExtras() {
+		builder.addInstruction("`BASE D");
 		builder.addLabel("start");
 		builder.addInstruction("MOVE 40000, R7");
 		builder.addInstruction("CALL " + getLabelForGlobal("INITIALIZERS"));
@@ -67,7 +68,7 @@ public class FriscAsmBuilderWithExtras {
 
 		if (signExtended20bitOk(op)) {
 			Logger.log("reference to 20bit extensible numeric literal:");
-			builder.addInstruction("MOVE " + Integer.toHexString(op) + ", R1");
+			builder.addInstruction("MOVE " + Integer.toString(op) + ", R1");
 			builder.addInstruction("PUSH R1");
 		} else {
 			Logger.log("reference to big numeric literal");
@@ -75,7 +76,7 @@ public class FriscAsmBuilderWithExtras {
 
 			String label = tmpLabelName("NUM20BIT");
 			dataSection.addLabel(label);
-			dataSection.addInstruction("DW " + op);
+			dataSection.addInstruction("DW " + Integer.toString(op));
 
 			builder.addInstruction("LOAD R1, (" + label + ")");
 			builder.addInstruction("PUSH R1");
@@ -104,7 +105,7 @@ public class FriscAsmBuilderWithExtras {
 		String label = tmpLabelName("STRING");
 		dataSection.addLabel(label);
 		for (int i = 0; i < unescapedString.length(); ++i)
-			dataSection.addInstruction("`DW " + Integer.toHexString(unescapedString.charAt(i)));
+			dataSection.addInstruction("`DW " + Integer.toString(unescapedString.charAt(i)));
 
 		builder.addInstruction("MOVE R1, " + label);
 		builder.addInstruction("PUSH R1");
@@ -143,9 +144,9 @@ public class FriscAsmBuilderWithExtras {
 	public void genLocalRef(int offset, boolean isByteSized, boolean passByAddress) {
 		Logger.log("reference to local variable @" + offset);
 		if (passByAddress) {
-			builder.addInstruction("ADD R5, " + Integer.toHexString(offset) + ", R1");
+			builder.addInstruction("ADD R5, " + Integer.toString(offset) + ", R1");
 		} else {
-			addLoadInstruction("R1, (R5+" + Integer.toHexString(offset) + ")", isByteSized);
+			addLoadInstruction("R1, (R5+" + Integer.toString(offset) + ")", isByteSized);
 		}
 		builder.addInstruction("PUSH R1");
 	}
@@ -225,7 +226,7 @@ public class FriscAsmBuilderWithExtras {
 		builder.addLabel(getReturnLabelForSub(subroutineName));
 		// R5 is used as frame pointer, restore it
 		builder.addInstruction("POP R5");
-		builder.addInstruction("ADD R7, " + Integer.toHexString(localsSize) + ", R7");
+		builder.addInstruction("ADD R7, " + Integer.toString(localsSize) + ", R7");
 		builder.addInstruction("RET ");
 	}
 
@@ -303,7 +304,7 @@ public class FriscAsmBuilderWithExtras {
 		builder.addInstruction("POP R1"); // right (value)
 		builder.addInstruction("POP R2"); // left (address)
 
-		addStoreInstruction("R1, (R2)", byteSized);
+		addStoreInstruction("R1, (R2)" + "; assignment", byteSized);
 
 		builder.addInstruction("PUSH R1");
 	}
@@ -402,12 +403,12 @@ public class FriscAsmBuilderWithExtras {
 	public void genGlobalAllocation(String name, int bytes) {
 		Logger.log("allocating global " + name);
 		dataSection.addLabel(getLabelForGlobal(name));
-		dataSection.addInstruction("`DS " + bytes);
+		dataSection.addInstruction("`DS " + bytes + "; allocating global " + name);
 	}
 	
 	public void prepGlobalInitialiser(String text) {
 		Logger.log("prepare init of " + text);
-		builder.addInstruction("MOVE " + getLabelForGlobal(text) + ", R1");
+		builder.addInstruction("MOVE " + getLabelForGlobal(text) + ", R1" + "; prepare init of " + text);
 		builder.addInstruction("PUSH R1");
 	}
 
