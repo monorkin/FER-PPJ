@@ -93,7 +93,7 @@ public class GeneratorKodaTest {
 		InputProcessor ip = new InputProcessor(inputLines);
 		Node tree = ip.getTree();
 
-		return FRISCtest.simulate(new SemanticsAnalyzer(tree).check().createAsmCode().replace("\n", "\\n"), 6).toString();
+		return FRISCtest.simulate(new SemanticsAnalyzer(tree).check().createAsmCode().replace("\n", "\\n").replace("\r", "\\r"), 6).toString();
 	}
 
 	// @Test

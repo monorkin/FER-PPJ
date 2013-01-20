@@ -27,6 +27,7 @@ public class GeneratorKoda {
 
 		SemanticsAnalyzer semAn = new SemanticsAnalyzer(tree);
 		String code = semAn.check().createAsmCode();
+//		code = "\t`BASE D\r\nstart\tMOVE %H 40000, R7\r\n\tCALL GLOBAL_INITIALIZERS\r\n\tCALL GLOBAL_main\r\n\tHALT\r\nGLOBAL_main\tPUSH R5\r\n\tMOVE 71, R1\r\n\tPUSH R1\r\n\tPOP R6\r\n\tJP RET_FROM_main\r\nRET_FROM_main\tPOP R5\r\n\tRET\r\nGLOBAL_INITIALIZERS\tRET\r\n";
 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("a.frisc")));
 		writer.write(code);

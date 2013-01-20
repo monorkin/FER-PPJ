@@ -43,7 +43,6 @@ public class FriscAsmBuilderWithExtras {
 		genDivProcedure();
 
 		init.addLabel(getLabelForGlobal("INITIALIZERS"));
-		init.addInstruction("");
 		++initStatus;
 	}
 
@@ -190,11 +189,11 @@ public class FriscAsmBuilderWithExtras {
 	}
 
 	public void genJumpToStartOfBlock() {
-		builder.addInstruction("JR " + blockStartLabels.getLast());
+		builder.addInstruction("JP " + blockStartLabels.getLast());
 	}
 
 	public void genJumpToEndOfBlock() {
-		builder.addInstruction("JR " + blockEndLabels.getLast());
+		builder.addInstruction("JP " + blockEndLabels.getLast());
 	}
 
 	/**
@@ -207,7 +206,6 @@ public class FriscAsmBuilderWithExtras {
 
 		subroutineName = subName;
 		builder.addLabel(getLabelForGlobal(subName));
-		builder.addInstruction("");
 		// R5 is used as frame pointer, save it
 		builder.addInstruction("PUSH R5");
 		builder.addInstruction("MOVE R7, R5");
@@ -228,16 +226,16 @@ public class FriscAsmBuilderWithExtras {
 			genLocalsDeallocation(localsSize);
 		// R5 is used as frame pointer, restore it
 		builder.addInstruction("POP R5");
-		builder.addInstruction("RET ");
+		builder.addInstruction("RET");
 	}
 
 	public void genReturnVal() {
 		builder.addInstruction("POP R6");
-		builder.addInstruction("JR " + getReturnLabelForSub(subroutineName));
+		builder.addInstruction("JP " + getReturnLabelForSub(subroutineName));
 	}
 
 	public void genReturnVoid() {
-		builder.addInstruction("JR " + getReturnLabelForSub(subroutineName));
+		builder.addInstruction("JP " + getReturnLabelForSub(subroutineName));
 	}
 
 	public void genCall(boolean hasReturnValue) {

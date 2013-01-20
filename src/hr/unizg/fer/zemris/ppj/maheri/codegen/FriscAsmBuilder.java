@@ -73,10 +73,13 @@ public class FriscAsmBuilder {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (InstructionData i : instr) {
-			for (String label : i.getLabels()) {
-				builder.append(label + "\n");
+			int size = i.getLabels().size();
+			for (int it = 0; it < size; ++it) {
+				builder.append(i.getLabels().get(it));
+				if (it != size - 1)
+					builder.append("\r\n");
 			}
-			builder.append("\t" + i.getInstructionBody() + "\n");
+			builder.append("\t" + i.getInstructionBody() + "\r\n");
 		}
 		return builder.toString();
 	}
