@@ -46,7 +46,7 @@ public class GeneratorKodaTest {
 		return fileNames;
 	}
 
-	@Test
+	@Test(timeout = 10000)
 	public void superDuperTest() throws Exception {
 		System.out.println("\nTESTISUJEMO TEST PRIMJER: " + fileName);
 		String output = null;

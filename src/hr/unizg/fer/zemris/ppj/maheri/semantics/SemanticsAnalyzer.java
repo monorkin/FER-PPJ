@@ -1706,6 +1706,7 @@ public class SemanticsAnalyzer {
 
 			codegen.genSubroutinePrologue(functionName.getText());
 			checkSubtree(slozenaNaredba, inner);
+			codegen.genSubroutineEpilogue(functionName.getText(), 0);
 			
 			// TODO deallocate locals...
 

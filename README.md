@@ -1,4 +1,7 @@
-3. Labos
+4. Labos
 ========
-We 30/30 now.
-Čeka se Osvalda da uploada na SPRUT.
+Na generatoru koda rade globalne varijable, izrazi ( osim && i || ) i pozivanje funkcija bez parametar.
+
+Tko dođe u priliku, neka pokuša osposobljavati kod da rade lokalne varijable.
+
+Trenutno prolaz 14/40. Uz lokalne varijable sigurno još *10.

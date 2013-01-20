@@ -90,7 +90,7 @@ public class FriscAsmBuilderWithExtras {
 	 */
 	public void genCharacterLiteralRef(char c) {
 		Logger.log("reference to 20bit extensible numeric literal:");
-		builder.addInstruction("MOVE " + c + ", R1");
+		builder.addInstruction("MOVE " + Integer.toString(c) + ", R1");
 		builder.addInstruction("PUSH R1");
 	}
 
@@ -241,7 +241,7 @@ public class FriscAsmBuilderWithExtras {
 
 	public void genCall(boolean hasReturnValue) {
 		builder.addInstruction("POP R1");
-		builder.addInstruction("CALL R1");
+		builder.addInstruction("CALL (R1)");
 		if (hasReturnValue) {
 			builder.addInstruction("PUSH R6");
 		}
