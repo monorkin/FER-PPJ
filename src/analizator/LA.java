@@ -12,10 +12,20 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Map;
 import java.util.Scanner;
+
 /*
  * not used directly, but required for autocompile in grader (and to 
  * deserialize properly
  */
+import hr.unizg.fer.zemris.ppj.maheri.lexer.actions.ChangeStateAction;
+import hr.unizg.fer.zemris.ppj.maheri.lexer.actions.ComeBackAction;
+import hr.unizg.fer.zemris.ppj.maheri.lexer.actions.DeclareClassAction;
+import hr.unizg.fer.zemris.ppj.maheri.lexer.actions.NewLineAction;
+import hr.unizg.fer.zemris.ppj.maheri.lexer.actions.SkipAction;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.Automaton;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
+import hr.unizg.fer.zemris.ppj.maheri.automaton.Transition;
 
 @SuppressWarnings("unused")
 public class LA {
