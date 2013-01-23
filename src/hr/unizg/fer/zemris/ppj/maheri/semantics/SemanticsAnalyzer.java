@@ -1,5 +1,6 @@
 package hr.unizg.fer.zemris.ppj.maheri.semantics;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
 import hr.unizg.fer.zemris.ppj.maheri.codegen.FriscAsmBuilderWithExtras;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.Node.Attribute;
 import hr.unizg.fer.zemris.ppj.maheri.semantics.SymbolTable.StorageInfo;
@@ -93,7 +94,7 @@ public class SemanticsAnalyzer {
 		}
 		for (Node c : errorNode.getChildren()) {
 			sb.append(c.toString()).append(" ");
-			System.err.println(c);
+			Logger.log(c);
 		}
 		sb.setLength(sb.length() - 1);
 		return sb.toString();
@@ -117,7 +118,7 @@ public class SemanticsAnalyzer {
 			} else {
 				output.append(errorString(e.getErrorNode()));
 			}
-			System.err.println(e.getMessage());
+			Logger.log(e.getMessage());
 		}
 		return this;
 	}
@@ -2371,7 +2372,7 @@ public class SemanticsAnalyzer {
 	}
 
 	protected static PPJCProduction determineProduction(Node node) {
-		// System.err.println("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " +
+		// Logger.log("TRAŽIM PRODUKCIJU ZA NEZAVRŠNI: " +
 		// node.getSymbol());
 
 		List<Node> children = node.getChildren();
@@ -2392,7 +2393,7 @@ public class SemanticsAnalyzer {
 				}
 			}
 			if (matchFound) {
-				// System.err.println("NAŠO PRODUKCIJU:" +
+				// Logger.log("NAŠO PRODUKCIJU:" +
 				// productionEnum[o.index]);
 				return productionEnum[o.index];
 			}

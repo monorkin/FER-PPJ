@@ -1,5 +1,7 @@
 package hr.unizg.fer.zemris.ppj.maheri.automaton;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -71,7 +73,7 @@ public class Transition implements Serializable {
 			return false;
 		
 		if (this.origin.equals(t.origin) && this.origin != t.origin) {
-			System.err.println("WARN: synonymous but different origin states in transitions");
+			Logger.log("WARN: synonymous but different origin states in transitions");
 		}
 
 		return this.key.equals(t.getKey()) && this.origin == t.origin;

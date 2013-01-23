@@ -186,12 +186,12 @@ public class ParserUtils {
 			for (LrItem item1 : lrItems) {
 				for (LrItem item2 : lrItems) {
 					if (item1 != item2 && item1.equals(item2)) {
-						System.err.println("Sanity check failed: wrong lritem equals");
-						System.err.println(item1 + " ?= " + item2);
+						Logger.log("Sanity check failed: wrong lritem equals");
+						Logger.log(item1 + " ?= " + item2);
 					}
 					if (item1 != item2 && item1.hashCode() != item2.hashCode() && item1.equals(item2)) {
-						System.err.println("Sanity check failed: wrong lritem equals");
-						System.err.println(item1 + " ?= " + item2);
+						Logger.log("Sanity check failed: wrong lritem equals");
+						Logger.log(item1 + " ?= " + item2);
 					}
 				}
 			}
@@ -293,9 +293,9 @@ public class ParserUtils {
 					Transition oldNext = map.get(x.getValue());
 
 					if (oldNext != null && !oldNext.equals(next)) {
-						System.err.println("INFO: Have similar old nonepsilon transition!!!");
-						System.err.println("### " + oldNext + " ### ");
-						System.err.println("### " + next + " ### ");
+						Logger.log("INFO: Have similar old nonepsilon transition!!!");
+						Logger.log("### " + oldNext + " ### ");
+						Logger.log("### " + next + " ### ");
 						map.put(x.getValue(), next);
 					}
 
@@ -389,9 +389,9 @@ public class ParserUtils {
 					Transition oldNext = map.get(Automaton.EPSILON);
 
 					if (oldNext != null && !oldNext.equals(trans)) {
-						System.err.println("INFO: Have similar old epsilon transition!!!");
-						System.err.println("### " + oldNext + " ### ");
-						System.err.println("### " + trans + " ### ");
+						Logger.log("INFO: Have similar old epsilon transition!!!");
+						Logger.log("### " + oldNext + " ### ");
+						Logger.log("### " + trans + " ### ");
 						map.put(Automaton.EPSILON, trans);
 					}
 
@@ -433,10 +433,10 @@ public class ParserUtils {
 		}
 
 		for (State state : autStates.values()) {
-			System.out.println(toString((Lr1Item) state.getData()));
+			Logger.log(toString((Lr1Item) state.getData()));
 		}
 
-		System.err.println("Made enfa with " + autStates.size() + " states and " + transitions.size()
+		Logger.log("Made enfa with " + autStates.size() + " states and " + transitions.size()
 				+ " (compacted) transitions, noncompacted is " + numTran);
 		// throw new Error();
 
@@ -570,13 +570,13 @@ public class ParserUtils {
 								if (old.charAt(0) == 'r') {
 									if (oldIndex == prodIndex)
 										continue;
-									System.err.println("Reduciraj/reduciraj nejednoznacnost u " + s + ", " + item
+									Logger.log("Reduciraj/reduciraj nejednoznacnost u " + s + ", " + item
 											+ " izmedju " + old + " i " + ("r" + prodIndex)
 											+ " rijeseno u korist one s manjim indeksom");
 									if (oldIndex < prodIndex)
 										continue;
 								} else if (old.charAt(0) == 's') {
-									System.err.println("Pomakni/reduciraj nejednoznacnost u " + s + ", " + item
+									Logger.log("Pomakni/reduciraj nejednoznacnost u " + s + ", " + item
 											+ " izmedju " + old + " i " + ("r" + prodIndex)
 											+ " rijeseno u korist pomakni");
 									continue;
@@ -670,7 +670,7 @@ public class ParserUtils {
 
 		public void print() {
 			for (int i = 0; i < actionsTable.size(); ++i)
-				System.err.println(actionsTable.get(i));
+				Logger.log(actionsTable.get(i));
 		}
 
 	}

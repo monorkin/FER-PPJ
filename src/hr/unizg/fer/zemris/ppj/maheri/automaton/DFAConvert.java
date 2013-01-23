@@ -38,9 +38,9 @@ public class DFAConvert {
 		Set<State> acceptable = new HashSet<State>(eAut.getAcceptableStates());
 		Set<State> dfaAcceptables = new HashSet<State>();
 		
-		System.err.println("Preparing nfa descriptio...");
+		Logger.log("Preparing nfa descriptio...");
 		HashMap<State, HashMap<String, Transition>> nfaTransitions = prepareTransitions(eAut);
-		System.err.println("Prepared automaton description.");
+		Logger.log("Prepared automaton description.");
 		
 		ArrayList<Object> stateData = new ArrayList<Object>();
 		int stateDataIndex = 0;
@@ -52,7 +52,7 @@ public class DFAConvert {
 		for (State s : nfaTransitions.keySet()) {
 			Set<Integer> set = new HashSet<Integer>(stateDataIndex);
 			set.add(i);
-//			System.err.println("Converted " + s.getData() + " to " + set.toString());
+//			Logger.log("Converted " + s.getData() + " to " + set.toString());
 			s.setData(set);
 			++i;
 		}
@@ -177,7 +177,7 @@ public class DFAConvert {
 		
 		Logger.log("======= END CONVERSION ========");
 		
-		System.err.println("converted to dfa with " + dfaStates.size() + " states and " + dfaTransitions.size() +"  transitions");
+		Logger.log("converted to dfa with " + dfaStates.size() + " states and " + dfaTransitions.size() +"  transitions");
 		
 		return new DFA(dfaStates, dfaTransitions, dfaAcceptables, dfaStartState);
 	}

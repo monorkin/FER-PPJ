@@ -1,3 +1,4 @@
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.Action;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerRule;
 import hr.unizg.fer.zemris.ppj.maheri.lexer.LexerState;
@@ -11,8 +12,10 @@ import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegexToAutomaton;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.structs.LexerRuleDescriptionText;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -31,10 +34,14 @@ import java.util.Map;
 public class GLA {
 
 	public static void main(String[] args) throws IOException {
+		run(System.in);
+	}
+
+	public static void run(InputStream in) throws IOException {
 
 		List<String> inputLines = new LinkedList<String>();
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		String currentLine;
 		while ((currentLine = reader.readLine()) != null) {
 			inputLines.add(currentLine);
@@ -86,19 +93,21 @@ public class GLA {
 			lexerStates.get(stateName).addRule(tmpRule);
 		}
 
+		File f = new File("analizator/lexerStates.ser");
+		f.getParentFile().mkdirs();
 		FileOutputStream stream = new FileOutputStream("analizator/lexerStates.ser");
 		ObjectOutputStream oStream = new ObjectOutputStream(stream);
 		LexerState startState = lexerStates.get(lexerStateNames.get(0));
-		System.err.println("About to begin serialization");
+		Logger.log("About to begin serialization");
 		try {
 			oStream.writeObject(lexerStates);
-			System.err.println("Wrote other states");
+			Logger.log("Wrote other states");
 			oStream.writeObject(startState);
-			System.err.println("Wrote start state");
+			Logger.log("Wrote start state");
 			oStream.close();
 			stream.close();
 		} catch (Error e) {
-			System.err.println("Scary error!!!");
+			Logger.log("Scary error!!!");
 			e.printStackTrace();
 		}
 	}

@@ -1,5 +1,7 @@
 package hr.unizg.fer.zemris.ppj.maheri.lexer;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
+
 import java.io.PrintStream;
 import java.util.Map;
 
@@ -33,7 +35,7 @@ public class Lexer {
 		lastIndex = -1;
 		lineCount = 1;
 
-		System.err.println("Made lexer starting in state " + startState.getName());
+		Logger.log("Made lexer starting in state " + startState.getName());
 	}
 
 	/**

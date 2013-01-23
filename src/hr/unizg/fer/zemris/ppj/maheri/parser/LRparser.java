@@ -2,6 +2,7 @@ package hr.unizg.fer.zemris.ppj.maheri.parser;
 
 import hr.unizg.fer.zemris.ppj.maheri.Logger;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ public class LRparser {
 	private List<String> tInput;
 	private int tState;
 	private HashSet<String> sync;
+	private final PrintStream out;
 
 
 	private int startState;
@@ -33,7 +35,7 @@ public class LRparser {
 	 * 				   a za kljuc "R" desnu stranu produkcije (koja je spremljena kao hash dakle {a,b,c,patka,guska,kokos,...})
 	 * 				   
 	 */
-	public LRparser(List<String> aInput, ArrayList<HashMap <String, String>> actionsTable, ArrayList<HashMap <String, ArrayList<String>>> aTransitions, int startState, HashSet<String> sync) 
+	public LRparser(List<String> aInput, ArrayList<HashMap <String, String>> actionsTable, ArrayList<HashMap <String, ArrayList<String>>> aTransitions, int startState, HashSet<String> sync, PrintStream out) 
 	{
 		tStack    	 = new lifoStack();
 		tAction   	 = actionsTable;
@@ -41,6 +43,7 @@ public class LRparser {
 		tInput    	 = aInput;
 		this.startState = startState;
 		this.sync = sync;
+		this.out = out;
 	}
 	
 	//Parsiraj niz
@@ -143,19 +146,19 @@ public class LRparser {
 				
 			//Prihvati
 			case 2:
-				if (tDebug == 1) System.err.println("LR_PARSER: Niz je u jeziku!");
+				if (tDebug == 1) Logger.log("LR_PARSER: Niz je u jeziku!");
 				running = false;
-				treeBranches.get(0).printRecursive(0);
+				treeBranches.get(0).printRecursive(0, this.out);
 				break;
 				
 			//Nedefinirani slucaj = ERROR
 			default:
-				System.err.println("Syntax error on line " + split[1] + ", error token is " + split[2]);
-				System.err.print("Expected one of: [");
+				Logger.log("Syntax error on line " + split[1] + ", error token is " + split[2]);
+				Logger.log("Expected one of: [");
 				for (String possible : tAction.get(tState).keySet()) {
 					System.err.print(possible + " , ");
 				}
-				System.err.println("]");
+				Logger.log("]");
 				Logger.log("Looking for " + sync);
 				while (counter < tInput.size() && ! sync.contains(tInput.get(counter).split(" ")[0])) {
 					Logger.log("Skipping symbol " + tInput.get(counter));
@@ -171,7 +174,7 @@ public class LRparser {
 						treeBranches.remove(treeBranches.size()-1);
 				}
 				if (tStack.look() == null) {
-					System.err.println("The syntax error is fatal");
+					Logger.log("The syntax error is fatal");
 					running = false;
 					break;
 				} else {
@@ -195,17 +198,17 @@ class TreeNode {
 		this.children = children;
 	}
 	
-	void printRecursive(int depth) {
+	void printRecursive(int depth, PrintStream output) {
 		StringBuilder out = new StringBuilder(depth + name.length());
 		for (int i = 0; i < depth; ++i)
 			out.append(' ');
 		
 		out.append(name);
 		
-		System.out.println(out.toString());
+		output.println(out.toString());
 		if (children != null)
 			for (TreeNode node : children)
-				node.printRecursive(depth+1);
+				node.printRecursive(depth+1, output);
 	}
 }
 

@@ -1,5 +1,7 @@
 package hr.unizg.fer.zemris.ppj.maheri.semantics.type;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class Types {
 		for (int i = 0; i < typesToTest.length; ++i) {
 			System.out.print(String.format("%12s\t", names.get(i)));
 		}
-		System.out.println();
+		Logger.log("");
 
 		for (int i = 0; i < typesToTest.length; ++i) {
 			System.out.print(String.format("%12s\t", names.get(i)));
@@ -34,7 +36,7 @@ public class Types {
 				boolean can = from.canConvertImplicit(typesToTest[j]);
 				System.out.print(String.format("%12s\t", can ? "~" : ""));
 			}
-			System.out.println();
+			Logger.log("");
 		}
 
 		for (int i = 0; i < typesToTest.length; ++i) {
@@ -63,7 +65,7 @@ public class Types {
 					Assert.assertTrue(castString, canExplicit);
 				}
 				if (canExplicit && !canImplicit)
-					System.out.println("Explicit-only casting: " + castString);
+					Logger.log("Explicit-only casting: " + castString);
 			}
 		}
 	}

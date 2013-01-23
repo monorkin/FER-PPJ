@@ -2,6 +2,7 @@ package hr.unizg.fer.zemris.ppj.maheri.tests.la;
 
 import static org.junit.Assert.*;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegexToAutomaton;
@@ -63,12 +64,12 @@ public class AutomatonSerializationTest {
 
 	@Test
 	public void test() {
-		System.err.println("regex is " + regex);
+		Logger.log("regex is " + regex);
 		try {
 			FileOutputStream stream = new FileOutputStream("res/testdata/AutomatonSerialization/automaton.ser");
 			ObjectOutputStream oStream = new ObjectOutputStream(stream);
 			oStream.writeObject(matcherAutomaton);
-			System.err.println("Wrote Automaton");
+			Logger.log("Wrote Automaton");
 			oStream.close();
 			stream.close();
 		} catch (IOException e) {

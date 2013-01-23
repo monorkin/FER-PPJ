@@ -2,6 +2,7 @@ package hr.unizg.fer.zemris.ppj.maheri.tests.la;
 
 import static org.junit.Assert.*;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.State;
 import hr.unizg.fer.zemris.ppj.maheri.automaton.eNfa;
 import hr.unizg.fer.zemris.ppj.maheri.lexergen.RegexToAutomaton;

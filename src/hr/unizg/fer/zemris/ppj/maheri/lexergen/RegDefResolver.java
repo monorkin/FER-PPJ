@@ -1,5 +1,7 @@
 package hr.unizg.fer.zemris.ppj.maheri.lexergen;
 
+import hr.unizg.fer.zemris.ppj.maheri.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +39,7 @@ public class RegDefResolver {
 					if (escaped) {
 						escaped = false;
 					} else {
-						System.err.println("WARN: unescaped '{' in regdef reference");
+						Logger.log("WARN: unescaped '{' in regdef reference");
 					}
 					break;
 				default:
@@ -69,7 +71,7 @@ public class RegDefResolver {
 						value.append('}');
 						escaped = false;
 					} else {
-						System.err.println("WARN: invalid regdef value: stray '}', ignoring");
+						Logger.log("WARN: invalid regdef value: stray '}', ignoring");
 					}
 					break;
 				default:
@@ -83,7 +85,7 @@ public class RegDefResolver {
 			}
 		}
 		if (escaped)
-			System.err.println("WARN: invalid regdef: escape at end!");
+			Logger.log("WARN: invalid regdef: escape at end!");
 		
 		return value.toString();
 	}
