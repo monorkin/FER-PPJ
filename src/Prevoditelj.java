@@ -49,15 +49,15 @@ public class Prevoditelj {
 
 			InputStream generativnoStablo = new ByteArrayInputStream(generativnoStabloOut.toByteArray());
 
-			System.err.println("***Započinjem semantičku analizu");
-			SemantickiAnalizator.run(generativnoStablo, System.err);
-			System.err.println("***Započinjem generiranje koda");
-			generativnoStablo.reset();
+//			System.err.println("***Započinjem semantičku analizu");
+//			SemantickiAnalizator.run(generativnoStablo, System.err);
+//			generativnoStablo.reset();
+			System.err.println("***Započinjem semantičku analizu generiranje koda");
 			GeneratorKoda.run(generativnoStablo, System.out);
 			System.err.println("***Završio s radom");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.err.println("***Došlo je do greške");
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 			System.exit(-1);
 		}
 	}

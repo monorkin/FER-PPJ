@@ -15,11 +15,11 @@ import java.util.List;
 
 public class GeneratorKoda {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		run(System.in, System.out);
 	}
 
-	public static void run(InputStream in, PrintStream out) throws IOException {
+	public static void run(InputStream in, PrintStream out) throws Exception {
 		List<String> inputLines = new ArrayList<String>();
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -32,9 +32,14 @@ public class GeneratorKoda {
 		Node tree = ip.getTree();
 
 		SemanticsAnalyzer semAn = new SemanticsAnalyzer(tree);
+		
 		String code = semAn.check().createAsmCode();
 		// code =
 		// "\t`BASE D\r\nstart\tMOVE %H 40000, R7\r\n\tCALL GLOBAL_INITIALIZERS\r\n\tCALL GLOBAL_main\r\n\tHALT\r\nGLOBAL_main\tPUSH R5\r\n\tMOVE 71, R1\r\n\tPUSH R1\r\n\tPOP R6\r\n\tJP RET_FROM_main\r\nRET_FROM_main\tPOP R5\r\n\tRET\r\nGLOBAL_INITIALIZERS\tRET\r\n";
+		
+		if(semAn.getOutput().length() > 0) {
+			throw new Exception(semAn.getOutput());
+		}
 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("a.frisc")));
 		writer.write(code);
