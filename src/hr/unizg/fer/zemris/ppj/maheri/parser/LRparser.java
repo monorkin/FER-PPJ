@@ -153,15 +153,15 @@ public class LRparser {
 				
 			//Nedefinirani slucaj = ERROR
 			default:
-				Logger.log("Syntax error on line " + split[1] + ", error token is " + split[2]);
-				Logger.log("Expected one of: [");
+				System.err.println("Syntax error on line " + split[1] + ", error token is " + split[2]);
+				System.err.println("Expected one of: [");
 				for (String possible : tAction.get(tState).keySet()) {
 					System.err.print(possible + " , ");
 				}
-				Logger.log("]");
-				Logger.log("Looking for " + sync);
+				System.err.println("]");
+				System.err.println("Looking for " + sync);
 				while (counter < tInput.size() && ! sync.contains(tInput.get(counter).split(" ")[0])) {
-					Logger.log("Skipping symbol " + tInput.get(counter));
+					System.err.println("Skipping symbol " + tInput.get(counter));
 					counter++;
 				}
 				String sym = tInput.get(counter).split(" ")[0];
@@ -174,7 +174,7 @@ public class LRparser {
 						treeBranches.remove(treeBranches.size()-1);
 				}
 				if (tStack.look() == null) {
-					Logger.log("The syntax error is fatal");
+					System.err.println("The syntax error is fatal");
 					running = false;
 					break;
 				} else {
@@ -251,9 +251,9 @@ class lifoStack
 		for (int i = 0; i < tStack.size(); i++) {
 			hItem = tStack.get(i);
 			
-			System.err.print("\""+hItem.getSymbol()+"|"+hItem.getState()+"\", ");
+			Logger.log("\""+hItem.getSymbol()+"|"+hItem.getState()+"\", ");
 		}
-		System.err.print("\n");
+		Logger.log("\n");
 	}
 }
 

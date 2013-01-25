@@ -14,6 +14,8 @@ import java.util.List;
 
 public class GSA {
 
+	public static final String OUTPUT = "analizator/lr1.ser";
+	
 	public static void main(String[] args) throws IOException {
 		run(System.in);
 	}
@@ -29,7 +31,7 @@ public class GSA {
 
 		ParserTable table = new ParserUtils(InputProcessor.parseInput(inputLines.toArray(new String[0]))).makeParser();
 
-		FileOutputStream stream = new FileOutputStream("analizator/lr1.ser");
+		FileOutputStream stream = new FileOutputStream(OUTPUT);
 		ObjectOutputStream oStream = new ObjectOutputStream(stream);
 		Logger.log("About to begin serialization");
 		try {

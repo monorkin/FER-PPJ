@@ -8,9 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class GeneratorKoda {
 		run(System.in, System.out);
 	}
 
-	public static void run(InputStream in, OutputStream out) throws IOException {
+	public static void run(InputStream in, PrintStream out) throws IOException {
 		List<String> inputLines = new ArrayList<String>();
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -41,7 +40,7 @@ public class GeneratorKoda {
 		writer.write(code);
 		writer.close();
 
-		new PrintWriter(out).println(code);
+		out.println(code);
 	}
 
 }

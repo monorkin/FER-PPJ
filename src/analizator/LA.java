@@ -31,7 +31,7 @@ import hr.unizg.fer.zemris.ppj.maheri.automaton.Transition;
 public class LA {
 
 	public static void main(String[] args) {
-		run(System.in, System.out, new File("lexerStates.ser"));
+		run(System.in, System.out, new File(GLA.OUTPUT));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -60,7 +60,7 @@ public class LA {
 		}
 
 		String input = new Scanner(in).useDelimiter("\\A").next();
-
+		
 		new Lexer(lexerStates, startState, input, new PrintStream(out)).doLexing();
 	}
 }

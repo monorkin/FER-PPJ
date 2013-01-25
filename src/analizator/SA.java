@@ -16,7 +16,7 @@ import java.util.List;
 public class SA {
 
 	public static void main(String[] args) throws IOException {
-		run(System.in, System.out, new File("lr1.ser"));
+		run(System.in, System.out, new File(GSA.OUTPUT));
 	}
 
 	public static void run(InputStream in, OutputStream out, File parserTable) throws IOException {

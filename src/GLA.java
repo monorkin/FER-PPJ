@@ -32,6 +32,8 @@ import java.util.Map;
  * 
  */
 public class GLA {
+	
+	public static String OUTPUT = "analizator/lexerStates.ser";
 
 	public static void main(String[] args) throws IOException {
 		run(System.in);
@@ -93,9 +95,9 @@ public class GLA {
 			lexerStates.get(stateName).addRule(tmpRule);
 		}
 
-		File f = new File("analizator/lexerStates.ser");
+		File f = new File(OUTPUT);
 		f.getParentFile().mkdirs();
-		FileOutputStream stream = new FileOutputStream("analizator/lexerStates.ser");
+		FileOutputStream stream = new FileOutputStream(OUTPUT);
 		ObjectOutputStream oStream = new ObjectOutputStream(stream);
 		LexerState startState = lexerStates.get(lexerStateNames.get(0));
 		Logger.log("About to begin serialization");

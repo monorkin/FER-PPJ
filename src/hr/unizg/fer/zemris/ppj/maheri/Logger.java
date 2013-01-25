@@ -6,7 +6,7 @@ public class Logger {
 
 	public static final void log(Object s) {
 		if (DEBUG) {
-			System.err.println(s);
+			System.err.println(s.toString());
 		}
 	}
 
